@@ -1,0 +1,216 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* === Plugin styles === */
+
+@import "~react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
+@import "~nouislider/distribute/nouislider.min.css";
+@import '~react-bootstrap-typeahead/css/Typeahead.css';
+@import '~react-bootstrap-typeahead/css/Typeahead-bs4.css';
+@import '~react-datepicker/dist/react-datepicker.css';
+
+
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+
+// @import "../assets/styles/variables";
+@import "../assets/styles/variables";
+@import "~compass-mixins/lib/compass";
+@import "~compass-mixins/lib/animate";
+@import "~bootstrap/scss/bootstrap";
+@import "../assets/styles/fonts";
+@import "../assets/styles/functions";
+
+/* === Icon fonts === */
+@import "~@mdi/font/scss/materialdesignicons";
+
+
+/* === Template mixins === */
+@import "../assets/styles/mixins/animation";
+@import "../assets/styles/mixins/badges";
+@import "../assets/styles/mixins/buttons";
+@import "../assets/styles/mixins/misc";
+@import "../assets/styles/mixins/color-functions";
+@import "../assets/styles/mixins/cards";
+@import "../assets/styles/mixins/blockqoute";
+@import "../assets/styles/mixins/popovers";
+@import "../assets/styles/mixins/tooltips";
+@import "../assets/styles/mixins/no-ui-slider";
+
+
+/* === Core Styles === */
+@import "../assets/styles/background";
+@import "../assets/styles/typography";
+@import "../assets/styles/reset";
+@import "../assets/styles/responsive";
+@import "../assets/styles/misc";
+@import "../assets/styles/utilities";
+@import "../assets/styles/demo";
+@import "../assets/styles/spinner";
+@import "../assets/styles/dashboard";
+
+/* === Components === */
+
+@import "../assets/styles/components/widgets";
+@import "../assets/styles/components/forms";
+@import "../assets/styles/components/checkbox-radio";
+@import "../assets/styles/components/icons";
+@import "../assets/styles/components/tables";
+@import "../assets/styles/components/accordions";
+@import "../assets/styles/components/buttons";
+@import "../assets/styles/components/breadcrumbs";
+@import "../assets/styles/components/badges";
+@import "../assets/styles/components/cards";
+@import "../assets/styles/components/preview";
+@import "../assets/styles/components/tooltips";
+@import "../assets/styles/components/user-profile";
+@import "../assets/styles/components/popovers";
+@import "../assets/styles/components/lists";
+@import "../assets/styles/components/bootstrap-progress";
+@import "../assets/styles/components/bootstrap-alerts";
+@import "../assets/styles/components/tabs";
+@import "../assets/styles/components/dropdowns";
+@import "../assets/styles/components/pagination";
+@import "../assets/styles/components/loaders/loaders";
+@import "../assets/styles/components/timeline";
+@import "../assets/styles/components/portfolio";
+@import "../assets/styles/components/pricing-table";
+@import "../assets/styles/components/email/mail-list-container";
+@import "../assets/styles/components/email/mail-sidebar";
+@import "../assets/styles/components/email/message-content";
+@import "../assets/styles/components/todo-list";
+@import "../assets/styles/components/spinner";
+@import "../assets/styles/components/tickets";
+@import "../assets/styles/components/project-list";
+@import "../assets/styles/components/product-tile";
+@import "../assets/styles/components/user-listing";
+@import "../assets/styles/components/landing";
+@import "../assets/styles/components/chats";
+@import "../assets/styles/components/kanban";
+@import "../assets/styles/components/react-table";
+
+@import "../assets/styles/components/landing-screens/auth";
+
+/* === Plugin Overrides === */
+@import "../assets/styles/components/plugin-overrides/contex-menu";
+@import "../assets/styles/components/plugin-overrides/no-ui-slider";
+@import "../assets/styles/components/plugin-overrides/slick-carousel";
+@import "../assets/styles/components/plugin-overrides/rating";
+@import "../assets/styles/components/plugin-overrides/date-picker";
+@import "../assets/styles/components/plugin-overrides/wizard";
+@import "../assets/styles/components/plugin-overrides/react-bootstrap-table";
+@import "../assets/styles/components/plugin-overrides/sweet-alert";
+@import "../assets/styles/components/plugin-overrides/full-calendar";
+@import "../assets/styles/components/plugin-overrides/react-photo-gallery";
+@import "../assets/styles/components/plugin-overrides/react-tag-autocomplete";
+@import "../assets/styles/components/plugin-overrides/jquery-jvectormap";
+@import "../assets/styles/components/plugin-overrides/react-table";
+
+/* === Layout === */
+@import "../assets/styles/navbar";
+@import "../assets/styles/sidebar";
+@import "../assets/styles/footer";
+@import "../assets/styles/layout";
+@import "../assets/styles/settings-panel";
+
+.dob-border-color{
+    border-color: red
+}
+.error-msg-style{
+    color: red;
+    font-size: 0.65rem
+}
+.ReactTable .rt-table {
+    font-size: 12px;
+}
+.form-control{
+    height: 2.15rem;
+}
+.ReactTable .rt-thead .rt-th {
+    padding: 0.9rem 0.4rem !important;
+    font-weight: 425;
+}
+.ReactTable .rt-td {
+    padding: 0.7rem 0.4rem !important
+}
+.card .card-title {
+    font-weight: 450;
+    font-size: 0.9rem;
+}
+.card .card-title2 {
+    color: #343a40;
+    margin-bottom: 0.75rem;
+    text-transform: capitalize;
+    font-weight: 400;
+    font-size: 0.8rem;
+}
+//side bar nad side nav bar size same 215
+.sidebar {
+    width: 215px;
+}
+.sidebar .nav .nav-item .nav-link .menu-title {
+    font-size: 0.78rem;
+}
+.content-wrapper {
+    padding: 1.25rem 1.25rem;
+}
+.ReactTable .-pagination .-btn {
+    font-size: 0.7em;
+}
+.ReactTable .-pagination .-center {
+    font-size: 0.7rem;
+}
+//side bar nad side nav bar size same 215
+// .navbar .navbar-brand-wrapper {
+//     width: 215px;
+// }
+.navbar .navbar-menu-wrapper {
+    padding-left: 0px; 
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
+
+.table th, .table td {
+    padding: 0.2rem;
+    vertical-align: baseline;
+    border-top: 1px solid #ebedf2;
+}
+.wrapper {
+    display: inline-block;
+    height: 250px;
+    width: 250px;
+    padding: 2px;
+    margin: 2px;
+    background: lightgray;
+  }
+  .wrapper img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+  }
+
+  .dropdown-content {
+    background:#eeeeee none repeat scroll 0 0;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    margin-right:35%;
+    z-index:5;width:200px;position:relative;
+  }
+  
+  .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .dropdown-content a:hover {background-color: #ddd;}
+  
+  .dropdown:hover .dropdown-content {display: block;}
+  
+  .dropdown:hover .dropbtn {background-color: #3e8e41;}
+

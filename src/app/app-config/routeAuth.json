@@ -1,0 +1,158 @@
+[
+  {
+    "path": "/dashboard",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/adminDashboard",
+    "roles": [
+      "ADMIN",
+      "INSTANCE ADMIN",
+      "SUPER_ADMIN"
+    ]
+  },
+    {
+    "path": "/sell",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN",
+      "INSTANCE ADMIN",
+      "SUPER_ADMIN"
+    ]
+  },
+  {
+    "path": "/register",
+    "roles": [
+      "TOPADMIN",
+      "SUPER_ADMIN"
+    ]
+  },
+    {
+    "path": "/purchase",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN",
+      "INSTANCE ADMIN"
+    ]
+  },
+  {
+    "path": "/weight",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN",
+      "INSTANCE ADMIN"
+    ]
+  },
+  {
+    "path": "/addProduct",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN",
+      "INSTANCE ADMIN"
+    ]
+  },
+  {
+    "path": "/productCode",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN",
+      "INSTANCE ADMIN"
+    ]
+  },
+  {
+    "path": "/company",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/workers",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN"
+    ]
+  },
+  {
+    "path": "/worklog",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN"
+    ]
+  },
+  {
+    "path": "/roles",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/profile",
+    "roles": [
+      "TOPADMIN",
+      "INSTANCE ADMIN",
+      "ADMIN"
+    ]
+  },
+  {
+    "path": "/basic-ui/buttons",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/basic-ui/dropdowns",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/basic-ui/typography",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/form-Elements/basic-elements",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/tables/basic-table",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/icons/mdi",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/charts/chart-js",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/error-pages/error-404",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/error-pages/error-500",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
+    "path": "/error-pages/error-500",
+    "roles": [
+      "TOPADMIN"
+    ]
+  }
+]

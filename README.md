@@ -1,1 +1,0 @@
-# lakdimandi_f

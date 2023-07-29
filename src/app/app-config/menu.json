@@ -1,0 +1,235 @@
+[ 
+
+{ "path": "/sell",
+    "title": "All Sell",
+    "icon": "mdi mdi-truck-delivery menu-icon", 
+    "state": "sellMenuOpen",
+    "role": [
+      "TOPADMIN",
+      "INSTANCE ADMIN",
+      "ADMIN",
+      "SUPER_ADMIN"
+    ]
+  },
+  { "path": "/purchase",
+    "title": "All Purchase",
+    "icon": "mdi mdi-car-door-lock menu-icon", 
+    "state": "sellMenuOpen",
+    "role": [
+      "TOPADMIN",
+      "ADMIN"
+    ]
+  },
+  { "path": "/weight",
+    "title": "Fluctuation Weight",
+    "icon": "mdi mdi-crosshairs-gps menu-icon", 
+    "state": "weightMenuOpen",
+    "role": [
+      "TOPADMIN",
+      "ADMIN",
+      "INSTANCE ADMIN"
+    ]
+  },
+  { "path": "/addProduct",
+  "title": "Add Product",
+  "icon": "mdi mdi-octagram mdi-spin menu-icon", 
+  "state": "addProductMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "INSTANCE ADMIN",
+    "ADMIN"
+  ]
+},
+{ "path": "/productCode",
+  "title": "Product Code",
+  "icon": "mdi mdi-yin-yang mdi-spin menu-icon", 
+  "state": "productCodeMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "INSTANCE ADMIN",
+    "ADMIN"
+  ]
+},
+{ "path": "/company",
+  "title": "Company Detail",
+  "icon": "mdi mdi-yin-yang mdi-spin menu-icon", 
+  "state": "companyCodeMenuOpen",
+  "role": [
+    "TOPADMIN"
+  ]
+},
+{ "path": "/workers",
+  "title": "Add New Worker",
+  "icon": "mdi mdi-crosshairs-gps menu-icon", 
+  "state": "workerCodeMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "ADMIN"
+  ]
+},
+{ "path": "/worklog",
+  "title": "Work Deatil",
+  "icon": "mdi mdi-crosshairs-gps menu-icon", 
+  "state": "worklogCodeMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "ADMIN"
+  ]
+},
+{ "path": "/roles",
+  "title": "User Role",
+  "icon": "mdi mdi-yin-yang mdi-spin menu-icon", 
+  "state": "roleCodeMenuOpen",
+  "role": [
+    "TOPADMIN"
+  ]
+},
+{ "path": "/register",
+  "title": "Registration Form",
+  "icon": "mdi mdi-yin-yang mdi-spin menu-icon", 
+  "state": "productCodeMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "SUPER_ADMIN"
+  ]
+},
+  { "path": "/basic-ui",
+    "title":"Basic UI Elements",
+    "icon": "mdi mdi-crosshairs-gps menu-icon", 
+    "state": "basicUiMenuOpen",
+    "role": [
+      "TOPADMIN"
+    ],
+    "children": [
+      {
+        "title": "Buttons",
+        "path": "/basic-ui/buttons"
+      },
+      {
+        "title": "Dropdowns",
+        "path": "/basic-ui/dropdowns"
+      },
+      {
+        "title": "Typography",
+        "path": "/basic-ui/typography"
+      }
+    ]
+  },
+  { "path": "/form-elements",
+    "title": "Form Elements",
+    "icon": "mdi mdi-format-list-bulleted menu-icon",  
+    "state": "formElementsMenuOpen",
+    "role": [
+      "TOPADMIN"
+    ],
+    "children": [
+      {
+        "title": "Basic Elements",
+        "path": "/form-elements/basic-elements"
+      }
+    ]
+   },
+  { "path": "/tables",
+    "title": "Tables",
+    "icon": "mdi mdi-table-large menu-icon", 
+    "state": "tablesMenuOpen",
+    "role": [
+      "TOPADMIN"
+    ],
+    "children": [
+      {
+        "title": "Basic Table",
+        "path": "/tables/basic-table"
+      }
+    ]
+  },
+  { "path": "/icons",
+    "title": "Icons", 
+    "icon": "mdi mdi-contacts menu-icon",
+    "state": "iconsMenuOpen",
+    "role": [
+      "TOPADMIN"
+    ],
+    "children": [
+      {
+        "title": "Material",
+        "path": "/icons/mdi"
+      }
+    ] 
+  },
+  { "path": "/charts",
+    "title": "Charts",
+    "icon": "mdi mdi-chart-bar menu-icon", 
+    "state": "chartsMenuOpen",
+    "role": [
+      "TOPADMIN"
+    ],
+    "children": [
+      {
+        "title": "Chart Js",
+        "path": "/charts/chart-js"
+      }
+    ]  
+  },
+  { "path": "/user-pages",
+    "title": "User Pages",
+    "icon": "mdi mdi-lock menu-icon", 
+    "state": "userPagesMenuOpen",
+    "role": [
+      "TOPADMIN"
+    ],
+    "children": [
+      {
+        "title": "Login",
+        "path": "/login"
+      },
+      {
+        "title": "Lockscreen",
+        "path": "/user-pages/lockscreen"
+      }
+    ] 
+  },
+  { "path": "/error-pages",
+    "title": "Error Pages",
+    "icon": "mdi mdi-security menu-icon", 
+    "state": "errorPagesMenuOpen",
+    "role": [
+      "TOPADMIN"
+    ],
+    "children": [
+      {
+        "title": "404",
+        "path": "/error-pages/error-404"
+      },
+      {
+        "title": "500",
+        "path": "/error-pages/error-500"
+      }
+    ] 
+  },
+  { "path": "/general-pages",
+    "title": "General Pages",
+    "icon": "mdi mdi-medical-bag menu-icon", 
+    "state": "generalPagesMenuOpen",
+    "role": [
+      "TOPADMIN"
+    ],
+    "children": [
+      {
+        "title": "Blank Page",
+        "path": "/general-pages/blank-page"
+      }
+    ]  
+  },
+  { "path": "/profile",
+  "title": "Profile",
+  "icon": "mdi mdi-account menu-icon", 
+  "state": "profileMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "INSTANCE ADMIN",
+    "ADMIN"
+  ]
+ }
+]
+    
