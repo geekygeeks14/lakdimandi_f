@@ -67,8 +67,35 @@
     "ADMIN"
   ]
 },
+{ "path": "/pay-option",
+  "title": "Pay Option",
+  "icon": "mdi mdi-crosshairs-gps menu-icon", 
+  "state": "payOptionMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "ADMIN"
+  ]
+},
+{ "path": "/due-amount",
+  "title": "Due Amount",
+  "icon": "mdi mdi-crosshairs-gps menu-icon", 
+  "state": "DueAmountMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "ADMIN"
+  ]
+},
+{ "path": "/expense",
+  "title": "Asset Earning and Expense",
+  "icon": "mdi mdi-crosshairs-gps menu-icon", 
+  "state": "ExpenseMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "ADMIN"
+  ]
+},
 { "path": "/worklog",
-  "title": "Work Deatil",
+  "title": "Work Detail",
   "icon": "mdi mdi-crosshairs-gps menu-icon", 
   "state": "worklogCodeMenuOpen",
   "role": [

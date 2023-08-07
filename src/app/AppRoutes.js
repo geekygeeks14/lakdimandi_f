@@ -28,7 +28,9 @@ const Login = lazy(() => import("./user-pages/Login"));
 const Lockscreen = lazy(() => import("./user-pages/Lockscreen"));
 const BlankPage = lazy(() => import("./general-pages/BlankPage"));
 const Profile = lazy (()=>import("./profile-page"))
-
+const Expense = lazy(()=>import("./Expense/expense"));
+const DueAmount = lazy(()=>import("./DueAmount"));
+const PayOption = lazy(()=> import("./PayOptions"))
 
 
 class AppRoutes extends Component {
@@ -57,8 +59,11 @@ class AppRoutes extends Component {
           <PrivateRoute path="/productCode" component={ProductCode} exact/>
           <PrivateRoute path="/company" component={CompanyName} exact/>
           <PrivateRoute path="/workers" component={Worker} exact/>
+          <PrivateRoute path="/expense" component={Expense} exact/>
           <PrivateRoute path="/worklog" component={WorkDetail} exact/>
           <PrivateRoute path="/roles" component={UserRole} exact/>
+          <PrivateRoute path="/due-amount" component={DueAmount} exact/>
+          <PrivateRoute path="/pay-option" component={PayOption} exact/>
           {/* <PrivateRoute path="/user-pages/lockscreen" component={Lockscreen} exact/> */}
           <PrivateRoute path="/error-pages/error-404" component={Error404} exact/>
           <PrivateRoute path="/error-pages/error-500" component={Error500} exact/>

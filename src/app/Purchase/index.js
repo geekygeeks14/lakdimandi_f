@@ -10,14 +10,11 @@ import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
-import { uniqueUsernameGenerator } from 'unique-username-generator';
 import Select from 'react-select';
 import 'react-block-ui/style.css';
-import { capitalize, logoutFunc } from "../util/helper";
+import { capitalize, convertMilliSecToHrMints, logoutFunc } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 toast.configure();
-var  randomGen = require('random-string-generator');
-var randomstring = require("randomstring");
 
 
 const paymentOption =[
@@ -58,17 +55,19 @@ export class Purchase extends Component {
           allWorker:[],
           allReciever:[],
           unLoadingWorkerList:[{workerId:''}],
+          loadingWorkerList:[{workerId:''}],
           recieverModel: false,
           allProductCode:[],
           allProductName:[],
           allProductCodeData:[],
           allProductNameData:[],
           paymentList:[{}],
-          purchaseDateTime:{
-            unLoadingDate: new Date(),
-            unLoadingStartTime: new Date(),
-            unLoadingEndTime: new Date()
-          },
+          unLoadingRowTime:0,
+          loadingRowTime:0,
+          grossWeight:0,
+          tareWeight: 0,
+          unLoadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
+          loadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
           purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
         };
       }
@@ -321,16 +320,26 @@ export class Purchase extends Component {
           // this.setState({
           //   loading2:true
           // })
-          const companyId= USER && USER.userInfo.companyId?USER.userInfo.companyId:''
-          const workDetail={
+          const companyId= (USER && USER.userInfo.companyId)?USER.userInfo.companyId:USER._id
+          const unLoadingWorkDetail={
             unLoadingWorker: values.unLoadingWorker,
-            unLoadingStartTime: this.state.purchaseDateTime.unLoadingStartTime,
-            unLoadingEndTime: this.state.purchaseDateTime.unLoadingEndTime,
+            startTime: this.state.unLoadingDateTime.startTime,
+            endTime: this.state.unLoadingDateTime.endTime,
             parentUserId: USER && USER.userInfo.userId,
-            unLoadingNote: 'Unloading',
+            note: 'Unloading',
             truck:true,
-            unLoadingRowTime: new Date(this.state.purchaseDateTime.unLoadingEndTime) - new Date(this.state.purchaseDateTime.unLoadingStartTime),
-            dateOfWork : this.state.purchaseDateTime.unLoadingDate.toLocaleDateString()
+            rowTime: new Date(this.state.unLoadingDateTime.endTime) - new Date(this.state.unLoadingDateTime.startTime),
+            dateOfWork : this.state.unLoadingDateTime.date.toLocaleDateString()
+          }
+          const loadingWorkDetail={
+            loadingWorker: values.loadingWorker,
+            startTime: this.state.loadingDateTime.startTime,
+            endTime: this.state.loadingDateTime.endTime,
+            parentUserId: USER && USER.userInfo.userId,
+            note: 'Loading',
+            truck:true,
+            rowTime: new Date(this.state.loadingDateTime.endTime) - new Date(this.state.loadingDateTime.startTime),
+            dateOfWork : this.state.loadingDateTime.date.toLocaleDateString()
           }
           const purchaseBasicInfo={
             companyName: values.companyName,
@@ -338,11 +347,15 @@ export class Purchase extends Component {
             vehicleNumber: values.vehicleNumber,
             kantaName: values.kantaName,
             kantaNo :values.kantaNo,
-            kantaWeight: values.kantaWeight,
+            grossWeight: values.grossWeight,
+            tareWeight: values.tareWeight,
+            netWeight: values.netWeight,
             recieverId: values.recieverId,
             materialName: values.materialName,
             frontImage:'',
-            backImage:''
+            backImage:'',
+            leftImage:'',
+            rightImage:'',
           }
           const purchaseProduct=values.purchaseProduct.map(data=> {
             return{
@@ -353,14 +366,15 @@ export class Purchase extends Component {
           })
         
           const payload={
-            workDetail: workDetail,
+            unLoadingWorkDetail: unLoadingWorkDetail,
+            loadingWorkDetail: loadingWorkDetail,
             purchaseBasicInfo: purchaseBasicInfo,
             purchaseProduct: purchaseProduct,
             totalWeight:values.totalWeight,
             actualWeght: values.actualWeght,
             insertedBy : USER && USER._id,
             companyId: companyId,
-            unLoadingDate: this.state.purchaseDateTime.unLoadingDate,
+            date: this.state.unLoadingDateTime.date,
             productCode : values.productCode
           }
   
@@ -414,6 +428,7 @@ export class Purchase extends Component {
             dueAmount:0,
             purchaseEditModal:false,
             unLoadingWorkerList:[{workerId:''}],
+            loadingWorkerList:[{workerId:''}],
             paymentList:[{}],
             purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
         },()=> this.getAllPurchase())
@@ -446,6 +461,7 @@ export class Purchase extends Component {
           dueAmount:0,
           purchaseEditModal:false,
           unLoadingWorkerList:[{workerId:''}],
+          loadingWorkerList:[{workerId:''}],
           paymentList:[{}],
           purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
         })
@@ -497,10 +513,10 @@ export class Purchase extends Component {
           selectedCell: cell
         })
       }
-      showProductClose =()=>{
+      showProductClose =(cell)=>{
         this.setState({
           showProductModal:false,
-          selectedCell:{}
+          selectedCell:cell
         })
       }
       addMorePayment=()=>{
@@ -541,23 +557,25 @@ export class Purchase extends Component {
           recieverModel: false
         })
       }
-      updateWorkerField=(rowIndex) => e=>{
-        let data = [...this.state.unLoadingWorkerList];
+      updateWorkerField=(rowIndex, workType) => e=>{
+        let data = [...this.state[`${workType}WorkerList`]];
         data[rowIndex]['workerId'] = e.target.value;
-        this.setState({ unLoadingWorkerList:data },
+        this.setState({ [`${workType}WorkerList`]:data },
           // ()=>{this.calculatePaymentAmount()}
           );        
 
       }
-      addMoreUnLoadingWoker=()=>{
+      addMoreWoker=(workType)=>{
         const newRow=[{workerId:''}]
-        this.setState({unLoadingWorkerList:[...this.state.unLoadingWorkerList, ...newRow]})
+        this.setState({[`${workType}WorkerList`]:[...this.state[`${workType}WorkerList`], ...newRow]})
        }
-      removeRow = (index)=> {
-        let unLoadingWorkerList = this.state.unLoadingWorkerList
-        if(unLoadingWorkerList.length>1){
-          unLoadingWorkerList.splice(index, 1);
-          this.setState({unLoadingWorkerList})
+      removeRow = (index, workType)=> {
+        let workerList = this.state[`${workType}WorkerList`]
+        if(workerList.length>1){
+          workerList.splice(index, 1);
+          this.setState({
+            [`${workType}WorkerList`]: workerList
+          })
         }else{
           toast["error"]('This is required row.');
         }
@@ -593,26 +611,38 @@ export class Purchase extends Component {
           productNameModel:false
         })
       }
-      handlePurchaseDate=(timeDate, action)=>{
-        let purchaseDateTime = this.state.purchaseDateTime
+      handleDate=(timeDate, action, workType)=>{
+        let workDateTime = this.state[`${workType}DateTime`]
         if(action==='date'){
-          purchaseDateTime.unLoadingDate = timeDate
+          workDateTime.date = timeDate
           this.setState({
-            purchaseDateTime: purchaseDateTime
+            [`${workType}DateTime`]: workDateTime
           })
         }
         if(action==='startTime'){
-          purchaseDateTime.unLoadingStartTime = timeDate
+          workDateTime.startTime = timeDate
           this.setState({
-            purchaseDateTime: purchaseDateTime
-          })
+            [`${workType}DateTime`]: workDateTime
+          },()=>this.calculateRowTime(workType))
         }
         if(action==='endTime'){
-          purchaseDateTime.unLoadingEndTime = timeDate
+          workDateTime.endTime = timeDate
           this.setState({
-            purchaseDateTime: purchaseDateTime
-          })
+            [`${workType}DateTime`]: workDateTime
+          },()=>this.calculateRowTime(workType))
         }
+      }
+      calculateRowTime=(workType)=>{
+      let  workDateTime = this.state[`${workType}DateTime`]
+            if(workDateTime.startTime && workDateTime.endTime && workDateTime.endTime>workDateTime.startTime ){
+                this.setState({
+                  [`${workType}RowTime`]: new Date (workDateTime.endTime)- new Date(workDateTime.startTime)
+                })
+            }else{
+              this.setState({
+                [`${workType}RowTime`]: 0
+              })
+            }
       }
       onChangeCmpName=(e)=>{
         this.setState({
@@ -693,7 +723,7 @@ export class Purchase extends Component {
 
 
   render() {
-    const {selectedCell, purchaseDateTime}= this.state
+    const {selectedCell, unLoadingDateTime, loadingDateTime}= this.state
     const productColumn =[
       {
         Header: "Product Name",
@@ -775,24 +805,17 @@ export class Purchase extends Component {
           },
         },
         {
-          Header: "Seller Name",
-          accessor: "sellerName",
-          Cell: (cell) => {
-            return  cell.original.sellerDetail &&  cell.original.sellerDetail.sellerName?cell.original.sellerDetail.sellerName:'NA'
-          },
-        },
-        {
           Header: "Company Name",
           accessor: "companyName",
           Cell: (cell) => {
-            return  cell.original.sellerDetail &&  cell.original.sellerDetail.companyName?cell.original.sellerDetail.companyName:'NA'
+            return  cell.original.purchaseBasicInfo &&  cell.original.purchaseBasicInfo.companyName?cell.original.purchaseBasicInfo.companyName:'NA'
           },
         },
         {
-          Header: "Phone Number",
-          accessor: "phoneNumber1",
+          Header: "Net Weight",
+          accessor: "netWeight",
           Cell: (cell) => {
-            return  cell.original.sellerDetail &&  cell.original.sellerDetail.phoneNumber1?cell.original.sellerDetail.phoneNumber1:'NA'
+            return  cell.original.purchaseBasicInfo &&  cell.original.purchaseBasicInfo.netWeight?cell.original.purchaseBasicInfo.netWeight:'NA'
           },
         },
         {
@@ -803,27 +826,27 @@ export class Purchase extends Component {
               <Link to="#" onClick={()=>this.ShowProduct(cell.original)}>Product Detail</Link>
             )}
         },
-        {
-          Header: "vehicle Number",
-          accessor: "vehicleNumber",
-          Cell: (cell) => {
-            return cell.original.vehicleInfo &&  cell.original.vehicleInfo.length>0? cell.original.vehicleInfo[0].vehicleNumber:'N/A'
-          }
-        },
-        {
-          Header: "Total Amount",
-          accessor: "amount",
-          Cell: (cell) => {
-            return  cell.original.totalAmount? cell.original.totalAmount:'0.00'
-          }
-        },
-        {
-          Header: "Mode Payment",
-          accessor: "payInfo",
-          Cell: (cell) => {
-            return cell.original.payInfo && cell.original.payInfo.length>0?cell.original.payInfo[0].payMode:'N/A'
-          }
-        },
+        // {
+        //   Header: "vehicle Number",
+        //   accessor: "vehicleNumber",
+        //   Cell: (cell) => {
+        //     return cell.original.vehicleInfo &&  cell.original.vehicleInfo.length>0? cell.original.vehicleInfo[0].vehicleNumber:'N/A'
+        //   }
+        // },
+        // {
+        //   Header: "Total Amount",
+        //   accessor: "amount",
+        //   Cell: (cell) => {
+        //     return  cell.original.totalAmount? cell.original.totalAmount:'0.00'
+        //   }
+        // },
+        // {
+        //   Header: "Mode Payment",
+        //   accessor: "payInfo",
+        //   Cell: (cell) => {
+        //     return cell.original.payInfo && cell.original.payInfo.length>0?cell.original.payInfo[0].payMode:'N/A'
+        //   }
+        // },
         {
           Header: "Action",
           // show:USER && USER.userInfo && USER.userInfo.role && USER.userInfo.role==='TOPADMIN'?true:true,
@@ -980,8 +1003,39 @@ export class Purchase extends Component {
                           }
                       }} />
                      </Col>
+                     </Row>
+                     <Row>
                      <Col>
-                      <AvField name="kantaWeight" label="Weight" placeholder="Weight" 
+                      <AvField name="grossWeight" label="Gross Weight(Kg)" placeholder="Weight" 
+                        onChange={(e)=>
+                          //console.log("eeee", e.target.value)
+                          this.setState({
+                          grossWeight: e.target.value
+                        })
+                      }
+                          validate={{
+                          required: {
+                              value: true,
+                              errorMessage: 'This field is required.'
+                          }
+                      }} />
+                     </Col>
+                     <Col>
+                      <AvField name="tareWeight" label="Tare Weight(Kg)" placeholder="Weight"
+                        onChange={(e)=>this.setState({
+                          tareWeight: e.target.value
+                        })} 
+                          validate={{
+                          required: {
+                              value: true,
+                              errorMessage: 'This field is required.'
+                          }
+                      }} />
+                     </Col>
+                     <Col>
+                      <AvField name="netWeight" label="Net Weight(Kg)" placeholder="Weight"
+                          value={parseFloat(this.state.grossWeight)- parseFloat(this.state.tareWeight)} 
+                          disabled={true}
                           validate={{
                           required: {
                               value: true,
@@ -1011,20 +1065,20 @@ export class Purchase extends Component {
                           }
                         }} 
                       >
-                        <option value='' key='recieverKey'>selecte Reciever </option>
+                        <option value='' key='recieverKey'>select Reciever </option>
                         {this.state.allReciever.map((data, index)=> <option value={data._id} key ={`${index}_reciever`}>{data.recieverName}</option>)}
                         <option value='create_new'key={'create_new'}>New Reciever </option>
                       </AvField>
                      </Col>
                      </Row>
                      <Row>
-                        <Col md={4}>
+                        <Col md={3}>
                           <div>
-                            <label >Unloading Date</label>
+                            <label >Loading Date</label>
                           </div>
                           <DatePicker
-                              selected={new Date(purchaseDateTime.unLoadingDate)}
-                              onChange={(date) => this.handlePurchaseDate(date, 'date')}
+                              selected={new Date(loadingDateTime.date)}
+                              onChange={(date) => this.handleDate(date, 'date', 'loading')}
                               //showTimeSelect
                               //showTimeSelectOnly
                               //timeIntervals={30}
@@ -1032,13 +1086,13 @@ export class Purchase extends Component {
                               dateFormat="dd/MM/yyyy"
                           />
                         </Col>
-                        <Col md={4}>
+                        <Col md={3}>
                           <div>
                             <label >Start Time</label>
                           </div>
                           <DatePicker
-                              selected={new Date(purchaseDateTime.unLoadingStartTime)}
-                              onChange={(startTime) => this.handlePurchaseDate(startTime, 'startTime')}
+                              selected={new Date(loadingDateTime.startTime)}
+                              onChange={(startTime) => this.handleDate(startTime, 'startTime', 'loading')}
                               showTimeSelect
                               showTimeSelectOnly
                               timeIntervals={30}
@@ -1046,13 +1100,13 @@ export class Purchase extends Component {
                               dateFormat="h:mm aa"
                           />
                         </Col>
-                        <Col md={4}>
+                        <Col md={3}>
                           <div>
                             <label >End Time</label>
                           </div>
                           <DatePicker
-                              selected={new Date(purchaseDateTime.unLoadingEndTime)}
-                              onChange={(endTime) => this.handlePurchaseDate(endTime, 'endTime')}
+                              selected={new Date(loadingDateTime.endTime)}
+                              onChange={(endTime) => this.handleDate(endTime, 'endTime','loading')}
                               showTimeSelect
                               showTimeSelectOnly
                               timeIntervals={30}
@@ -1060,13 +1114,19 @@ export class Purchase extends Component {
                               dateFormat="h:mm aa"
                           />
                         </Col>
+                        <Col md={3}>
+                        <AvField name="unloadTime"  label ="Load Time" placeholder="00:00"
+                            disabled={true}
+                            value={convertMilliSecToHrMints(this.state.loadingRowTime)}
+                        />
+                        </Col>
                      </Row>
-                     {this.state.unLoadingWorkerList.map((data, indexNum)=>
+                     {this.state.loadingWorkerList.map((data, indexNum)=>
                         <Row>
                         <Col md={4}>
-                         <AvField name={`unLoadingWorker[${indexNum}].userId`} type='select' label="Unloaded By" placeholder="Unloaded By"  key={`${indexNum}workerId`}
+                         <AvField name={`loadingWorker[${indexNum}].userId`} type='select' label="Unloaded By" placeholder="Unloaded By"  key={`${indexNum}workerId`}
                            value={data.workerId}
-                           onChange={ this.updateWorkerField(indexNum) }
+                           onChange={ this.updateWorkerField(indexNum, 'loading') }
                            validate={{
                            required: {
                                value: true,
@@ -1081,7 +1141,7 @@ export class Purchase extends Component {
                         <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}} >
                           <Form.Group>
                             <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                            <button type="button" key={`${indexNum}_remove`}className="btn btn-gradient-danger btn-sm" onClick={()=>this.removeRow(indexNum)}>
+                            <button type="button" key={`${indexNum}_remove`}className="btn btn-gradient-danger btn-sm" onClick={()=>this.removeRow(indexNum, 'loading')}>
                             Remove 
                         </button>
                         </Form.Group>
@@ -1089,10 +1149,94 @@ export class Purchase extends Component {
                        </Row>
                      )}
                       <div className="d-flex mb-3">
-                        <button type="button" className="btn btn-gradient-primary btn-sm" onClick={this.addMoreUnLoadingWoker}>
-                          Add More worker
+                        <button type="button" className="btn btn-gradient-primary btn-sm" onClick={()=>this.addMoreWoker('loading')}>
+                          Add More worker for loading
                         </button>
                     </div>
+                     <Row>
+                        <Col md={3}>
+                          <div>
+                            <label >Unloading Date</label>
+                          </div>
+                          <DatePicker
+                              selected={new Date(unLoadingDateTime.date)}
+                              onChange={(date) => this.handleDate(date, 'date', 'unLoading')}
+                              //showTimeSelect
+                              //showTimeSelectOnly
+                              //timeIntervals={30}
+                              //timeCaption="Time"
+                              dateFormat="dd/MM/yyyy"
+                          />
+                        </Col>
+                        <Col md={3}>
+                          <div>
+                            <label >Start Time</label>
+                          </div>
+                          <DatePicker
+                              selected={new Date(unLoadingDateTime.startTime)}
+                              onChange={(startTime) => this.handleDate(startTime, 'startTime', 'unLoading')}
+                              showTimeSelect
+                              showTimeSelectOnly
+                              timeIntervals={30}
+                              timeCaption="Time"
+                              dateFormat="h:mm aa"
+                          />
+                        </Col>
+                        <Col md={3}>
+                          <div>
+                            <label >End Time</label>
+                          </div>
+                          <DatePicker
+                              selected={new Date(unLoadingDateTime.endTime)}
+                              onChange={(endTime) => this.handleDate(endTime, 'endTime','unLoading')}
+                              showTimeSelect
+                              showTimeSelectOnly
+                              timeIntervals={30}
+                              timeCaption="Time"
+                              dateFormat="h:mm aa"
+                          />
+                        </Col>
+                        <Col md={3}>
+                        <AvField name="unloadTime"  label ="Unload Time" placeholder="00:00"
+                            disabled={true}
+                            value={convertMilliSecToHrMints(this.state.unLoadingRowTime)}
+                        />
+                        </Col>
+                     </Row>
+                     {this.state.unLoadingWorkerList.map((data, indexNum)=>
+                        <Row>
+                        <Col md={4}>
+                         <AvField name={`unLoadingWorker[${indexNum}].userId`} type='select' label="Unloaded By" placeholder="Unloaded By"  key={`${indexNum}workerId`}
+                           value={data.workerId}
+                           onChange={ this.updateWorkerField(indexNum, 'unLoading') }
+                           validate={{
+                           required: {
+                               value: true,
+                               errorMessage: 'This field is required.'
+                             }
+                           }} 
+                         >
+                           <option value='' key='workerKey'>Select Worker</option>
+                           {this.state.allWorker.map((data, index)=> <option value={data.userInfo && data.userInfo.userId} key={`${index}_workerkey`}>{data.userInfo && data.userInfo.fullName}</option>)}
+                           </AvField>
+                        </Col>
+                        <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}} >
+                          <Form.Group>
+                            <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            <button type="button" key={`${indexNum}_remove`}className="btn btn-gradient-danger btn-sm" onClick={()=>this.removeRow(indexNum, 'unLoading')}>
+                            Remove 
+                        </button>
+                        </Form.Group>
+                      </Col>
+                       </Row>
+                     )}
+                      <div className="d-flex mb-3">
+                        <button type="button" className="btn btn-gradient-primary btn-sm" onClick={()=>this.addMoreWoker('unLoading')}>
+                          Add More worker for unloading
+                        </button>
+                    </div>
+
+
                    
                     <Row>
                       <Col>
@@ -1134,7 +1278,7 @@ export class Purchase extends Component {
                       <>
                       <Row >
                         <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
-                        <AvField type='select' name= {`purchaseProduct[${numIndex}].purcoductNameId`}
+                        <AvField type='select' name= {`purchaseProduct[${numIndex}].productNameId`}
                           validate={{
                             required: {
                                 value: true,
@@ -1723,9 +1867,9 @@ export class Purchase extends Component {
               <Modal.Title>Product Detail Report</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                 <ReactTable
-                data={this.state.selectedCell.purchaseInfo && this.state.selectedCell.purchaseInfo.length>0?this.state.selectedCell.purchaseInfo:[]}
-               className='-striped -highlight'
+              <ReactTable
+                data={this.state.selectedCell && this.state.selectedCell.purchaseProduct && this.state.selectedCell.purchaseProduct.length>0?this.state.selectedCell.purchaseProduct:[]}
+                className='-striped -highlight'
                 // className='-highlight'
                 columns={productColumn}
                 defaultSorted={[{ id: "created", desc: true }]}

@@ -28,3 +28,23 @@ export const capitalize=(sentance)=>{
  export const encryptAES = (text, SECRET_MSG) => {
     return CryptoJS.AES.encrypt(text, SECRET_MSG).toString();
   }
+
+  export const convertMilliSecToHrMints=(milliseconds=0)=> {
+    const seconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const formattedHours = ("0" + hours).slice(-2); // Ensures a leading zero if needed
+    const formattedMinutes = ("0" + minutes).slice(-2); // Ensures a leading zero if needed
+    return formattedHours + ":" + formattedMinutes;
+}
+
+export const groupedData =(data, key) => {
+    console.log("data", key)
+    data.reduce((acc, obj) => {
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(obj);
+    return acc;
+  }, {});
+}

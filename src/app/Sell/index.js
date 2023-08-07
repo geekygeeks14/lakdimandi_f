@@ -49,6 +49,7 @@ export class Sell extends Component {
           dueAmount:0,
           totalPaidAmount:0,
           totalWeight:0,
+          loadingCharge:0,
           selectedCell:{},
           paymentList:[{}],
           allProductCode:[],
@@ -294,6 +295,7 @@ export class Sell extends Component {
           paidAmount: values.totalPaidAmount,
           dueAmount: values.dueAmount,
           totalAmount: values.totalAmount,
+          loadingCharge: values.loadingCharge,
           insertedBy : USER && USER._id,
           companyId: USER && USER.userInfo.companyId
         }
@@ -347,6 +349,7 @@ export class Sell extends Component {
           discountAmount: values.discountAmount?values.discountAmount:0,
           paidAmount: values.totalPaidAmount,
           dueAmount: values.dueAmount,
+          loadingCharge: values.loadingCharge,
           totalAmount: values.totalAmount,
           actionPassword: (ROLE && ROLE==='ADMIN')? encryptAES(values.actionPassword, USER.userInfo.password): undefined
         }
@@ -470,7 +473,8 @@ export class Sell extends Component {
           discountAmount:0,
           totalWeight:0,
           suggestions:[],
-          selectedPurchaser:{}, 
+          selectedPurchaser:{},
+          text:'', 
           sellProductList:[{productName:'',length:'',breadth:'',height:'',weight:'',unit:'',qty:'', rate:''}]
         })
       }
@@ -576,7 +580,7 @@ export class Sell extends Component {
 
 
   calculateAmount = () => {
-        let grandTotal = 0;
+        let grandTotal = this.state.loadingCharge?parseFloat(this.state.loadingCharge):0
         let totalWeight =0;
         this.state.sellProductList.forEach((it)=>{
             if(!!it.lineTotal && parseFloat (it.lineTotal) > 0){
@@ -638,6 +642,9 @@ export class Sell extends Component {
   };
   calculateDiscountAmount = (e) => {
     this.setState({ discountAmount: e.target.value }, ()=>{this.calculateAmount()});
+  };
+  calculateLoadingCharge = (e) => {
+    this.setState({ loadingCharge: e.target.value }, ()=>{this.calculateAmount()});
   };
 
   changeSellSelectOption = (rowIndex, e, key) => {
@@ -768,6 +775,9 @@ editToggle=(cell)=>{
     selectedLength:'',
     selectedBreadth:'',
     selectedHeight:'',
+    text:'',
+    suggestions:[],
+    selectedPurchaser:{}
    })
  }
 
@@ -859,6 +869,14 @@ editToggle=(cell)=>{
         width: 85,
         Cell: (cell) => {
           return cell.original.weight ? cell.original.weight:'N/A'
+        }
+      },
+      {
+        Header: "Total Weight",
+        accessor: "weighted",
+        width: 150,
+        Cell: (cell) => {
+          return cell.original.weighted ? cell.original.weighted:'N/A'
         }
       },
       {
@@ -1436,58 +1454,6 @@ editToggle=(cell)=>{
                           Add More
                         </button>
                     </div>
-                      {/* {this.state.paymentList.map((paymentData,index)=>
-                      <>
-                       <Row>
-                       <Col md={2}>
-                          <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
-                              type="select" name={`payment[${index}].payMode`} label="Select Pay" 
-                              value={!!paymentData && !!paymentData.payMode? paymentData.payMode:null}
-                              onChange={(e)=>this.changePaymentOption(index, e, 'payMode')}
-                              validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
-                              }
-                          }} >
-                        <option value=''>Choose pay</option>
-                        {paymentOption.map((data, index)=> {return (<option key={index} style={{color:"black"}}>{data.label}</option>)} )}
-                        </AvField>
-                      </Col>
-                      <Col md={2}>
-                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
-                            name={`payment[${index}].amount`}  label ="Enter amount" placeholder="0.00"
-                            value={!!paymentData && !!paymentData.amount? paymentData.amount:0.00}
-                            onKeyUp={ e => this.calculatePaymentField(e, index) }
-                            onChange={ this.updatePaymentField(index, 'amount') }
-                            validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:'^[0-9]+(\\.[0-9]{2})?$',
-                              errorMessage: `Invalid amount number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                      <Col md={3} style={{paddingLeft:'3px',paddingRight:'3px'}} >
-                      <Form.Group>
-                            <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                          <button type="button" className="btn btn-gradient-danger btn-sm" onClick={()=>this.removePaymentRow(index)}>
-                          Remove Payment Row
-                        </button>
-                        </Form.Group>
-                      </Col>
-                      </Row>
-                      </>
-                      )}
-                        <div className="d-flex mb-3">
-                        <button type="button" className="btn btn-gradient-success btn-sm" onClick={this.addMorePayment}>
-                          Add More Payment
-                        </button>
-                      </div> */}
                       <Row>
                       <Col md={2}>
                         <AvField name="vehicleNumber"  label ="Vehical Detail" placeholder="Vehical Detail"
@@ -1511,13 +1477,15 @@ editToggle=(cell)=>{
                       </Col>
                       </Row>
                     <Row>
-                    <Col md={4}>
-                        <AvField name="Select payment options"  label ="&nbsp;&nbsp;&nbsp;" placeholder="Select Payment Options"
+                    <Col md={3} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="Select payment options"  label ="&nbsp;&nbsp;&nbsp;" placeholder="Select Payment Options"
                           disabled={true}
                         />
                       </Col>
-                      <Col md={2}>
-                        <AvField name="totalPaidAmount"  label ="Total Paid Amount" placeholder="Total Paid Amount"
+                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                         name="totalPaidAmount"  label ="Total Paid Amount" placeholder="Total Paid Amount"
                           value={parseFloat(this.state.totalPaidAmount).toFixed(2)}
                           disabled={true}
                           validate={{
@@ -1532,8 +1500,9 @@ editToggle=(cell)=>{
                         }} 
                         />
                       </Col>
-                      <Col md={2}>
-                        <AvField name="dueAmount"  label ="Due Amount" placeholder="0.00"
+                      <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="dueAmount"  label ="Due Amount" placeholder="0.00"
                         value={parseFloat(this.state.dueAmount).toFixed(2)}
                         disabled={true}
                           validate={{
@@ -1548,8 +1517,9 @@ editToggle=(cell)=>{
                         }} 
                         />
                       </Col>
-                      <Col md={2}>
-                        <AvField name="discountAmount"  label ="Discount Amount" placeholder="0.00"
+                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="discountAmount"  label ="Discount Amount" placeholder="0.00"
                         //value={this.state.dueAmount}
                         onKeyUp={this.calculateDiscountAmount}
                           validate={{
@@ -1564,8 +1534,26 @@ editToggle=(cell)=>{
                         }} 
                         />
                       </Col>
-                      <Col md={2}>
-                        <AvField name="totalAmount"  label ="Grand Total Amount" placeholder="0.0"
+                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="loadingCharge"  label ="Loading Charge" placeholder="0.00"
+                        //value={this.state.dueAmount}
+                        onKeyUp={this.calculateLoadingCharge}
+                          validate={{
+                            // required: {
+                            //     value: true,
+                            //     errorMessage: 'This field is required.'
+                            // },
+                            pattern: {
+                              value:'^[0-9]+(\\.[0-9]{2})?$',
+                              errorMessage: `Invalid Amount.`
+                            }
+                        }} 
+                        />
+                      </Col>
+                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="totalAmount"  label ="Grand Total Amount" placeholder="0.0"
                           value={parseFloat(this.state.totalAmount).toFixed(2)}
                           disabled={true}
                           validate={{
@@ -1767,20 +1755,7 @@ editToggle=(cell)=>{
                   
                     }} />
                      </Col>
-                     {/* <Col>
-                     <AvField type="select" name="productCodeId" label="Product Code" placeholder="Product Code" 
-                        validate={{
-                        required: {
-                            value: true,
-                            errorMessage: 'This field is required.'
-                        }
-                    }} >
-                      <option value=''>Choose product code</option>
-                        {this.state.allProductCode.length>0 && this.state.allProductCode.map((data, index)=> {return (<option key={`${index}_prodcode`} value={data._id} style={{color:"black"}}>{data.productCode}</option>)} )}
-                      </AvField>
-                     </Col> */}
                     </Row>
-
                     <h3 className="text-dark d-flex justify-content-center">Product Details</h3>
                     {this.state.sellProductList.map((productData,index)=>
                       <>
@@ -2007,58 +1982,6 @@ editToggle=(cell)=>{
                           Add More
                         </button>
                     </div>
-                      {/* {this.state.paymentList.map((paymentData,index)=>
-                      <>
-                       <Row>
-                       <Col md={2}>
-                          <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
-                              type="select" name={`payment[${index}].payMode`} label="Select Pay" 
-                              value={!!paymentData && !!paymentData.payMode? paymentData.payMode:null}
-                              onChange={(e)=>this.changePaymentOption(index, e, 'payMode')}
-                              validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
-                              }
-                          }} >
-                        <option value=''>Choose pay</option>
-                        {paymentOption.map((data, index)=> {return (<option key={index} style={{color:"black"}}>{data.label}</option>)} )}
-                        </AvField>
-                      </Col>
-                      <Col md={2}>
-                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
-                            name={`payment[${index}].amount`}  label ="Enter amount" placeholder="0.00"
-                            value={!!paymentData && !!paymentData.amount? paymentData.amount:0.00}
-                            onKeyUp={ e => this.calculatePaymentField(e, index) }
-                            onChange={ this.updatePaymentField(index, 'amount') }
-                            validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:'^[0-9]+(\\.[0-9]{2})?$',
-                              errorMessage: `Invalid amount number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                      <Col md={3} style={{paddingLeft:'3px',paddingRight:'3px'}} >
-                      <Form.Group>
-                            <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                          <button type="button" className="btn btn-gradient-danger btn-sm" onClick={()=>this.removePaymentRow(index)}>
-                          Remove Payment Row
-                        </button>
-                        </Form.Group>
-                      </Col>
-                      </Row>
-                      </>
-                      )}
-                        <div className="d-flex mb-3">
-                        <button type="button" className="btn btn-gradient-success btn-sm" onClick={this.addMorePayment}>
-                          Add More Payment
-                        </button>
-                      </div> */}
                       <Row>
                       <Col md={2}>
                         <AvField name="vehicleNumber"  label ="Vehical Detail" placeholder="Vehical Detail"
@@ -2082,13 +2005,15 @@ editToggle=(cell)=>{
                       </Col>
                       </Row>
                     <Row>
-                    <Col md={4}>
-                        <AvField name="Select payment options"  label ="&nbsp;&nbsp;&nbsp;" placeholder="Select Payment Options"
+                    <Col md={3} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="Select payment options"  label ="&nbsp;&nbsp;&nbsp;" placeholder="Select Payment Options"
                           disabled={true}
                         />
                       </Col>
-                      <Col md={2}>
-                        <AvField name="totalPaidAmount"  label ="Total Paid Amount" placeholder="Total Paid Amount"
+                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="totalPaidAmount"  label ="Total Paid Amount" placeholder="Total Paid Amount"
                           value={parseFloat(this.state.totalPaidAmount).toFixed(2)}
                           disabled={true}
                           validate={{
@@ -2103,8 +2028,9 @@ editToggle=(cell)=>{
                         }} 
                         />
                       </Col>
-                      <Col md={2}>
-                        <AvField name="dueAmount"  label ="Due Amount" placeholder="0.00"
+                      <Col md={1}style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="dueAmount"  label ="Due Amount" placeholder="0.00"
                         value={parseFloat(this.state.dueAmount).toFixed(2)}
                         disabled={true}
                           validate={{
@@ -2119,8 +2045,9 @@ editToggle=(cell)=>{
                         }} 
                         />
                       </Col>
-                      <Col md={2}>
-                        <AvField name="discountAmount"  label ="Discount Amount" placeholder="0.00"
+                      <Col md={2}style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="discountAmount"  label ="Discount Amount" placeholder="0.00"
                         //value={this.state.dueAmount}
                         onKeyUp={this.calculateDiscountAmount}
                         disabled={ROLE && ROLE==='SUPER_ADMIN'}
@@ -2136,8 +2063,26 @@ editToggle=(cell)=>{
                         }} 
                         />
                       </Col>
-                      <Col md={2}>
-                        <AvField name="totalAmount"  label ="Grand Total Amount" placeholder="0.0"
+                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="loadingCharge"  label ="Loading Charge" placeholder="0.00"
+                        //value={this.state.dueAmount}
+                        onKeyUp={this.calculateLoadingCharge}
+                          validate={{
+                            // required: {
+                            //     value: true,
+                            //     errorMessage: 'This field is required.'
+                            // },
+                            pattern: {
+                              value:'^[0-9]+(\\.[0-9]{2})?$',
+                              errorMessage: `Invalid Amount.`
+                            }
+                        }} 
+                        />
+                      </Col>
+                      <Col md={2}style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                        name="totalAmount"  label ="Grand Total Amount" placeholder="0.0"
                           value={parseFloat(this.state.totalAmount).toFixed(2)}
                           disabled={true}
                           validate={{

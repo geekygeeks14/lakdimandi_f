@@ -75,6 +75,27 @@
     ]
   },
   {
+    "path": "/expense",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN"
+    ]
+  },
+  {
+    "path": "/pay-option",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN"
+    ]
+  },
+  {
+    "path": "/due-amount",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN"
+    ]
+  },
+  {
     "path": "/worklog",
     "roles": [
       "TOPADMIN",

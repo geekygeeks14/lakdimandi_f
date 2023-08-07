@@ -12,7 +12,7 @@ import { AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
 import withFixedColumns from 'react-table-hoc-fixed-columns';
 import 'react-table-hoc-fixed-columns/lib/styles.css'
-import { capitalize, logoutFunc } from "../util/helper";
+import { capitalize, convertMilliSecToHrMints, logoutFunc } from "../util/helper";
 import DatePicker from "react-datepicker";
 const ReactTableFixedColumns = withFixedColumns(ReactTable);
 
@@ -204,24 +204,24 @@ export class WorkDetail extends Component {
           },()=>this.getDaysInMonth(month, year))
        }
 
-      convertMilliSecToHrMints=(milliseconds=0)=> {
-          const seconds = Math.floor(milliseconds / 1000);
-          const hours = Math.floor(seconds / 3600);
-          const minutes = Math.floor((seconds % 3600) / 60);
-          const formattedHours = ("0" + hours).slice(-2); // Ensures a leading zero if needed
-          const formattedMinutes = ("0" + minutes).slice(-2); // Ensures a leading zero if needed
-          return formattedHours + ":" + formattedMinutes;
-      }
+      // convertMilliSecToHrMints=(milliseconds=0)=> {
+      //     const seconds = Math.floor(milliseconds / 1000);
+      //     const hours = Math.floor(seconds / 3600);
+      //     const minutes = Math.floor((seconds % 3600) / 60);
+      //     const formattedHours = ("0" + hours).slice(-2); // Ensures a leading zero if needed
+      //     const formattedMinutes = ("0" + minutes).slice(-2); // Ensures a leading zero if needed
+      //     return formattedHours + ":" + formattedMinutes;
+      // }
 
        calculateTotalTime=()=>{
-        let totalMilliSec=0
         const allList = [...this.state.loadingWorkList,...this.state.unLoadingWorkList,...this.state.productionWorkList,...this.state.otherWorkList]
-        allList.forEach(data=>{
-          if(data.loadingRowTime || data.unLoadingRowTime || data.productionRowTime || data.otherRowTime){
-              const time=   data.loadingRowTime>0?data.loadingRowTime: data.unLoadingRowTime>0? data.unLoadingRowTime: data.productionRowTime>0? data.productionRowTime: data.otherRowTime>0? data.otherRowTime:0
-              totalMilliSec+= parseInt(time)
-          }
-        })
+        const totalMilliSec = allList.reduce((acc, curr) => acc + parseInt(curr.rowTime?curr.rowTime:0),0);
+        // allList.forEach(data=>{
+        //   if(data.rowTime || data.rowTime || data.rowTime || data.rowTime){
+        //       const time=   data.rowTime>0?data.rowTime: data.rowTime>0? data.rowTime: data.rowTime>0? data.rowTime: data.rowTime>0? data.rowTime:0
+        //       totalMilliSec+= parseInt(time)
+        //   }
+        // })
         this.setState({
           totalMilliSec: totalMilliSec
           })
@@ -269,10 +269,10 @@ export class WorkDetail extends Component {
           })
         }else{
           this.setState({  
-            loadingWorkList:[{loadingNote:'',loadingStartTime:selectedDate,loadingEndTime: selectedDate, loadingRowTime:0}],
-            unLoadingWorkList:[{unLoadingNote:'',unLoadingStartTime:selectedDate,unLoadingEndTime: selectedDate, unLoadingRowTime:0}],
-            productionWorkList:[{productionNote:'',productionStartTime:selectedDate,productionEndTime: selectedDate, productionRowTime:0}],
-            otherWorkList:[{otherNote:'',otherStartTime:selectedDate,otherEndTime: selectedDate, otherRowTime:0}],
+            loadingWorkList:[{note:'',startTime:selectedDate,endTime: selectedDate, rowTime:0}],
+            unLoadingWorkList:[{note:'',startTime:selectedDate,endTime: selectedDate, rowTime:0}],
+            productionWorkList:[{note:'',startTime:selectedDate,endTime: selectedDate, rowTime:0}],
+            otherWorkList:[{note:'',startTime:selectedDate,endTime: selectedDate, rowTime:0}],
             workDetailModel:true,
             edit: false,
             dateOfWork,
@@ -287,9 +287,9 @@ export class WorkDetail extends Component {
       }
       handleStartTime=(sTime, index, type)=>{
         let getList = this.state[`${type}WorkList`]
-        let msec = new Date( getList[index][`${type}EndTime`]) - new Date (sTime)
-        getList[index][`${type}StartTime`]=sTime
-        getList[index][`${type}RowTime`]= msec>0?msec:0
+        let msec = new Date( getList[index][`endTime`]) - new Date (sTime)
+        getList[index][`startTime`]=sTime
+        getList[index][`rowTime`]= msec>0?msec:0
         this.setState({
           [`${type}WorkList`]:getList,
         },()=>this.calculateTotalTime())
@@ -297,9 +297,9 @@ export class WorkDetail extends Component {
       }
       handleEndTime=(eTime, index,type)=>{
         let getList = this.state[`${type}WorkList`]
-        let msec = new Date(eTime) - new Date(getList[index][`${type}StartTime`]) 
-        getList[index][`${type}EndTime`]=eTime
-        getList[index][`${type}RowTime`]= msec>0?msec:0
+        let msec = new Date(eTime) - new Date(getList[index][`startTime`]) 
+        getList[index][`endTime`]=eTime
+        getList[index][`rowTime`]= msec>0?msec:0
         this.setState({
           [`${type}WorkList`]:getList,
         },
@@ -322,7 +322,7 @@ export class WorkDetail extends Component {
       const selectedDate = new Date(this.state.selectedDate)
       selectedDate.setMonth(this.state.selectedMonth)
       selectedDate.setFullYear(this.state.selectedYear)
-      const newWorkList = [{[`${type}Note`]:'', [`${type}StartTime`]:selectedDate, [`${type}EndTime`]: selectedDate, [`${type}RowTime`]:0}]
+      const newWorkList = [{note:'', startTime:selectedDate, endTime: selectedDate, rowTime:0}]
       const oldList = this.state[`${type}WorkList`]
       const newList = [...oldList, ...newWorkList]
       this.setState({[`${type}WorkList`]:newList})
@@ -366,7 +366,7 @@ export class WorkDetail extends Component {
                   style={{cursor:`${(index+1>todayDate && mm===todayMM && yyyy===todayYear)?'':'pointer'}`, color:`${(index+1===todayDate && mm===todayMM && yyyy===todayYear)? 'green': (index+1>todayDate && mm===todayMM && yyyy===todayYear)?'#969696':''}`}} 
                   onClick={(index+1>todayDate && mm===todayMM && yyyy===todayYear)?null:()=>this.getCellInfo(index+1, cell.original.userInfo.userId, dateOfWork)}
                   >
-                  {this.convertMilliSecToHrMints(this.state.allWorkDetail.find(data=> data.dateOfWork===dateOfWork && data.userId ===cell.original.userInfo.userId)?.totalMilliSec)}
+                  {convertMilliSecToHrMints(this.state.allWorkDetail.find(data=> data.dateOfWork===dateOfWork && data.userId ===cell.original.userInfo.userId)?.totalMilliSec)}
                 </span>
             }
           )
@@ -449,12 +449,12 @@ export class WorkDetail extends Component {
                       <>
                       <Row>
                       <Col md={4}>
-                        <AvField type="text" name={`loading[${index}].loadingNote`} label="Loading Note" placeholder="Add loading detail" 
-                        value={(loading && loading.loadingNote)? loading.loadingNote:''}
-                        onChange={this.updateField(index, 'loadingNote','loading')}  
+                        <AvField type="text" name={`loading[${index}].note`} label="Loading Note" placeholder="Add loading detail" 
+                        value={(loading && loading.note)? loading.note:''}
+                        onChange={this.updateField(index, 'note','loading')}  
                         validate={{
                           required: {
-                              value: loading.loadingRowTime>0?true:false,
+                              value: loading.rowTime>0?true:false,
                               errorMessage: 'This field is required.'
                           }
                         }} 
@@ -465,7 +465,7 @@ export class WorkDetail extends Component {
                         <label >Start Time</label>
                       </div>
                       <DatePicker
-                          selected={new Date(loading.loadingStartTime)}
+                          selected={new Date(loading.startTime ? loading.startTime: new Date())}
                           onChange={(startTime) => this.handleStartTime(startTime, index,'loading' )}
                           showTimeSelect
                           showTimeSelectOnly
@@ -479,7 +479,7 @@ export class WorkDetail extends Component {
                         <label >End Time</label>
                       </div>
                       <DatePicker
-                          selected={new Date(loading.loadingEndTime)}
+                          selected={new Date(loading.endTime? loading.endTime: new Date())}
                           onChange={(endTime) => this.handleEndTime(endTime, index,'loading' )}
                           showTimeSelect
                           showTimeSelectOnly
@@ -490,7 +490,7 @@ export class WorkDetail extends Component {
                       </Col>
                     <Col md={2}>
                     <AvField name="totalHour" label="Total Hour" placeholder="Add Working Hour"
-                        value={this.convertMilliSecToHrMints(loading.loadingRowTime)}
+                        value={convertMilliSecToHrMints(loading.rowTime)}
                         disabled={true}
                    
                     />
@@ -519,12 +519,12 @@ export class WorkDetail extends Component {
                       <>
                       <Row>
                       <Col md={4}>
-                        <AvField type="text" name={`unLoading[${index}].unLoadingNote`} label="UnLoading Note" placeholder="Add UnLoading detail" 
-                        value={(unLoading && unLoading.unLoadingNote)? unLoading.unLoadingNote:''}
-                        onChange={this.updateField(index, 'unLoadingNote','unLoading')}  
+                        <AvField type="text" name={`unLoading[${index}].note`} label="UnLoading Note" placeholder="Add UnLoading detail" 
+                        value={(unLoading && unLoading.note)? unLoading.note:''}
+                        onChange={this.updateField(index, 'note','unLoading')}  
                         validate={{
                           required: {
-                              value: unLoading.unLoadingRowTime>0?true:false,
+                              value: unLoading.rowTime>0?true:false,
                               errorMessage: 'This field is required.'
                           }
                         }} 
@@ -535,7 +535,7 @@ export class WorkDetail extends Component {
                         <label >Start Time</label>
                       </div>
                       <DatePicker
-                          selected={new Date(unLoading.unLoadingStartTime)}
+                          selected={new Date(unLoading.startTime ? unLoading.startTime: new Date())}
                           onChange={(startTime) => this.handleStartTime(startTime, index,'unLoading' )}
                           showTimeSelect
                           showTimeSelectOnly
@@ -549,7 +549,7 @@ export class WorkDetail extends Component {
                         <label >End Time</label>
                       </div>
                       <DatePicker
-                          selected={new Date(unLoading.unLoadingEndTime)}
+                          selected={new Date(unLoading.endTime? unLoading.endTime: new Date())}
                           onChange={(endTime) => this.handleEndTime(endTime, index,'unLoading' )}
                           showTimeSelect
                           showTimeSelectOnly
@@ -560,7 +560,7 @@ export class WorkDetail extends Component {
                       </Col>
                     <Col md={2}>
                     <AvField name="totalHour" label="Total Hour" placeholder="Add Working Hour"
-                        value={this.convertMilliSecToHrMints(unLoading.unLoadingRowTime)}
+                        value={convertMilliSecToHrMints(unLoading.rowTime)}
                         disabled={true}
                    
                     />
@@ -588,12 +588,12 @@ export class WorkDetail extends Component {
                       <>
                       <Row>
                       <Col md={4}>
-                        <AvField type="text" name={`production[${index}].productionNote`} label="Production Note" placeholder="Add production detail" 
-                        value={(production && production.productionNote)?production.productionNote:''}
-                        onChange={this.updateField(index, 'productionNote','production')}  
+                        <AvField type="text" name={`production[${index}].note`} label="Production Note" placeholder="Add production detail" 
+                        value={(production && production.note)?production.note:''}
+                        onChange={this.updateField(index, 'note','production')}  
                         validate={{
                           required: {
-                              value: production.productionRowTime>0?true:false,
+                              value: production.rowTime>0?true:false,
                               errorMessage: 'This field is required.'
                           }
                         }} 
@@ -604,7 +604,7 @@ export class WorkDetail extends Component {
                         <label >Start Time</label>
                       </div>
                       <DatePicker
-                          selected={new Date(production.productionStartTime)}
+                          selected={new Date(production.startTime?production.startTime: new Date() )}
                           onChange={(startTime) => this.handleStartTime(startTime, index,'production' )}
                           showTimeSelect
                           showTimeSelectOnly
@@ -618,7 +618,7 @@ export class WorkDetail extends Component {
                         <label >End Time</label>
                       </div>
                       <DatePicker
-                          selected={new Date(production.productionEndTime)}
+                          selected={new Date(production.endTime? production.endTime: new Date())}
                           onChange={(endTime) => this.handleEndTime(endTime, index,'production' )}
                           showTimeSelect
                           showTimeSelectOnly
@@ -629,7 +629,7 @@ export class WorkDetail extends Component {
                       </Col>
                     <Col md={2}>
                     <AvField name="totalHour" label="Total Hour" placeholder="Add Working Hour"
-                        value={this.convertMilliSecToHrMints(production.productionRowTime)}
+                        value={convertMilliSecToHrMints(production.rowTime)}
                         disabled={true}
                    
                     />
@@ -657,12 +657,12 @@ export class WorkDetail extends Component {
                       <>
                       <Row>
                       <Col md={4}>
-                        <AvField type="text" name={`other[${index}].otherNote`} label="other work Note" placeholder="Add other work detail" 
-                        value={(other && other.otherNote)?other.otherNote:''}
-                        onChange={this.updateField(index, 'otherNote','other')}  
+                        <AvField type="text" name={`other[${index}].note`} label="other work Note" placeholder="Add other work detail" 
+                        value={(other && other.note)?other.note:''}
+                        onChange={this.updateField(index, 'note','other')}  
                         validate={{
                           required: {
-                              value: other.otherRowTime>0?true:false,
+                              value: other.rowTime>0?true:false,
                               errorMessage: 'This field is required.'
                           }
                         }} 
@@ -673,7 +673,7 @@ export class WorkDetail extends Component {
                         <label >Start Time</label>
                       </div>
                       <DatePicker
-                          selected={new Date(other.otherStartTime)}
+                          selected={new Date(other.startTime? other.startTime : new Date())}
                           onChange={(startTime) => this.handleStartTime(startTime, index,'other' )}
                           showTimeSelect
                           showTimeSelectOnly
@@ -687,7 +687,7 @@ export class WorkDetail extends Component {
                         <label >End Time</label>
                       </div>
                       <DatePicker
-                          selected={new Date(other.otherEndTime)}
+                          selected={new Date(other.endTime? other.endTime: new Date())}
                           onChange={(endTime) => this.handleEndTime(endTime, index,'other' )}
                           showTimeSelect
                           showTimeSelectOnly
@@ -698,7 +698,7 @@ export class WorkDetail extends Component {
                       </Col>
                     <Col md={2}>
                     <AvField name="totalHour" label="Total Hour" placeholder="Add Working Hour"
-                        value={this.convertMilliSecToHrMints(other.otherRowTime)}
+                        value={convertMilliSecToHrMints(other.rowTime)}
                         disabled={true}
                    
                     />
@@ -725,7 +725,7 @@ export class WorkDetail extends Component {
                      <Row>
                      <Col>
                         <div className="d-flex justify-content-center">
-                          <Button variant="success" className="d-flex justify-content-center mt-3" >{this.convertMilliSecToHrMints(this.state.totalMilliSec).split(':')[0]} Hr {this.convertMilliSecToHrMints(this.state.totalMilliSec).split(':')[1]} Mint</Button>
+                          <Button variant="success" className="d-flex justify-content-center mt-3" >{convertMilliSecToHrMints(this.state.totalMilliSec).split(':')[0]} Hr {convertMilliSecToHrMints(this.state.totalMilliSec).split(':')[1]} Mint</Button>
                         </div>
                      </Col>
                      <Col>
@@ -809,7 +809,7 @@ export class WorkDetail extends Component {
                      </Row>
                      <Row>
                      <Col>
-                      <AvField type="textarea" name="loadingNote" label="Loading Note" placeholder="Add loading detail"
+                      <AvField type="textarea" name="note" label="Loading Note" placeholder="Add loading detail"
                           // value={this.state.edit && this.state.selectedCell && this.state.selectedCell.productName}
                       //     validate={{
                       //     required: {
@@ -831,7 +831,7 @@ export class WorkDetail extends Component {
                         />
                      </Col>
                      <Col>
-                      <AvField type="textarea" name="productionNote" label="Production Note" placeholder="Add production detail"
+                      <AvField type="textarea" name="note" label="Production Note" placeholder="Add production detail"
                           // value={this.state.edit && this.state.selectedCell && this.state.selectedCell.productName}
                       //     validate={{
                       //     required: {
