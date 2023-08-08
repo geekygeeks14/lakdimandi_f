@@ -23,6 +23,10 @@ const paymentOption =[
   {value:'phonePay',label:'phonePay'},
   {value:'Axis Bank',label:'Axis Bank'},
 ]
+const sellDueFilterOption=[
+  {value:'all', label:'All'},
+  {value:'today', label:'Today'}
+]
 
 class DueAmount extends Component {
     constructor(props){
@@ -41,12 +45,19 @@ class DueAmount extends Component {
             duePaidAmount:0,
             restDueAmount:0,
             dueAmount:0,
-            selectedSellId:''
+            selectedSellId:'',
+            selectedFilter: 'all'
         }
     }
 
     componentDidMount(){
+      if(window.location.href.includes('today')){
+        this.setState({
+          selectedFilter:'today'
+        },()=> this.getAllSell(),window.history.pushState('', '',  window.location.pathname))
+      }else{
         this.getAllSell()
+      }
     }
 
     async getAllSell(){
@@ -56,14 +67,16 @@ class DueAmount extends Component {
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
         const url = new URL(SETTING.APP_CONSTANT.API_URL+'admin/getAllSell')
-        // url.searchParams.set('productNameId', this.state.selectedProductNameId)
-        // url.searchParams.set('productCodeId', this.state.selectedProductCodeId)
-        // url.searchParams.set('length', this.state.selectedLength)
-        // url.searchParams.set('breadth', this.state.selectedBreadth)
-        // url.searchParams.set('height', this.state.selectedHeight)
-        // if(this.state.selectedCompnay && ROLE && ROLE==='SUPER_ADMIN'){
-        //   url.searchParams.set('companyId', this.state.selectedCompnay)
-        // }
+        if(this.state.selectedFilter && this.state.selectedFilter==='today'){
+          const toDate= new Date()
+          const fromDate = new Date()
+          let dateFrom = new Date(fromDate.toString()).toISOString().split("T")[0]
+          let dateTo = new Date(toDate.toString()).toISOString().split("T")[0]
+          url.searchParams.set('dateFilter', this.state.selectedFilter)
+          url.searchParams.set('fromDate', dateFrom)
+          url.searchParams.set('toDate', dateTo)
+        }
+      
         await Axios.get(url,{headers: options})
         .then((res) => {
           this.setState({
@@ -72,7 +85,7 @@ class DueAmount extends Component {
           if (res && res.data.success) {
             //let data =res.data.sellData.filter((val)=>val.dueAmount!==0)
             const  allSellData = res.data.sellData.filter((val)=>val.dueAmount!==0) 
-             const  uniqueSellData= allSellData.reduce((acc, obj) => {
+             const  uniqueSellDataByNumber= allSellData.reduce((acc, obj) => {
               const key = obj.buyerDetail.phoneNumber1;
               if (!acc[key]) {
                 acc[key] = [];
@@ -81,13 +94,13 @@ class DueAmount extends Component {
               return acc;
             }, {});
             
-            const allDue= (Object.entries(uniqueSellData).map(([key, value]) => ({ key, value }))).map(data=>{
+            const allDue= (Object.entries(uniqueSellDataByNumber).map(([key, value]) => ({ key, value }))).map(data=>{
               return{
                 ...data,
                 totalDueAmount : parseFloat(data.value.reduce((acc, curr)=> acc+ parseFloat(curr.dueAmount),0)).toFixed(2)
               }
             }) 
-            console.log("UniqueSellData", allDue)
+            // console.log("UniqueSellData", allDue)
              this.setState({
               allSell: res.data.sellData.filter((val)=>val.dueAmount!==0),
               uniqueSellData:allDue              
@@ -230,6 +243,11 @@ class DueAmount extends Component {
         data[rowIndex][key] = e.target.value;
         this.setState({ paymentList:data });
       };
+      filterSellDue=(e)=>{
+        this.setState({
+            selectedFilter: e.target.value
+        },()=> this.getAllSell())
+      }
 
     render(){
         const sellColumn = [
@@ -363,7 +381,20 @@ class DueAmount extends Component {
           <div className="col-12 grid-margin">
             <div className="card">
               <div className="card-body">
-                <p className="card-title2">Total Due Amount Details: {'5'}</p>
+                <p className="card-title2">Total Due Amount Details: {this.state.uniqueSellData.length}</p>
+                <Row>
+                  <Col md={2}>
+                    <Form.Group>
+                      <label htmlFor="exampleFormControlSelect3">Product Name</label>
+                        <select className="form-control form-control-sm" id="exampleForm"
+                        value={this.state.selectedFilter}
+                        onChange={this.filterSellDue}
+                      >
+                      {sellDueFilterOption.map((data, index)=><option  key={`${index}${data.value}`}value={data.value}>{data.label}</option>)}
+                      </select>
+                    </Form.Group>
+                  </Col>
+                </Row>
                 <ReactTable
                 data={this.state.uniqueSellData?this.state.uniqueSellData:[]}
                 className='-striped -highlight'
