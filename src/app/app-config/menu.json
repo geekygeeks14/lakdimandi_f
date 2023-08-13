@@ -8,7 +8,8 @@
       "TOPADMIN",
       "INSTANCE ADMIN",
       "ADMIN",
-      "SUPER_ADMIN"
+      "SUPER_ADMIN",
+      "ACCOUNTANT"
     ]
   },
   { "path": "/purchase",
@@ -17,7 +18,8 @@
     "state": "sellMenuOpen",
     "role": [
       "TOPADMIN",
-      "ADMIN"
+      "ADMIN",
+      "ACCOUNTANT"
     ]
   },
   { "path": "/weight",
@@ -27,7 +29,8 @@
     "role": [
       "TOPADMIN",
       "ADMIN",
-      "INSTANCE ADMIN"
+      "INSTANCE ADMIN",
+      "ACCOUNTANT"
     ]
   },
   { "path": "/addProduct",
@@ -37,7 +40,8 @@
   "role": [
     "TOPADMIN",
     "INSTANCE ADMIN",
-    "ADMIN"
+    "ADMIN",
+    "ACCOUNTANT"
   ]
 },
 { "path": "/productCode",
@@ -47,7 +51,8 @@
   "role": [
     "TOPADMIN",
     "INSTANCE ADMIN",
-    "ADMIN"
+    "ADMIN",
+    "ACCOUNTANT"
   ]
 },
 { "path": "/company",
@@ -100,7 +105,8 @@
   "state": "worklogCodeMenuOpen",
   "role": [
     "TOPADMIN",
-    "ADMIN"
+    "ADMIN",
+    "ACCOUNTANT"
   ]
 },
 { "path": "/roles",
@@ -117,7 +123,8 @@
   "state": "productCodeMenuOpen",
   "role": [
     "TOPADMIN",
-    "SUPER_ADMIN"
+    "SUPER_ADMIN",
+    "ADMIN"
   ]
 },
   { "path": "/basic-ui",

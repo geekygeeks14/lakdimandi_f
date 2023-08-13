@@ -45,7 +45,9 @@ class Sidebar extends Component {
   }
 
   render() {
-    let menuData = SideMenu.filter(data => data.role.find(res => res === USER.userInfo.roleName)).map(res => res);
+
+    let menuData = USER.permissions && USER.permissions.length>0?SideMenu.filter(item => USER.permissions.includes(item.path)): SideMenu.filter(data => data.role.find(res => res === USER.userInfo.roleName)).map(res => res);
+
     return (
       <nav className="sidebar sidebar-offcanvas" id="sidebar">
         <ul className="nav">

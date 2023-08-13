@@ -6,7 +6,7 @@ export class BlankPage extends Component {
     if(USER){
       const roleName= USER.userInfo.roleName
       if(roleName==='TOPADMIN')window.location.href="/dashboard"
-      if(roleName==='ADMIN' ||roleName==='SUPER_ADMIN'||roleName==='INSTANCE ADMIN')window.location.href="/adminDashboard"
+      if(roleName!=='TOPADMIN')window.location.href="/adminDashboard"
    
 
     }else{

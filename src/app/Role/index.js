@@ -30,9 +30,8 @@ export class Role extends Component {
   }
   async getRole() {
     let options = SETTING.HEADER_PARAMETERS;
-    options['Authorization'] = localStorage.getItem('jwttoken');
-    
-    await Axios.get(SETTING.APP_CONSTANT.API_URL+`role/getAllRoles`,{headers: options})
+     options['Authorization'] = localStorage.getItem("token")
+      await Axios.get(SETTING.APP_CONSTANT.API_URL+`role/getAllRoles`,{headers: options})
       .then((res) => {
         if (res && res.data.success) {
           this.setState({

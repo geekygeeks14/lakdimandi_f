@@ -67,6 +67,7 @@ export class Sell extends Component {
           selectedBreadth : '',
           selectedHeight:'',
           selectedCompnay:'All',
+          sizeRequired:true,
           sellProductList:[{productNameId:'',productCodeId:'', length:'',breadth:'',height:'',weight:'', weighted:'',unit:'',qty:'', rate:''}]
      
         };
@@ -418,7 +419,8 @@ export class Sell extends Component {
 
       SellModelOpen=()=>{
         this.setState({
-            sellModal:true
+            sellModal:true,
+            sizeRequired:true,
         })
        }
 
@@ -655,9 +657,14 @@ export class Sell extends Component {
  };
 
  changePaymentOption = (rowIndex, e, key) => {
-  let data = [...this.state.paymentList];
-  data[rowIndex][key] = e.target.value;
-  this.setState({ paymentList:data });
+  
+  if(e.target.value && e.target.value!=='createNewPayment'){
+    let data = [...this.state.paymentList];
+    data[rowIndex][key] = e.target.value;
+    this.setState({ paymentList:data });
+  }else if(e.target.value && e.target.value==='createNewPayment'){
+    window.location.href="pay-option?createNewPayment"
+  }
 };
 clearSearch = (e) => {
   this.setState({
@@ -779,6 +786,11 @@ editToggle=(cell)=>{
     suggestions:[],
     selectedPurchaser:{}
    })
+ }
+ handleRequiredSize=()=>{
+    this.setState({
+      sizeRequired:!this.state.sizeRequired
+    })
  }
 
 
@@ -1243,6 +1255,15 @@ editToggle=(cell)=>{
                     </Row>
 
                     <h3 className="text-dark d-flex justify-content-center">Product Details</h3>
+                    <Form>
+                      <Form.Check 
+                        type="switch"
+                        id='sizeRequired'
+                        label={this.state.sizeRequired===true?'Size Required':'Size Not Required'}
+                        checked={this.state.sizeRequired}
+                        onChange={this.handleRequiredSize}
+                      />
+                    </Form>
                     {this.state.sellProductList.map((productData,index)=>
                       <>
                       <Row key={`sellProductIndex_${index}`}>
@@ -1305,7 +1326,7 @@ editToggle=(cell)=>{
                         max={400}
                           validate={{
                             required: {
-                                value: true,
+                                value: this.state.sizeRequired,
                                 errorMessage: 'This field is required.'
                             }, 
                             pattern: {
@@ -1323,7 +1344,7 @@ editToggle=(cell)=>{
                           max={200}
                           validate={{
                             required: {
-                                value: true,
+                                value: this.state.sizeRequired,
                                 errorMessage: 'This field is required.'
                             }, 
                             pattern: {
@@ -1341,7 +1362,7 @@ editToggle=(cell)=>{
                         max={20}
                           validate={{
                             required: {
-                                value: true,
+                                value: this.state.sizeRequired,
                                 errorMessage: 'This field is required.'
                             },
                             pattern: {
@@ -1585,6 +1606,7 @@ editToggle=(cell)=>{
                           }} >
                         <option value=''>Choose pay</option>
                         {paymentOption.map((data, index)=> {return (<option key={index} style={{color:"black"}}>{data.label}</option>)} )}
+                        <option value='createNewPayment'>New Payment</option>
                         </AvField>
                       </Col>
                       <Col md={2}>
@@ -1823,7 +1845,7 @@ editToggle=(cell)=>{
                         max={400}
                           validate={{
                             required: {
-                                value: true,
+                                value: this.state.sizeRequired,
                                 errorMessage: 'This field is required.'
                             }, 
                             pattern: {
@@ -1842,7 +1864,7 @@ editToggle=(cell)=>{
                           disabled={ROLE && ROLE==='SUPER_ADMIN'}
                           validate={{
                             required: {
-                                value: true,
+                                value: this.state.sizeRequired,
                                 errorMessage: 'This field is required.'
                             }, 
                             pattern: {
@@ -1861,7 +1883,7 @@ editToggle=(cell)=>{
                         disabled={ROLE && ROLE==='SUPER_ADMIN'}
                           validate={{
                             required: {
-                                value: true,
+                                value: this.state.sizeRequired,
                                 errorMessage: 'This field is required.'
                             },
                             pattern: {

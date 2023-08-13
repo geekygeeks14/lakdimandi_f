@@ -30,7 +30,7 @@ export class Login extends Component {
     if(USER){
       const roleName= USER.userInfo.roleName
       if(roleName==='TOPADMIN')window.location.href="/dashboard"
-      if(roleName==='ADMIN')window.location.href="/adminDashboard"
+      if(roleName!=='TOPADMIN')window.location.href="/adminDashboard"
     }
   }
 
@@ -70,7 +70,7 @@ export class Login extends Component {
           toast["success"]("Logged in successfully");
             const roleName= user.userInfo.roleName
             if(roleName==='TOPADMIN')window.location.href="/dashboard"
-            if(roleName==='ADMIN'|| roleName==='INSTANCE ADMIN'|| roleName==='SUPER_ADMIN')window.location.href="/adminDashboard"
+            if(roleName!=='TOPADMIN')window.location.href="/adminDashboard"
         } else {
           toast["error"](res && res.data && res.data.message? res.data.message:"user name or Password is wrong Please try again");
         }

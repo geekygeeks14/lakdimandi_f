@@ -48,7 +48,13 @@ class PayOptions extends Component {
     }
 
     componentDidMount(){
-        this.getAllPayOptions()
+        if(window.location.href.includes('createNewPayment')){
+          this.setState({
+            payOptionModal:true
+          },()=> this.getAllPayOptions(),window.history.pushState('', '',  window.location.pathname))
+        }else{
+          this.getAllPayOptions()
+        }
     }
 
     async getAllPayOptions(){

@@ -10,7 +10,8 @@
     "roles": [
       "ADMIN",
       "INSTANCE ADMIN",
-      "SUPER_ADMIN"
+      "SUPER_ADMIN",
+      "ACCOUNTANT"
     ]
   },
     {
@@ -19,14 +20,16 @@
       "TOPADMIN",
       "ADMIN",
       "INSTANCE ADMIN",
-      "SUPER_ADMIN"
+      "SUPER_ADMIN",
+      "ACCOUNTANT"
     ]
   },
   {
     "path": "/register",
     "roles": [
       "TOPADMIN",
-      "SUPER_ADMIN"
+      "SUPER_ADMIN",
+      "ADMIN"
     ]
   },
     {
@@ -34,7 +37,8 @@
     "roles": [
       "TOPADMIN",
       "ADMIN",
-      "INSTANCE ADMIN"
+      "INSTANCE ADMIN",
+      "ACCOUNTANT"
     ]
   },
   {
@@ -42,7 +46,8 @@
     "roles": [
       "TOPADMIN",
       "ADMIN",
-      "INSTANCE ADMIN"
+      "INSTANCE ADMIN",
+      "ACCOUNTANT"
     ]
   },
   {
@@ -50,7 +55,8 @@
     "roles": [
       "TOPADMIN",
       "ADMIN",
-      "INSTANCE ADMIN"
+      "INSTANCE ADMIN",
+      "ACCOUNTANT"
     ]
   },
   {
@@ -58,7 +64,8 @@
     "roles": [
       "TOPADMIN",
       "ADMIN",
-      "INSTANCE ADMIN"
+      "INSTANCE ADMIN",
+      "ACCOUNTANT"
     ]
   },
   {
@@ -85,7 +92,8 @@
     "path": "/pay-option",
     "roles": [
       "TOPADMIN",
-      "ADMIN"
+      "ADMIN",
+      "ACCOUNTANT"
     ]
   },
   {
@@ -99,7 +107,9 @@
     "path": "/worklog",
     "roles": [
       "TOPADMIN",
-      "ADMIN"
+      "ADMIN",
+      "ACCOUNTANT"
+
     ]
   },
   {

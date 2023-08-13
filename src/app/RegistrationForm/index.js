@@ -7,10 +7,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { Button, Card, Col, Form, Modal, Row } from "react-bootstrap";
 import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
-import { AvField, AvForm } from "availity-reactstrap-validation";
+import { AvCheckbox, AvCheckboxGroup, AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
 import { logoutFunc } from "../util/helper";
 import stateCityList from "../util/stateCityList.json"
+import SideMenuList from "../app-config/menu.json"
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
@@ -28,20 +29,25 @@ export class Index extends Component {
             roleList:[],
             selectedState:null,
             deleteModal:false,
-            passwordInfo:{}
+            passwordInfo:{},
+            rules:[],
+            showPermission:true,
+            selectedRole:{}
         }
       }
      componentDidMount(){
       this.getRole()
       this.getAllUser()
      } 
-
-
-// router.post("/addUser", isAunthaticatedAdmin, admin.addUser);
-// router.post("/updateUser/:id", isAunthaticatedAdmin, admin.updateUserById);
-// router.get("/getUser", isAunthaticatedAdmin, admin.getAllUsers);
-// router.delete("/deleteUser/:id", isAunthaticatedAdmin, admin.deleteUser);
-      getRole = async()=>{
+     getAllPermissionsList=(roleName)=>{
+        const permissionList=  SideMenuList.filter(data=> 
+          data.role.includes(roleName)
+        )
+         this.setState({
+           rules: permissionList
+         })
+     }
+   getRole = async()=>{
         this.setState({
           loading:true
         })
@@ -54,7 +60,7 @@ export class Index extends Component {
           })
           if (res && res.data.success) {
             this.setState({
-              roleList: res.data.data,
+              roleList: res.data &&  res.data.data && res.data.data.length>0 ? res.data.data.filter(data=> data.roleName!=='WORKER'):[],
             })
           } else {
             toast["error"](res.data.message);
@@ -109,7 +115,7 @@ export class Index extends Component {
         })
         let payLoad={
           roleId: values.roleId,
-          roleName: this.state.roleList.find(data=> data._id.toString()===values.roleId).roleName,
+          roleName: this.state.selectedRole.roleName,
           firstName: values.firstName,
           lastName : values.lastName,
           companyName: values.companyName,
@@ -117,12 +123,14 @@ export class Index extends Component {
           address: values.address,
           state : values.state,
           city: values.city,
+          permissions:values.permissions
         }
         if(payLoad.roleName!=='INSTANCE ADMIN'){
           payLoad= {
             ...payLoad,
             parentUserId: USER && USER.userInfo.userId,
-            compnayId: USER && USER.userInfo.compnayId,
+            compnayId: USER && USER.userInfo.companyId,
+            companyName: USER && USER.userInfo.companyName,
           }
         }
         let url = this.state.edit? `admin/updateUser/`+this.state.selectedCell._id : `admin/addUser`
@@ -219,6 +227,14 @@ export class Index extends Component {
             registerModal:true
         })
        }
+       changeRole=(e)=>{
+        if(e.target.value){
+          const roleData= this.state.roleList.find(data=> data._id=== e.target.value)
+          this.setState({
+              selectedRole: roleData
+          },()=>this.getAllPermissionsList(roleData.roleName))
+        }
+       }
 
        handleClose=()=>{
         this.setState({
@@ -246,12 +262,16 @@ export class Index extends Component {
           selectedCell: cell,
           registerModal: true,
           edit: true,
-          selectedState: cell.userInfo.state
-        })
+          selectedState: cell.userInfo.state,
+          showPermission: true,
+        },()=>this.getAllPermissionsList(cell.userInfo.roleName))
        }
   render() {
     const {selectedCell} = this.state
-    const formData=this.state.edit? {...selectedCell.userInfo}:{}
+    const formData=this.state.edit? {
+      ...selectedCell.userInfo,
+      permissions:selectedCell.permissions
+    }:{}
     const columns = [
       {
         Header: "Date/Time",
@@ -359,7 +379,7 @@ export class Index extends Component {
         <BlockUi/>
           <Modal
             show={this.state.registerModal}
-            size={"md"}
+            size={"xl"}
             onHide={this.handleClose}
             aria-labelledby="contained-modal-title-vcenter"
             animation="true"
@@ -377,10 +397,11 @@ export class Index extends Component {
                 model={formData}
                 >
                   {/* <h3 className="text-dark d-flex justify-content-center">Registration Form</h3> */}
-                      <Col>
+                      <Col md={6}>
                         <AvField
                           type='select' name='roleId'  label ="Select Role" placeholder="Choose Role"
                           disabled={this.state.edit}
+                          onChange={this.changeRole}
                           validate={{
                             required: {
                                 value: true,
@@ -392,27 +413,28 @@ export class Index extends Component {
                         {this.state.roleList.length>0 && this.state.roleList.map((data, index)=> {return (<option key={`${index}_role`} value={data._id} style={{color:"black"}}>{data.roleName}</option>)} )}
                         </AvField>  
                       </Col>
-                      <Col>
-                          <AvField name="firstName" label="First Name" placeholder="Enter First Name"
-                            validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'Required'
-                              },
-                            }} 
-                        />
-                      </Col>
-                      <Col>
-                          <AvField name="lastName" label="Last Name" placeholder="Enter Last Name"
-                            validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'Required'
-                              },
-                            }} 
-                        />
-                      </Col>
-                      <Col>
+                      <Row>
+                        <Col md={3}>
+                            <AvField name="firstName" label="First Name" placeholder="Enter First Name"
+                              validate={{
+                                required: {
+                                    value: true,
+                                    errorMessage: 'Required'
+                                },
+                              }} 
+                          />
+                        </Col>
+                        <Col md={3}>
+                            <AvField name="lastName" label="Last Name" placeholder="Enter Last Name"
+                              validate={{
+                                required: {
+                                    value: true,
+                                    errorMessage: 'Required'
+                                },
+                              }} 
+                          />
+                        </Col>
+                        <Col md={3}>
                           <AvField name="phoneNumber1" label="Phone" placeholder="Enter Phone Number"
                             validate={{
                               required: {
@@ -422,55 +444,93 @@ export class Index extends Component {
                             }} 
                         />
                       </Col>
-                      <Col>
-                          <AvField name="companyName" label="Company Name" placeholder="Enter Company Name"
-                            validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'Required'
-                              },
-                            }} 
-                        />
-                      </Col>
-                      <Col>
-                          <AvField name="address" label="Full Address" placeholder="Enter Full Address"
-                            validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'Required'
-                              },
-                            }} 
-                        />
-                      </Col>
-                      <Col>
-                          <AvField name="state" type='select' label="State" placeholder="State"
-                            onChange={this.onChangeStateName}
-                            validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'Required'
-                              },
-                            }} 
-                        >
-                        <option value=''>Choose State</option>
-                       
-                        {Object.keys(stateCityList).map((data, index)=> {return (<option key={`${index}_state`} value={data} style={{color:"black"}}>{data}</option>)} )}
-                        </AvField>
-                      </Col>
-                      <Col>
-                          <AvField name="city" type='select' label="City" placeholder="City"
-                          disabled={!this.state.selectedState && !this.state.edit}
-                            validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'Required'
-                              },
-                            }} 
-                        >
-                           <option value=''>Choose City</option>
-                         {this.state.selectedState&&stateCityList[this.state.selectedState].sort((a, b) => a.value - b.value).map((data, index)=> {return (<option key={`${index}_state`} value={data} style={{color:"black"}}>{data}</option>)} )}
-                         </AvField>
-                      </Col>
+                      {this.state.selectedRole && this.state.selectedRole.roleName==='INSTANCE ADMIN' && 
+                        <Col md={3}>
+                            <AvField name="companyName" label="Company Name" placeholder="Enter Company Name"
+                              validate={{
+                                required: {
+                                    value: true,
+                                    errorMessage: 'Required'
+                                },
+                              }} 
+                          />
+                        </Col>
+                      }
+                      </Row>
+                      <Row>
+                        <Col md={3}>
+                            <AvField name="address" label="Full Address" placeholder="Enter Full Address"
+                              validate={{
+                                required: {
+                                    value: true,
+                                    errorMessage: 'Required'
+                                },
+                              }} 
+                          />
+                        </Col>
+                        <Col md={3}>
+                            <AvField name="state" type='select' label="State" placeholder="State"
+                              onChange={this.onChangeStateName}
+                              validate={{
+                                required: {
+                                    value: true,
+                                    errorMessage: 'Required'
+                                },
+                              }} 
+                          >
+                          <option value=''>Choose State</option>
+                        
+                          {Object.keys(stateCityList).map((data, index)=> {return (<option key={`${index}_state`} value={data} style={{color:"black"}}>{data}</option>)} )}
+                          </AvField>
+                        </Col>
+                        <Col md={3}>
+                            <AvField name="city" type='select' label="City" placeholder="City"
+                            disabled={!this.state.selectedState && !this.state.edit}
+                              validate={{
+                                required: {
+                                    value: true,
+                                    errorMessage: 'Required'
+                                },
+                              }} 
+                          >
+                            <option value=''>Choose City</option>
+                          {this.state.selectedState&&stateCityList[this.state.selectedState].sort((a, b) => a.value - b.value).map((data, index)=> {return (<option key={`${index}_state`} value={data} style={{color:"black"}}>{data}</option>)} )}
+                          </AvField>
+                        </Col>
+                      </Row>
+
+                      {this.state.showPermission && this.state.rules.length>0 && (
+                          <Col md="12">
+                              <Row>
+                                  <Col md="12">
+                                      <p className={"menu-header-title text-capitalize mb-2 mt-2"}>Permissions</p>
+                                  </Col>
+                                  <Col md="12">
+                                      <AvCheckboxGroup name="permissions" label=""  key={'checked group key'}
+                                       required>
+                                          {
+                                              this.state.rules.map((item,index)=>{
+                                                  return (
+                                                      item.children ? 
+                                                      <div key={`${item.path[index][index+1]}`} style={{marginLeft:'20px'}}>
+                                                        <AvCheckbox  key={`${item.path[index]}`} label={item.title} value={item.path} />
+                                                      </div> 
+                                                        : 
+                                                      <div key={`${item.path[index]}_${index}`}>
+                                                        <AvCheckbox 
+                                                        key={`${item.path[index]}`} 
+                                                        label={item.title} 
+                                                        value={item.path} 
+                                                        />
+                                                      </div>
+                                                  )
+                                              })
+                                          }
+                                      </AvCheckboxGroup>
+                                  </Col>
+                              </Row>
+                          </Col>
+                      )}
                     <Row>
                         <div className="col-md-6 d-flex justify-content-center">
                         <Button type="submit">Submit</Button>
