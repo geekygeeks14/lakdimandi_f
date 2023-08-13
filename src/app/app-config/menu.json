@@ -87,7 +87,8 @@
   "state": "DueAmountMenuOpen",
   "role": [
     "TOPADMIN",
-    "ADMIN"
+    "ADMIN",
+    "ACCOUNTANT"
   ]
 },
 { "path": "/expense",

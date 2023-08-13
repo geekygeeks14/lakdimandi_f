@@ -100,7 +100,8 @@
     "path": "/due-amount",
     "roles": [
       "TOPADMIN",
-      "ADMIN"
+      "ADMIN",
+      "ACCOUNTANT"
     ]
   },
   {
