@@ -43,7 +43,10 @@ class PayOptions extends Component {
             payOptionModal:false,
             selectedCell:{},
             allPayOptions:[],
-            payMethod:''
+            payMethod:'',
+            deleteModal:false,
+            loading3:false,
+            edit:false
         }
     }
 
@@ -63,7 +66,7 @@ class PayOptions extends Component {
         })
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
-        const url = new URL(SETTING.APP_CONSTANT.API_URL+'admin/getAllPayOptions')
+        const url = new URL(SETTING.APP_CONSTANT.API_URL+'admin/getAllPayOption')
 
         await Axios.get(url,{headers: options})
         .then((res) => {
@@ -71,7 +74,7 @@ class PayOptions extends Component {
             loading:false
           })
           if (res && res.data.success) {
-            const  allPayOptions = res.data.sellData.filter((val)=>!val.deleted) 
+            const  allPayOptions = res.data.data.filter((val)=>!val.deleted) 
              this.setState({
               allPayOptions:allPayOptions              
             })
@@ -92,64 +95,104 @@ class PayOptions extends Component {
        }
        payOptionSubmit=async(error, values)=>{
         let payOptionInfo={}
-        if(values.type==='BANK'){
+        if(values.payMethod==='BANK'){
           payOptionInfo={
-            ifscCode: values.IFCCode,
+            bankName: values.bankName,
+            ifscCode: values.ifscCode,
             accountNumber: values.accountNumber
           }
         }
-        if(values.type==='UPI'){
+        if(values.payMethod==='UPI'){
           payOptionInfo={
-            upiId: values.IFCCode,
+            upiType: values.upiType,
+            upiId: values.upiId,
           }
         }
-        const payload={
-          name: values.name,
-          type: values.type,
+        let payLoad={
+          payMethod: values.payMethod,
           payOptionInfo: payOptionInfo,
-          companyId: USER && USER.userInfo.companyId,
-          insertedBy : USER && USER._id,
+        }
+        let url =`admin/createPayOption`
+        if(this.state.edit){
+           url= `admin/updatePayOption/`+this.state.selectedCell._id 
+        }else{
+          payLoad={
+            ...payLoad,
+            companyId: USER && USER.userInfo.companyId,
+            insertedBy : USER && USER._id,
+          }
         }
         
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
-        // await Axios.post(SETTING.APP_CONSTANT.API_URL+`admin/updateSellData/`+this.state.selectedSellId,payload,{headers: options})
-        // .then((res) => {
-        //   if (res && res.data.success) {
-        //     toast["success"](res.data.message); 
-        //     this.getAllSell() 
-        //     this.handleClosePayOptioneModel()     
-        //     this.setState({
-        //       selectedCell: {},
-        //       detailModal: false,
-        //       totalDueAmount: 0,
-        //       dueDetails: [],
-        //     })
-            
-        //   } else {
-        //     if(res?.data?.actionPassword){
-        //       this.setState({loading4:false})
-        //       toast["error"](res.data.message);
-        //     }else{
-        //       toast["error"](res.data.message);
-        //       this.handleClosePayOptioneModel();
-        //     }
-        //   } 
-        // })
-        // .catch((err) =>{
-        //   this.handleClosePayOptioneModel()
-        //   if(err && err.success===false  ){
-        //     toast["error"](err.message? err.message: "Error while submitting pay option data.");
-        //   }else{
-        //     logoutFunc(err)
-        //   }
-        // });
+        await Axios.post(SETTING.APP_CONSTANT.API_URL+url,payLoad,{headers: options})
+        .then((res) => {
+          if (res && res.data.success) {
+            toast["success"](res.data.message); 
+            this.getAllPayOptions() 
+            this.handleClosePayOptioneModel()     
+          } else {
+            if(res?.data?.actionPassword){
+              this.setState({loading4:false})
+              toast["error"](res.data.message);
+            }else{
+              toast["error"](res.data.message);
+              this.handleClosePayOptioneModel();
+            }
+          } 
+        })
+        .catch((err) =>{
+          this.handleClosePayOptioneModel()
+          if(err && err.success===false  ){
+            toast["error"](err.message? err.message: "Error while submitting pay option data.");
+          }else{
+            logoutFunc(err)
+          }
+        });
+       }
+       deleteHandle=async(err, values)=>{
+        this.setState({
+          loading3:true
+        })
+        // const actionPassword=   encryptAES(values.actionPassword, USER.userInfo.password)
+        let options = SETTING.HEADER_PARAMETERS;
+        options['Authorization'] = localStorage.getItem("token")
+        const url = new URL(SETTING.APP_CONSTANT.API_URL+`admin/deletePayOption/`+this.state.selectedCell._id)
+        // if(ROLE && ROLE==='ADMIN'){
+        //   url.searchParams.set('actionPassword', actionPassword)
+        // }
+         await Axios.delete(url,{headers: options})
+        .then((res) => {
+          if (res && res.data.success) {
+            toast["success"](res.data.message);
+            this.getAllPayOptions()
+            this.handleCloseDeleteModel()
+          } else {
+            if(res?.data?.actionPassword){
+              this.setState({loading3:false})
+              toast["error"](res.data.message);
+            }else{
+              toast["error"](res.data.message);
+              this.handleCloseDeleteModel()
+            }
+          }
+        })
+        .catch((err) =>{
+          this.handleCloseDeleteModel()
+          if(err && err.success===false  ){
+            toast["error"](err.message? err.message: "Error while deleting pay option.");
+          }else{
+            logoutFunc(err)
+          }
+        });
        }
 
        editToggle=(cell)=>{
           this.setState({
               selectedCell: cell,
               payOptionModal: true,
+              edit:true,
+              payMethod: cell.payMethod
           })
        }
  
@@ -157,6 +200,8 @@ class PayOptions extends Component {
         this.setState({
           selectedCell:{},
           payOptionModal: false,
+          edit:false,
+          payMethod:''
         })
        }
        openPayOptioneModel=()=>{
@@ -170,55 +215,99 @@ class PayOptions extends Component {
           payMethod: e.target.value
         })
        }
+       deleteToggle =(cell)=>{
+        this.setState({
+          selectedCell: cell,
+          deleteModal:true
+        })
+       }
+       handleCloseDeleteModel=()=>{
+        this.setState({
+          deleteModal:false,
+          selectedCell:{},
+        })
+      }
 
 
 
     render(){
+      
+      let formData={}
+      const selectedCell = this.state.selectedCell
+      if(this.state.edit  && selectedCell.payMethod==='UPI'){
+        formData={
+          payMethod: selectedCell.payMethod,
+          upiType: selectedCell.payOptionInfo.upiType,
+          upiId: selectedCell.payOptionInfo.upiId
+        }
+      }
+      if(this.state.edit  && selectedCell.payMethod==='BANK'){
+        formData={
+          payMethod: selectedCell.payMethod,
+          bankName: selectedCell.payOptionInfo.bankName,
+          accountNumber: selectedCell.payOptionInfo.accountNumber,
+          ifscCode: selectedCell.payOptionInfo.ifscCode
+        }
+      }
       const columns = [
-            {
-              Header: "Date/Time",
-              accessor: "created",
-              width: 180,
-              Cell: (cell) => {
-                return new Date(cell.original.created)
-                  .toLocaleString("en-GB", {
-                    hour12: true,
-                  })
-                  .toUpperCase();
+              {
+                Header: "Date/Time",
+                accessor: "created",
+                width: 180,
+                Cell: (cell) => {
+                  return new Date(cell.original.created)
+                    .toLocaleString("en-GB", {
+                      hour12: true,
+                    })
+                    .toUpperCase();
+                },
               },
-            },
-            {
-                Header: "Name",
-                accessor: "name",
+              {
+                Header: "Detail",
+               //accessor: "name",
+                Cell: (cell) => {
+                     return (cell.original.payMethod && cell.original.payMethod==='BANK')?
+                     <>
+                       Bank Name : {cell.original.payOptionInfo && cell.original.payOptionInfo.bankName?cell.original.payOptionInfo.bankName:''}
+                        <br></br>
+                       Account No. : {cell.original.payOptionInfo && cell.original.payOptionInfo.accountNumber?cell.original.payOptionInfo.accountNumber:''} 
+                       <br></br>
+                       IFSC Code : {cell.original.payOptionInfo && cell.original.payOptionInfo.ifscCode?cell.original.payOptionInfo.ifscCode:''}
+                     </>
+                     :
+                     <span>
+                      UPI Type: {cell.original.payOptionInfo && cell.original.payOptionInfo.upiType? cell.original.payOptionInfo.upiType:''}
+                      <br></br>
+                      UPI ID : {cell.original.payOptionInfo && cell.original.payOptionInfo.upiId? cell.original.payOptionInfo.upiId:''} 
+                     </span>
+                },
               },
               {
                 Header: "Type",
-                accessor: "type",
+                //accessor: "type",
                 Cell: (cell) => {
-                  return  cell.original.type &&  cell.original.type.toUpperCase()
-                 },
+                  return  cell.original.payMethod ?  cell.original.payMethod:'N/A'
+                },
               },
-              // {
-              //   Header: "other Info",
-              //   accessor: "payOptionInfo",
-              //   Cell: (cell) => {
-              //     return  cell.original.payOptionInfo &&  cell.original.buyerDetail.phoneNumber1?cell.original.buyerDetail.phoneNumber1:'NA'
-              //    },
-              // },
               {
                 Header: "Action",
-                //show:USER && USER.userInfo && USER.userInfo.role && USER.userInfo.role==='TOPADMIN'?true:false,
                 width: 150,
                 Cell:cell=>{
                   return(
-                      <Row style={{marginLeft:"0.1rem", marginTop:"0px"}}>
-                          <a href="#/" title='Pay' id={'pay'}
+                    <Row style={{marginLeft:"0.1rem", marginTop:"0px"}}>
+                        <a href="#/" title='Pay' id={'Edit'}
+                        className="mb-2 badge" 
+                        onClick={e=>this.editToggle(cell.original)}
+                        >
+                        <i className="mdi mdi-lead-pencil mdi-18px"></i>
+                        </a>
+                        <a href="#/" title='delete' id={'delete'}
                           className="mb-2 badge" 
-                          onClick={e=>this.editToggle(cell.original)}
-                          >
-                          <i className="mdi mdi-cash-multiple mdi-18px"></i>
-                          </a>
-                      </Row>
+                            onClick={e=>this.deleteToggle(cell.original)
+                          }>
+                            <i className="mdi mdi-delete mdi-18px"></i>
+                        </a>
+                    </Row>
                   )
                 }
               }
@@ -271,11 +360,13 @@ class PayOptions extends Component {
             <Modal.Body>
               <Card>
                 <Card.Body>
-                  <AvForm ref={c=>(this.form= c)}  onValidSubmit={this.payOptionSubmit}>
-                    
+                  <AvForm ref={c=>(this.form= c)}  onValidSubmit={this.payOptionSubmit}
+                   model={formData}
+                  >
                         <Col>
                           <AvField name="payMethod"  type='select' label="Choose Pay Method" placeholder=""
                             onChange={this.onChangePayMethod} 
+                            disabled={this.state.edit}
                             validate={{
                             required: {
                                 value: true,
@@ -283,15 +374,14 @@ class PayOptions extends Component {
                               }
                             }} 
                           >
-                            <option value='' key='paymethodKey'>select Pay Method </option>
+                            <option value='' key='paymethodKey'>Select Pay Method </option>
                             {payMethodList.map((data, index)=> <option value={data.value} key ={`${index}_payMethod`}>{data.label}</option>)}
                           </AvField>
                         </Col>
                         {this.state.payMethod && this.state.payMethod==='UPI' && 
                         <>
                           <Col>
-                            <AvField name="UPIType"  type='select' label="Choose UPI Type" placeholder=""
-                              //onChange={this.onChangePayMethod} 
+                            <AvField name="upiType"  type='select' label="Choose UPI Type" placeholder=""
                               validate={{
                               required: {
                                   value: true,
@@ -305,7 +395,7 @@ class PayOptions extends Component {
                           </Col>
                         <Col >
                           <AvField 
-                              name={`upiId`}  label ="UPI ID" placeholder=""
+                              name='upiId'  label ="UPI ID" placeholder=""
                               validate={{
                               required: {
                                   value: true,
@@ -318,38 +408,38 @@ class PayOptions extends Component {
                         }
                       {this.state.payMethod && this.state.payMethod==='BANK' && 
                       <>
-                      <Col>
-                        <AvField 
-                              type="text" name={`name`} label="Bank Name" 
-                              validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
-                              }
-                          }} >
-                        </AvField>
-                      </Col>
-                      <Col >
+                        <Col>
                           <AvField 
-                              name={`accountNumber`}  label ="Account Number" placeholder=""
-                              validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
+                                type="text" name='bankName' label="Bank Name" 
+                                validate={{
+                                required: {
+                                    value: true,
+                                    errorMessage: 'This field is required.'
+                                }
+                            }} >
+                          </AvField>
+                        </Col>
+                        <Col >
+                            <AvField 
+                                name='accountNumber'  label ="Account Number" placeholder=""
+                                validate={{
+                                required: {
+                                    value: true,
+                                    errorMessage: 'This field is required.'
+                                },
+                            }} 
+                            />
+                        </Col>
+                        <Col >
+                          <AvField  name="ifscCode" label="IFSC Code" placeholder="SBI000242342"
+                            validate={{
+                            required: {
+                                value: true,
+                                errorMessage: 'This field is required.'
                               },
-                          }} 
-                          />
-                      </Col>
-                      <Col >
-                        <AvField  name="ifscCode" label="IFSC Code" placeholder="SBI000242342"
-                          validate={{
-                          required: {
-                              value: true,
-                              errorMessage: 'This field is required.'
-                            },
-                          }} 
-                          />
-                      </Col>
+                            }} 
+                            />
+                        </Col>
                       </>
                       }
                   <Row>
@@ -360,6 +450,48 @@ class PayOptions extends Component {
                       <div className="col-md-6 d-flex justify-content-center">
                       <Button variant="dark" 
                         onClick={this.handleClosePayOptioneModel}
+                       >Cancel</Button>
+                      </div>
+                  </Row>
+                </AvForm>
+                </Card.Body>
+              </Card>
+            </Modal.Body>
+          </Modal>
+          <Modal
+            show={this.state.deleteModal}
+            // size={"lg"}
+            onHide={this.handleCloseDeleteModel}
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Delete Pay Option</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Card>
+                <Card.Body>
+                  <Card.Text>Are you want to sure delete this pay option?
+                  </Card.Text>
+                  <AvForm ref={c=>(this.form= c)}  onValidSubmit={this.deleteHandle}>
+                    {/* {ROLE && ROLE==='ADMIN'  &&
+                      <AvField type='password' name="actionPassword" label="Password" placeholder="Password"
+                          validate={{
+                          required: {
+                              value: true,
+                              errorMessage: 'This field is required.'
+                          },
+                        }} 
+                      />
+                    } */}
+                  <Row>
+                      <div className="col-md-6 d-flex justify-content-center">
+                      <Button  variant="danger"  type="submit"
+                       >Delete</Button>
+                      </div>
+                      <div className="col-md-6 d-flex justify-content-center">
+                      <Button variant="dark" 
+                        onClick={this.handleCloseDeleteModel}
                        >Cancel</Button>
                       </div>
                   </Row>

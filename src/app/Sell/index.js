@@ -17,11 +17,10 @@ import { Link } from "react-router-dom/cjs/react-router-dom";
 toast.configure();
 // const paymentMode=['Cash','Gpay','phonePay','Axis Bank']
 const paymentOption =[
-  {value:'Cash',label:'Cash'},
-  {value:'Gpay',label:'Gpay'},
-  {value:'Paytm',label:'Paytm'},
-  {value:'phonePay',label:'phonePay'},
-  {value:'Axis Bank',label:'Axis Bank'},
+  {value:'Gpay',label:'Gpay (Old Data)'},
+  {value:'Paytm',label:'Paytm (Old Data)'},
+  {value:'phonePay',label:'phonePay (Old Data)'},
+  {value:'Axis Bank',label:'Axis Bank (Old Data)'},
 ]
 
 const unitOption =[
@@ -68,6 +67,7 @@ export class Sell extends Component {
           selectedHeight:'',
           selectedCompnay:'All',
           sizeRequired:true,
+          allPayOptions:[],
           sellProductList:[{productNameId:'',productCodeId:'', length:'',breadth:'',height:'',weight:'', weighted:'',unit:'',qty:'', rate:''}]
      
         };
@@ -77,6 +77,7 @@ export class Sell extends Component {
         this.getAllSell();
         this.getAllProductCode()
         this.getAllProductName()
+        this.getAllPayOptions()
         this.getFluctionWeight()
         if(ROLE && ROLE==='SUPER_ADMIN')this.getCompanyDetail()
       }
@@ -103,16 +104,10 @@ export class Sell extends Component {
             loading:false
           })
           if (res && res.data.success) {
-          
-              //  const uniqueSellsList = [...new Map(res.data.sellData.map(item =>
-              //   [item.buyerDetail.phoneNumber1, item])).values()]
-           
             this.setState({
               allSell: res.data.sellData,
               uniqueSellsList: [...new Map(res.data.sellData.map(item =>[item.buyerDetail.phoneNumber1, item])).values()]
-              
             })
-           
           } else {
             toast["error"](res.data.message);
           } 
@@ -252,6 +247,39 @@ export class Sell extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while getting all Copmpany data.');
+          }else{
+            logoutFunc(err)
+          }
+        });
+       }
+       async getAllPayOptions(){
+        this.setState({
+          loading:true
+        })
+        let options = SETTING.HEADER_PARAMETERS;
+        options['Authorization'] = localStorage.getItem("token")
+        const url = new URL(SETTING.APP_CONSTANT.API_URL+'admin/getAllPayOption')
+
+        await Axios.get(url,{headers: options})
+        .then((res) => {
+          this.setState({
+            loading:false
+          })
+          if (res && res.data.success) {
+            const  allPayOptions = res.data.data.filter((val)=>!val.deleted) 
+             this.setState({
+              allPayOptions:allPayOptions              
+            })
+          } else {
+            toast["error"](res.data.message);
+          } 
+        })
+        .catch((err) =>{
+          this.setState({
+            loading:false
+          })
+          if(err && err.success===false  ){
+            toast["error"](err.message? err.message: "Error while getting all Pay Option");
           }else{
             logoutFunc(err)
           }
@@ -1593,7 +1621,7 @@ editToggle=(cell)=>{
                     {this.state.paymentList.map((paymentData,index)=>
                       <>
                        <Row>
-                       <Col md={2}>
+                       <Col md={4}>
                           <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
                               type="select" name={`payment[${index}].payMode`} label="Select Pay" 
                               value={!!paymentData && !!paymentData.payMode? paymentData.payMode:null}
@@ -1605,8 +1633,11 @@ editToggle=(cell)=>{
                               }
                           }} >
                         <option value=''>Choose pay</option>
-                        {paymentOption.map((data, index)=> {return (<option key={index} style={{color:"black"}}>{data.label}</option>)} )}
-                        <option value='createNewPayment'>New Payment</option>
+                        <option style={{color:"black"}} value='Cash'>Cash</option>
+                        {this.state.allPayOptions.map((data, index)=> {return (<option key={index} value={data._id} style={{color:"black"}}>
+                          {data.payMethod==='BANK'?`${data.payOptionInfo.bankName} (${data.payOptionInfo.accountNumber})` :`${data.payOptionInfo.upiType} (${data.payOptionInfo.upiId})`}
+                          </option>)} )}
+                        <option style={{color:"green"}} value='createNewPayment'>New Payment</option>
                         </AvField>
                       </Col>
                       <Col md={2}>
@@ -2125,7 +2156,7 @@ editToggle=(cell)=>{
                         {this.state.paymentList.map((paymentData,index)=>
                         <>
                         <Row>
-                        <Col md={4}>
+                        <Col md={5}>
                             <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
                                 type="select" name={`payment[${index}].payMode`} label="Select Pay" 
                                 value={!!paymentData && !!paymentData.payMode? paymentData.payMode:null}
@@ -2138,10 +2169,16 @@ editToggle=(cell)=>{
                                 }
                             }} >
                           <option value=''>Choose pay</option>
-                          {paymentOption.map((data, index)=> {return (<option key={index} style={{color:"black"}}>{data.label}</option>)} )}
+                          <option style={{color:"black"}} value='Cash'>Cash</option>
+                          {paymentOption.map((data, index)=>{return (<option key={`old${index}`} value={data.value} >{data.label}</option>)})}
+                            {this.state.allPayOptions.map((data, index)=> {return (
+                          <option key={index} value={data._id} style={{color:"black"}}>
+                            {data.payMethod==='BANK'?`${data.payOptionInfo.bankName} (${data.payOptionInfo.accountNumber})` :`${data.payOptionInfo.upiType} (${data.payOptionInfo.upiId})`}
+                          </option>)} )}
+                        <option style={{color:"green"}} value='createNewPayment'>New Payment</option>
                           </AvField>
                         </Col>
-                        <Col md={4}>
+                        <Col md={3}>
                           <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
                               name={`payment[${index}].amount`}  label ="Enter amount" placeholder="0.00"
                               value={!!paymentData && !!paymentData.amount? paymentData.amount:0.00}
