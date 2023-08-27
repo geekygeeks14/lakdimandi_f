@@ -15,7 +15,7 @@
   { "path": "/purchase",
     "title": "All Purchase",
     "icon": "mdi mdi-car-door-lock menu-icon", 
-    "state": "sellMenuOpen",
+    "state": "purchaseMenuOpen",
     "role": [
       "TOPADMIN",
       "ADMIN",
@@ -58,7 +58,7 @@
 { "path": "/company",
   "title": "Company Detail",
   "icon": "mdi mdi-yin-yang mdi-spin menu-icon", 
-  "state": "companyCodeMenuOpen",
+  "state": "companyMenuOpen",
   "role": [
     "TOPADMIN"
   ]
@@ -84,7 +84,7 @@
 { "path": "/due-amount",
   "title": "Due Amount",
   "icon": "mdi mdi-crosshairs-gps menu-icon", 
-  "state": "DueAmountMenuOpen",
+  "state": "dueAmountMenuOpen",
   "role": [
     "TOPADMIN",
     "ADMIN",
@@ -94,7 +94,7 @@
 { "path": "/expense",
   "title": "Asset Earning and Expense",
   "icon": "mdi mdi-crosshairs-gps menu-icon", 
-  "state": "ExpenseMenuOpen",
+  "state": "expenseMenuOpen",
   "role": [
     "TOPADMIN",
     "ADMIN"
@@ -119,9 +119,9 @@
   ]
 },
 { "path": "/register",
-  "title": "Registration Form",
+  "title": "Registration",
   "icon": "mdi mdi-yin-yang mdi-spin menu-icon", 
-  "state": "productCodeMenuOpen",
+  "state": "registerMenuOpen",
   "role": [
     "TOPADMIN",
     "SUPER_ADMIN",

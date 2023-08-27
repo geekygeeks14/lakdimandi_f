@@ -49,6 +49,8 @@ export class Sell extends Component {
           totalPaidAmount:0,
           totalWeight:0,
           loadingCharge:0,
+          oldDueAmount:0,
+          userPurchaseHistory:[],
           selectedCell:{},
           paymentList:[{}],
           allProductCode:[],
@@ -68,6 +70,7 @@ export class Sell extends Component {
           selectedCompnay:'All',
           sizeRequired:true,
           allPayOptions:[],
+          showSellHistoryModal:false,
           sellProductList:[{productNameId:'',productCodeId:'', length:'',breadth:'',height:'',weight:'', weighted:'',unit:'',qty:'', rate:''}]
      
         };
@@ -559,7 +562,7 @@ export class Sell extends Component {
           }
         })
         .catch((err) =>{
-          this.handleClose()
+          this.handleClose()  
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while deleting sell data.");
           }else{
@@ -608,7 +611,27 @@ export class Sell extends Component {
         })
       }
 
-
+      purchaseHistory=(phoneNumber)=>{
+        const  uniqueSellDataByNumber = this.state.allSell.filter((val)=>val.buyerDetail.phoneNumber1===phoneNumber) 
+        if(uniqueSellDataByNumber && uniqueSellDataByNumber.length>0){
+          const oldDueAmount =parseFloat(uniqueSellDataByNumber.reduce((acc, curr)=> acc+ parseFloat(curr.dueAmount),0)).toFixed(2)
+          // const userPurchaseHistoryData= (Object.entries(uniqueSellDataByNumber).map(([key, value]) => ({ key, value }))).map(data=>{
+          //   return{
+          //     ...data,
+          //     oldDueAmount : parseFloat(data.value.reduce((acc, curr)=> acc+ parseFloat(curr.dueAmount),0)).toFixed(2)
+          //   }
+          // }) 
+          this.setState({
+          userPurchaseHistory: uniqueSellDataByNumber,
+          oldDueAmount: oldDueAmount
+          })
+        }else{
+          this.setState({
+            userPurchaseHistory: [],
+            oldDueAmount: 0
+          })
+        }
+      }
   calculateAmount = () => {
         let grandTotal = this.state.loadingCharge?parseFloat(this.state.loadingCharge):0
         let totalWeight =0;
@@ -699,13 +722,14 @@ clearSearch = (e) => {
       text:"",
       //searchInput:"",
       suggestions:[],
-      selectedPurchaser: {}
+      selectedPurchaser: {},
+      userPurchaseHistory:[]
   })
 }
 handleSearchChange = (e) => {
   const value = e.target.value;
   let suggestions = [];
-  this.setState({selectedPurchaser:null, suggestions:[]})
+  this.setState({selectedPurchaser:null, suggestions:[], userPurchaseHistory:[]})
   if(value.length > 0){
       //this.setState({disableClear:false})
       suggestions = this.state.uniqueSellsList.filter(item => {
@@ -737,7 +761,7 @@ handleSearchChange = (e) => {
       text: value.buyerDetail.phoneNumber1,
       selectedPurchaser: value,
       suggestions: [],
-  }))
+  }),()=> this.purchaseHistory(value.buyerDetail.phoneNumber1))
 }
 
 renderSuggestions = () => {
@@ -746,7 +770,7 @@ renderSuggestions = () => {
       return null;
   }
   return (
-      <ul className="ul" style={{'height':'auto', 'maxHeight':'120px','zIndex':'10000', 'overflowX':'hidden','overflowY':'scroll'}}>
+      <ul className="ul" style={{'height':'auto', 'maxHeight':'120px','zIndex':'10000', 'overflowX':'hidden','overflowY':'scroll'}} >
           {
               suggestions.map((item, index) => (<div className="dropdown-content"><a  href="#/"  key={index} onClick={() => 
               this.selectedText(item)}>{item.buyerDetail.phoneNumber1 }
@@ -819,6 +843,12 @@ editToggle=(cell)=>{
     this.setState({
       sizeRequired:!this.state.sizeRequired
     })
+ }
+
+ togleSellHistory=()=>{
+  this.setState({
+    showSellHistoryModal:!this.state.showSellHistoryModal
+  })
  }
 
 
@@ -1042,7 +1072,63 @@ editToggle=(cell)=>{
           )
         }
       }
-    ];
+    ]
+    const sellHistoryColumn=[
+      {
+        Header: "Date/Time",
+        accessor: "created",
+        width: 180,
+        Cell: (cell) => {
+          return new Date(cell.original.created)
+            .toLocaleString("en-GB", {
+              hour12: true,
+            })
+            .toUpperCase();
+        },
+      },
+      {
+          Header: "Buyer Name",
+          accessor: "buyerName",
+          Cell: (cell) => {
+                return  cell.original.buyerDetail &&  cell.original.buyerDetail.buyerName?cell.original.buyerDetail.buyerName:'NA'
+          },
+        },
+        {
+          Header: "Company Name",
+          accessor: "companyName",
+          Cell: (cell) => {
+            return  cell.original.buyerDetail &&  cell.original.buyerDetail.companyName?cell.original.buyerDetail.companyName:'NA'
+           },
+        },
+        {
+          Header: "Phone Number",
+          accessor: "phoneNumber1",
+          Cell: (cell) => {
+            return  cell.original.buyerDetail &&  cell.original.buyerDetail.phoneNumber1?cell.original.buyerDetail.phoneNumber1:'NA'
+           },
+        },
+        {
+          Header: "Total Amt.",
+          accessor: "totalAmount",
+          Cell: (cell) => {
+            return  cell.original.totalAmount? cell.original.totalAmount:'0.00'
+          }
+        },
+        {
+          Header: "Paid Amt.",
+          accessor: "paidAmount",
+          Cell: (cell) => {
+            return  cell.original.paidAmount? cell.original.paidAmount:'0.00'
+          }
+        },
+        {
+          Header: "Due Amt.",
+          accessor: "dueAmount",
+          Cell: (cell) => {
+            return  cell.original.dueAmount? cell.original.dueAmount:'0.00'
+          }
+        },
+    ]
 
     return (
      <div>
@@ -1171,6 +1257,7 @@ editToggle=(cell)=>{
             <BlockUi tag="div" blocking={this.state.loading2}  className="block-overlay-dark"  loader={<Spinner/>}>
             <div className="card">
                 <div className="card-body">
+                {this.state.userPurchaseHistory.length>0?<h5 onClick={this.togleSellHistory} style={{ cursor: 'pointer' }} className="text-dark d-flex justify-content-left">See History</h5>:null}
                 <AvForm onValidSubmit={this.handleSubmit}>
                   <h3 className="text-dark d-flex justify-content-center">Customer Details</h3>
                     <Row>
@@ -2175,7 +2262,6 @@ editToggle=(cell)=>{
                           <option key={index} value={data._id} style={{color:"black"}}>
                             {data.payMethod==='BANK'?`${data.payOptionInfo.bankName} (${data.payOptionInfo.accountNumber})` :`${data.payOptionInfo.upiType} (${data.payOptionInfo.upiId})`}
                           </option>)} )}
-                        <option style={{color:"green"}} value='createNewPayment'>New Payment</option>
                           </AvField>
                         </Col>
                         <Col md={3}>
@@ -2311,6 +2397,29 @@ editToggle=(cell)=>{
                 className='-striped -highlight'
                 // className='-highlight'
                 columns={productColumn}
+                defaultSorted={[{ id: "created", desc: true }]}
+                pageSize={5}
+                showPageSizeOptions={false}
+                showPageJump={false}
+              />
+            </Modal.Body>
+          </Modal>
+          <Modal
+            show={this.state.showSellHistoryModal}
+            size={"lg"}
+            onHide={this.togleSellHistory}
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>USer Purchase History Report (Previous Purchase Due Amount= {this.state.oldDueAmount})</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                 <ReactTable
+                data={this.state.userPurchaseHistory && this.state.userPurchaseHistory.length>0?this.state.userPurchaseHistory:[]}
+                className='-striped -highlight'
+                // className='-highlight'
+                columns={sellHistoryColumn}
                 defaultSorted={[{ id: "created", desc: true }]}
                 pageSize={5}
                 showPageSizeOptions={false}

@@ -1,12 +1,7 @@
 const CryptoJS = require('crypto-js');
 
 export const logoutFunc=(errData)=>{
-    if(errData && errData.response && errData.response.data && errData.response.data.message && 
-        (   errData.response.data.message==='LOGOUT'
-            || errData.response.data.message==='Not Authorized' 
-            || errData.response.data.message ==='jwt expired'
-        )
-    ){
+    if(errData.response && errData.response.status===401){
         localStorage.clear()
         window.location.href = '/login'
     }

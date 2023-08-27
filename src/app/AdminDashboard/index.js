@@ -155,7 +155,7 @@ export class AdminDashboard extends Component {
                 Today Total Due Amount {" "}
                   <i className="mdi mdi-diamond mdi-24px float-right"></i>
                 </h4>
-                <h2 className="mb-5" style={{ cursor: 'pointer' }} onClick={()=>this.redirectToDuePage} >{dashboardData.todayDue?<>&#x20B9; {parseFloat(dashboardData.todayDue).toFixed(2)}</>:'loading...'}</h2>
+                <h2 className="mb-5" style={{ cursor: 'pointer' }} onClick={this.redirectToDuePage} >{dashboardData.todayDue?<>&#x20B9; {parseFloat(dashboardData.todayDue).toFixed(2)}</>:'loading...'}</h2>
                 {/* <h6 className="card-text">Data N/A</h6> */}
               </div>
             </div>

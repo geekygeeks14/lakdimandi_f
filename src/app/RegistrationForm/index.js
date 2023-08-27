@@ -243,7 +243,9 @@ export class Index extends Component {
             selectedState:null,
             selectedCell:{},
             edit:false,
-            passwordModal:false
+            passwordModal:false,
+            rules:[],
+            showPermission: false
         })
        }
        onChangeStateName=(e)=>{
@@ -351,7 +353,7 @@ export class Index extends Component {
           <div className="col-12 grid-margin">
             <div className="card">
               <div className="card-body">
-                <p className="card-title">Vendor Registration Report</p>
+                <p className="card-title">User Registration</p>
                 {/* <p className="card-title2">Fluctuation Weight value in Percentage</p> */}
                 <Row>
                 <Col md={4}>
