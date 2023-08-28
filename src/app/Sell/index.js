@@ -1611,6 +1611,26 @@ editToggle=(cell)=>{
                         }} 
                         />
                       </Col>
+                      {this.state.oldDueAmount && Number(this.state.oldDueAmount)>0 &&
+                        <Col md={2}>
+                        <AvField name="oldDueAmount"  label ="Old Due Amount" placeholder="Old Due Amount"
+                          className='text-danger'
+                          style={{'textWeight':900}}
+                          value={parseFloat(this.state.oldDueAmount).toFixed(2)}
+                          disabled={true}
+                          // validate={{
+                          //   required: {
+                          //       value: true,
+                          //       errorMessage: 'This field is required.'
+                          //   },
+                          //   pattern: {
+                          //     value:'^[0-9]+(\\.[0-9]{2})?$',
+                          //     errorMessage: `Invalid Weight .`
+                          //   }
+                          // }} 
+                        />
+                        </Col>
+                      }
                       </Row>
                     <Row>
                     <Col md={3} style={{paddingLeft:'3px',paddingRight:'3px'}}>
