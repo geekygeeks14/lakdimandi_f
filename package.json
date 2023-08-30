@@ -21,6 +21,7 @@
     "namor": "^1.1.3",
     "node-sass": "^4.12.0",
     "nouislider-react": "^3.3.2",
+    "os": "^0.1.2",
     "pdfmake": "^0.2.7",
     "rc-steps": "^5.0.0-alpha.0",
     "react": "^16.9.0",

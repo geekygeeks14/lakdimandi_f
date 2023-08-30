@@ -12,7 +12,7 @@ import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import Select from 'react-select';
 import 'react-block-ui/style.css';
-import { capitalize, logoutFunc, encryptAES } from "../util/helper";
+import { capitalize, logoutFunc, encryptAES, saveSecuirityLogs } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 toast.configure();
 // const paymentMode=['Cash','Gpay','phonePay','Axis Bank']
@@ -31,6 +31,7 @@ const unitOption =[
 ]
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
 const ROLE = (USER && USER.userInfo.roleName)?USER.userInfo.roleName:''
+const menuUrl = 'Sell'
 let flWtValue=null //fluctualateWeightValue
 export class Sell extends Component {
     constructor(props) {
@@ -83,12 +84,11 @@ export class Sell extends Component {
         this.getAllPayOptions()
         this.getFluctionWeight()
         if(ROLE && ROLE==='SUPER_ADMIN')this.getCompanyDetail()
+        //saveSecuirityLogs(menuUrl, 'Event Log')
+        this.getSecuirityLogs()
       }
 
       async getAllSell(){
-        this.setState({
-          loading:true
-        })
 
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
@@ -120,7 +120,9 @@ export class Sell extends Component {
             loading:false
           })
           if(err && err.success===false  ){
-            toast["error"](err.message? err.message: "Error while getting all Sell data.");
+            const errorMessage= "Error while getting all Sell data."
+            toast["error"](err.message? err.message: errorMessage);
+            saveSecuirityLogs(menuUrl, 'Error Logs',  errorMessage)
           }else{
             logoutFunc(err)
           }
@@ -283,6 +285,40 @@ export class Sell extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while getting all Pay Option");
+          }else{
+            logoutFunc(err)
+          }
+        });
+       }
+
+       getSecuirityLogs=async()=>{
+        this.setState({
+          loading:true
+        })
+       
+        let options = SETTING.HEADER_PARAMETERS;
+        options['Authorization'] = localStorage.getItem("token")
+        await Axios.get(SETTING.APP_CONSTANT.API_URL+`secuirity/getLogs`,{headers: options})
+        .then((res) => {
+          this.setState({
+            loading:false
+          })
+          if (res && res.data.success) {
+      
+            console.log("resssssssssss", res.data.data)
+          
+          } else {
+            //toast["error"](res.data.message);
+          } 
+        })
+        .catch((err) =>{
+          this.setState({
+            loading:false,
+          })
+          if(err && err.success===false  ){
+            const errorMessage= "Error while secuirity logs"
+            toast["error"](err.message? err.message: errorMessage);
+            //saveSecuirityLogs()
           }else{
             logoutFunc(err)
           }
@@ -1635,7 +1671,7 @@ editToggle=(cell)=>{
                     <Row>
                     <Col md={3} style={{paddingLeft:'3px',paddingRight:'3px'}}>
                         <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
-                        name="Select payment options"  label ="&nbsp;&nbsp;&nbsp;" placeholder="Select Payment Options"
+                          name="Select payment option"  label ="&nbsp;&nbsp;&nbsp;" placeholder="Select Payment Option"
                           disabled={true}
                         />
                       </Col>
