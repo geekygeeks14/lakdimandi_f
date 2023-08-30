@@ -12,7 +12,7 @@ import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import Select from 'react-select';
 import 'react-block-ui/style.css';
-import { capitalize, logoutFunc, encryptAES, saveSecuirityLogs } from "../util/helper";
+import { capitalize, logoutFunc, encryptAES, saveSecurityLogs } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 toast.configure();
 // const paymentMode=['Cash','Gpay','phonePay','Axis Bank']
@@ -84,8 +84,8 @@ export class Sell extends Component {
         this.getAllPayOptions()
         this.getFluctionWeight()
         if(ROLE && ROLE==='SUPER_ADMIN')this.getCompanyDetail()
-        //saveSecuirityLogs(menuUrl, 'Event Log')
-        this.getSecuirityLogs()
+        //saveSecurityLogs(menuUrl, 'Event Log')
+        this.getSecurityLogs()
       }
 
       async getAllSell(){
@@ -122,7 +122,7 @@ export class Sell extends Component {
           if(err && err.success===false  ){
             const errorMessage= "Error while getting all Sell data."
             toast["error"](err.message? err.message: errorMessage);
-            saveSecuirityLogs(menuUrl, 'Error Logs',  errorMessage)
+            saveSecurityLogs(menuUrl, 'Error Logs',  errorMessage)
           }else{
             logoutFunc(err)
           }
@@ -291,14 +291,14 @@ export class Sell extends Component {
         });
        }
 
-       getSecuirityLogs=async()=>{
+       getSecurityLogs=async()=>{
         this.setState({
           loading:true
         })
        
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
-        await Axios.get(SETTING.APP_CONSTANT.API_URL+`secuirity/getLogs`,{headers: options})
+        await Axios.get(SETTING.APP_CONSTANT.API_URL+`security/getLogs`,{headers: options})
         .then((res) => {
           this.setState({
             loading:false
@@ -318,7 +318,7 @@ export class Sell extends Component {
           if(err && err.success===false  ){
             const errorMessage= "Error while secuirity logs"
             toast["error"](err.message? err.message: errorMessage);
-            //saveSecuirityLogs()
+            //saveSecurityLogs()
           }else{
             logoutFunc(err)
           }

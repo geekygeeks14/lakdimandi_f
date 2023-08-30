@@ -98,7 +98,7 @@ export const groupedData =(data, key) => {
   }, {});
 }
 
-export const saveSecuirityLogs= async(menuUrl, activityType, message='')=>{
+export const saveSecurityLogs= async(menuUrl, activityType, message='')=>{
   let dataToSend={
     message: message,
     menuUrl: menuUrl,
