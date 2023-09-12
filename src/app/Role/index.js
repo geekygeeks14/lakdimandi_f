@@ -10,10 +10,11 @@ import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
-import { capitalize, logoutFunc } from "../util/helper";
+import { capitalize, logoutFunc,saveSecurityLogs } from "../util/helper";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl = "roles";
 
 export class Role extends Component {
   constructor(props) {
@@ -57,6 +58,7 @@ export class Role extends Component {
         modalShow:false
       })
       if (res && res.data.success) {
+        saveSecurityLogs(menuUrl, 'Create/Add')
         toast["success"](res.data.message);
       } else {
         toast["error"](res && res.data && res.data.message? res.data.message:"Error while creating role ");
@@ -67,6 +69,7 @@ export class Role extends Component {
         modalShow:false
       })
       this.getRole()
+      saveSecurityLogs(menuUrl, 'Error Logs',err)
       toast["error"]("Something went wrong.");
     });
   }

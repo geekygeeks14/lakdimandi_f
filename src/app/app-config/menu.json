@@ -110,6 +110,16 @@
     "ACCOUNTANT"
   ]
 },
+{ "path": "/security",
+  "title": "Security Log",
+  "icon": "mdi mdi-crosshairs-gps menu-icon", 
+  "state": "securitylogCodeMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "ADMIN",
+    "SUPER_ADMIN"
+  ]
+},
 { "path": "/roles",
   "title": "User Role",
   "icon": "mdi mdi-yin-yang mdi-spin menu-icon", 

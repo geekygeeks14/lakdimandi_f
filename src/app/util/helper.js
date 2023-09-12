@@ -3,7 +3,7 @@ import Axios from "axios";
 const CryptoJS = require('crypto-js');
 const os = require('os');
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const activityTypeList =['Login', 'Logout', 'Update','Create/Add','Delete','Menu Log','Event Log','Status Change','Suspended company', 'Error Log']
+export const activityTypeList =['Login', 'Logout', 'Update','Create/Add','Delete','Menu Log','Event Log','Status Change','Suspended company', 'Error Log']
 
 const getIpAdress= ()=>{
   fetch('https://api.ipify.org?format=json')
@@ -110,7 +110,7 @@ export const saveSecurityLogs= async(menuUrl, activityType, message='')=>{
 
   let options = SETTING.HEADER_PARAMETERS;
   options['Authorization'] = localStorage.getItem("token")
-  await Axios.post(SETTING.APP_CONSTANT.API_URL+`secuirity/save`,dataToSend,{headers: options})
+  await Axios.post(SETTING.APP_CONSTANT.API_URL+`security/save`,dataToSend,{headers: options})
   .then((res) => {
      // console.log("resss", res)
   })

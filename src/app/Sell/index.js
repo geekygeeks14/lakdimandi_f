@@ -31,7 +31,7 @@ const unitOption =[
 ]
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
 const ROLE = (USER && USER.userInfo.roleName)?USER.userInfo.roleName:''
-const menuUrl = 'Sell'
+const menuUrl = 'sell'
 let flWtValue=null //fluctualateWeightValue
 export class Sell extends Component {
     constructor(props) {
@@ -85,7 +85,6 @@ export class Sell extends Component {
         this.getFluctionWeight()
         if(ROLE && ROLE==='SUPER_ADMIN')this.getCompanyDetail()
         //saveSecurityLogs(menuUrl, 'Event Log')
-        this.getSecurityLogs()
       }
 
       async getAllSell(){
@@ -291,39 +290,7 @@ export class Sell extends Component {
         });
        }
 
-       getSecurityLogs=async()=>{
-        this.setState({
-          loading:true
-        })
-       
-        let options = SETTING.HEADER_PARAMETERS;
-        options['Authorization'] = localStorage.getItem("token")
-        await Axios.get(SETTING.APP_CONSTANT.API_URL+`security/getLogs`,{headers: options})
-        .then((res) => {
-          this.setState({
-            loading:false
-          })
-          if (res && res.data.success) {
-      
-            console.log("resssssssssss", res.data.data)
-          
-          } else {
-            //toast["error"](res.data.message);
-          } 
-        })
-        .catch((err) =>{
-          this.setState({
-            loading:false,
-          })
-          if(err && err.success===false  ){
-            const errorMessage= "Error while secuirity logs"
-            toast["error"](err.message? err.message: errorMessage);
-            //saveSecurityLogs()
-          }else{
-            logoutFunc(err)
-          }
-        });
-       }
+     
 
        handleSubmit = async(e, values)=>{
         //console.log("eeeeeeeeeeeeee", values)
@@ -374,15 +341,18 @@ export class Sell extends Component {
         .then((res) => {
           if (res && res.data.success) {
             toast["success"](res.data.message);
+           
           } else {
             toast["error"](res.data.message);
           } 
+          saveSecurityLogs(menuUrl, 'Create/Add')
           this.handleClose()
         })
         .catch((err) =>{
           this.handleClose()
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while submitting Sell data.");
+            saveSecurityLogs(menuUrl, 'Error Logs',  err.message)
           }else{
             logoutFunc(err)
           }
@@ -429,12 +399,15 @@ export class Sell extends Component {
           if (res && res.data.success) {
             toast["success"](res.data.message);
             this.handleClose()
+            saveSecurityLogs(menuUrl, 'Update')
           } else {
             if(res?.data?.actionPassword){
               this.setState({loading4:false})
               toast["error"](res.data.message);
+              saveSecurityLogs(menuUrl, 'Error Logs',  res.data.message)
             }else{
               toast["error"](res.data.message);
+              saveSecurityLogs(menuUrl, 'Error Logs',  res.data.message)
               this.handleClose()
             }
           } 
@@ -586,13 +559,16 @@ export class Sell extends Component {
         .then((res) => {
           if (res && res.data.success) {
             toast["success"](res.data.message);
+            saveSecurityLogs(menuUrl, 'Delete')
             this.handleClose()
           } else {
             if(res?.data?.actionPassword){
               this.setState({loading3:false})
               toast["error"](res.data.message);
+              saveSecurityLogs(menuUrl, 'Error Logs', res.data.message)
             }else{
               toast["error"](res.data.message);
+              saveSecurityLogs(menuUrl, 'Error Logs', res.data.message)
               this.handleClose()
             }
           }
@@ -601,6 +577,7 @@ export class Sell extends Component {
           this.handleClose()  
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while deleting sell data.");
+            saveSecurityLogs(menuUrl, 'Error Logs',err.message)
           }else{
             logoutFunc(err)
           }
@@ -818,6 +795,7 @@ renderSuggestions = () => {
 }
 
 editToggle=(cell)=>{
+  debugger
   this.setState({
     selectedCell: cell,
     sellProductList: (cell.sellInfo && cell.sellInfo.length>0)?cell.sellInfo.map(data=> {return {...data, weighted: data.weighted?data.weighted: data.weight, lineTotal:   parseFloat(data.weighted?data.weighted:data.weight) * parseFloat(data.rate)}}):[],

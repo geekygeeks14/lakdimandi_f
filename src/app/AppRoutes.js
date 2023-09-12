@@ -31,6 +31,7 @@ const Profile = lazy (()=>import("./profile-page"))
 const Expense = lazy(()=>import("./Expense/expense"));
 const DueAmount = lazy(()=>import("./DueAmount"));
 const PayOption = lazy(()=> import("./PayOptions"))
+const Security = lazy(()=>import("./securitylog/security"))
 
 
 class AppRoutes extends Component {
@@ -53,6 +54,7 @@ class AppRoutes extends Component {
           <PrivateRoute path="/profile" component={Profile} exact/>
           <PrivateRoute path="/purchase" component={Purchase} exact/>
           <PrivateRoute path="/sell" component={Sell} exact/>
+          <PrivateRoute path="/security" component={Security} exact/>
           <PrivateRoute path="/weight" component={FluctuationWeight} exact/>
           <PrivateRoute path="/register" component={RegisterForm} exact/>
           <PrivateRoute path="/addProduct" component={ProductName} exact/>
