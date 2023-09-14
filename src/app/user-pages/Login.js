@@ -55,8 +55,8 @@ export class Login extends Component {
 
       let dataToSend = {
         userId: values.userName,
-        password: encryptAES(values.password,'login'),
-        };
+        password: encryptAES(values.password),
+      };
     
       await Axios.post(SETTING.APP_CONSTANT.API_URL+`public/userlogin`, dataToSend)
       .then((res) => {

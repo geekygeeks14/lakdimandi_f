@@ -92,7 +92,7 @@
   ]
 },
 { "path": "/expense",
-  "title": "Asset Earning and Expense",
+  "title": "Earning & Expense",
   "icon": "mdi mdi-crosshairs-gps menu-icon", 
   "state": "expenseMenuOpen",
   "role": [

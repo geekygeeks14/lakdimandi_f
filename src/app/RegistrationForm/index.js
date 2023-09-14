@@ -129,7 +129,7 @@ export class Index extends Component {
           payLoad= {
             ...payLoad,
             parentUserId: USER && USER.userInfo.userId,
-            compnayId: USER && USER.userInfo.companyId,
+            companyId: USER && USER.userInfo.companyId,
             companyName: USER && USER.userInfo.companyName,
           }
         }

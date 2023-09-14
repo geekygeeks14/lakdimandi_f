@@ -2,6 +2,7 @@ import { SETTING } from "../app-config/cofiguration";
 import Axios from "axios";
 const CryptoJS = require('crypto-js');
 const os = require('os');
+const SECRET_MSG =  process.env.REACT_APP_SECRET_MSG
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
 export const activityTypeList =['Login', 'Logout', 'Update','Create/Add','Delete','Menu Log','Event Log','Status Change','Suspended company', 'Error Log']
 
@@ -74,7 +75,7 @@ export const capitalize=(sentance)=>{
     return capitalizeWord
  }
 
- export const encryptAES = (text, SECRET_MSG) => {
+ export const encryptAES = (text) => {
     return CryptoJS.AES.encrypt(text, SECRET_MSG).toString();
   }
 
@@ -104,8 +105,8 @@ export const saveSecurityLogs= async(menuUrl, activityType, message='')=>{
     menuUrl: menuUrl,
     activity_type: activityType, 
     userId: USER._id, 
-    ipAdress: getIpAdress(),
-    device: getDevice()
+    // ipAdress: getIpAdress(),
+    // device: getDevice()
   }
 
   let options = SETTING.HEADER_PARAMETERS;

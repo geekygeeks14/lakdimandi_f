@@ -82,7 +82,7 @@ class Security extends Component{
             loading:false,
           })
           if(err && err.success===false  ){
-            const errorMessage= "Error while secuirity logs"
+            const errorMessage= "Error while getting secuirity logs"
             toast["error"](err.message? err.message: errorMessage);
             //saveSecurityLogs()
           }else{
@@ -92,7 +92,7 @@ class Security extends Component{
        }
 
        clearFilter =()=>{
-            this.setState({logValue:""})
+            this.setState({logValue:""},()=>this.getSecurityLogs())
        }
 
     //    handleSearch=(e)=>{
@@ -108,6 +108,7 @@ class Security extends Component{
             {
                 Header:"Time Stamp",
                 accessor:"activity_date_time",
+                width: 100,
                 Cell :(cell)=>{
                     return  new Date(cell.original.created).toLocaleDateString("en-GB")
                 }
@@ -115,6 +116,7 @@ class Security extends Component{
             {
                 Header:"User Role",
                 accessor:"name",
+                width: 100,
                 Cell :(cell)=>{
                     return cell.original.name?cell.original.name:"NA"
                 }
@@ -122,6 +124,7 @@ class Security extends Component{
             {
                 Header:"Page URL",
                 accessor:"menu_url",
+                width: 100,
                 Cell :(cell)=>{
                     return cell.original.menu_url?cell.original.menu_url:"NA"
                 }
@@ -129,6 +132,7 @@ class Security extends Component{
             {
                 Header:"Log Type",
                 accessor:"activity_type",
+                width: 100,
                 Cell :(cell)=>{
                     return cell.original.activity_type?cell.original.activity_type:"NA"
                 }
@@ -140,10 +144,6 @@ class Security extends Component{
                     return cell.original.desc?cell.original.desc:"NA"
                 }
             },
-            {
-                Header:"Action",
-                accessor:"action"
-            }
         ]
     return(
         <div>
@@ -187,7 +187,7 @@ class Security extends Component{
                                     </select>
                                     </Form.Group>
                                    </Col>
-                                   <Col md={2}>
+                                   <Col md={4}>
                                    <Form.Group>
                                         <Button type="button" className="btn btn-warning text-dark mt-3" onClick={this.clearFilter}>Clear Filter</Button>
                                     </Form.Group>

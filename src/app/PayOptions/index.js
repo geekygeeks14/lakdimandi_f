@@ -154,7 +154,7 @@ class PayOptions extends Component {
         this.setState({
           loading3:true
         })
-        // const actionPassword=   encryptAES(values.actionPassword, USER.userInfo.password)
+        // const actionPassword=   encryptAES(values.actionPassword)
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
         const url = new URL(SETTING.APP_CONSTANT.API_URL+`admin/deletePayOption/`+this.state.selectedCell._id)

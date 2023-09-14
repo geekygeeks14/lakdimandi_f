@@ -1,20 +1,20 @@
 import Axios from "axios";
 import React, { Component } from "react";
 import ReactTable from "react-table";
-import _, { result, values } from "lodash";
 import { toast } from "react-toastify";
 import { SETTING } from "../app-config/cofiguration";
 import "react-toastify/dist/ReactToastify.css";
-import { Button, Col, Container, Form, FormGroup, Modal, Row } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
-import Select from 'react-select';
 import 'react-block-ui/style.css';
 import { capitalize, convertMilliSecToHrMints, logoutFunc } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
+import imageCompression from 'browser-image-compression';
 toast.configure();
+const mime = require('mime')
 
 
 const paymentOption =[
@@ -396,7 +396,7 @@ export class Purchase extends Component {
           .catch((err) =>{
             //this.handleClose()
             if(err && err.success===false  ){
-              toast["error"](err.message? err.message: 'Error while getting all Sell data.');
+              toast["error"](err.message? err.message: 'Error while getting submitting purchase data.');
             }else{
               logoutFunc(err)
             }
@@ -714,13 +714,89 @@ export class Purchase extends Component {
         })
       }
 
+  fileSelect = async (e, docUploadType='truckFrontImage') => {
+      const uniqueNumber = `${new Date().getMilliseconds()}${Math.floor(Math.random() * 900000) + 100000}`;
+      const selectedFile= e.target.files[0]
+       if (selectedFile) {
+            const doc = selectedFile
+            const bmmsId= USER.userInfo.userId
+            const slectedtUserId= USER._id
+            const isValidExtension = doc ? ['png', 'jpg', 'jpeg'].includes(mime.getExtension(mime.getType(doc.name))) : false
+            if(isValidExtension){
+                const fileName = uniqueNumber + '_'+ docUploadType + '.' + mime.getExtension(mime.getType(doc && doc.name));
+                const docData = {
+                  imageFile: selectedFile,
+                  fileName: fileName,
+                  userId:bmmsId,
+                  slectedtUserId:slectedtUserId,
+                  docUploadType:docUploadType
+                  }
+              this.setState({selectedDoc: docData})
+            } else {
+              this.setState({
+                loading2:false,
+                })
+                toast.error(`Please select supported files "'png', 'jpg', 'jpeg'"`);
+                document.getElementById(e.target.id).value = "";
+            }
+        }
+        else {
+            toast.error('Please select the document type to upload the file');
+            document.getElementById("document").value = "";
+        }
+    }
 
-      
-      // Example usage:
-     
-
-
-
+  fileUpload = async () => {
+    // this.setState({
+    //   loading2:true
+    // })
+    const {selectedDoc} = this.state
+    const imageFile = selectedDoc.imageFile
+    const fileName = selectedDoc.fileName
+    const imgOptions = {
+      maxSizeMB: 0.1,
+      maxWidthOrHeight: 1024,
+      useWebWorker: true,
+      fileType: 'image/png',             // optional, fileType override e.g., 'image/jpeg', 'image/png' (default: file.type)
+    }
+    try {
+      const compressedFile = await imageCompression(imageFile, imgOptions);
+      const formData = new FormData();
+      formData.append('avatar', compressedFile,fileName);
+      formData.append('fileName', fileName.toString())
+      formData.append('file', imageFile);
+    
+      let options = SETTING.HEADER_PARAMETERS;
+      options['Authorization'] = localStorage.getItem("token")
+       await Axios.post(SETTING.APP_CONSTANT.API_URL+`admin/uploadImage/`,formData,{headers: options})
+      .then((res) => {
+        if (res && res.data.success) {
+          toast["success"](res.data.message);
+          this.setState({
+            allSell: res.data.data,
+          })
+         
+        } else {
+          toast["error"](res.data.message);
+        } 
+        //this.handleClose()
+      })
+      .catch((err) =>{
+        //this.handleClose()
+        if(err && err.success===false  ){
+          toast["error"](err.message? err.message: 'Error.');
+        }else{
+          //logoutFunc(err)
+      }
+      });
+    } catch (error) {
+      this.setState({
+        loading2:false
+      })
+      console.log(error);
+      toast["error"]("Error while upload doc/photo. Please try again");
+    }
+  }
 
   render() {
     const {selectedCell, unLoadingDateTime, loadingDateTime}= this.state
@@ -1235,20 +1311,22 @@ export class Purchase extends Component {
                           Add More worker for unloading
                         </button>
                     </div>
-
-
-                   
                     <Row>
                       <Col>
-                           <label>Front Image </label>
-                           <input
-                             type="file"
-                             className="form-control"
-                             multiple
-                             name="file"
-                             onChange={this.handleInputChange}
-                             required
-                           />
+                          <label>Front Image </label>
+                          <div>
+                            <input
+                              type="file"
+                              className="form-control"
+                              multiple
+                              id="document"
+                              onChange = {(e)=>this.fileSelect(e, 'truckFrontImage')}
+                              required
+                            />
+                            <button 
+                            //onClick = {this.fileUpload}
+                            >Upload</button>
+                          </div>
                      </Col>
                      <Col>
                       <label>Back Image </label>

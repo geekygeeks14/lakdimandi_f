@@ -389,7 +389,7 @@ export class Sell extends Component {
           dueAmount: values.dueAmount,
           loadingCharge: values.loadingCharge,
           totalAmount: values.totalAmount,
-          actionPassword: (ROLE && ROLE==='ADMIN')? encryptAES(values.actionPassword, USER.userInfo.password): undefined
+          actionPassword: (ROLE && ROLE==='ADMIN')? encryptAES(values.actionPassword): undefined
         }
         
         let options = SETTING.HEADER_PARAMETERS;
@@ -548,7 +548,7 @@ export class Sell extends Component {
         this.setState({
           loading3:true
         })
-        const actionPassword=   encryptAES(values.actionPassword, USER.userInfo.password)
+        const actionPassword=   encryptAES(values.actionPassword)
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
         const url = new URL(SETTING.APP_CONSTANT.API_URL+`admin/deleteSellData/`+this.state.selectedCell._id)

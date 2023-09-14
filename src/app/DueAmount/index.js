@@ -127,7 +127,7 @@ class DueAmount extends Component {
             //discountAmount: values.discountAmount?values.discountAmount:0,
             duePaidAmount: values.duePaidAmount,
             restDueAmount: values.restDueAmount,
-            actionPassword: (ROLE && ROLE==='ADMIN')? encryptAES(values.actionPassword, USER.userInfo.password): undefined,
+            actionPassword: (ROLE && ROLE==='ADMIN')? encryptAES(values.actionPassword): undefined,
             insertedBy : USER && USER._id,
           }
           
