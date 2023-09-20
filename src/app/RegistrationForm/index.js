@@ -9,12 +9,13 @@ import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import { AvCheckbox, AvCheckboxGroup, AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
-import { logoutFunc } from "../util/helper";
+import { logoutFunc, saveSecurityLogs } from "../util/helper";
 import stateCityList from "../util/stateCityList.json"
 import SideMenuList from "../app-config/menu.json"
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl = "register"
 export class Index extends Component {
     constructor(props) {
         super(props);
@@ -38,6 +39,7 @@ export class Index extends Component {
      componentDidMount(){
       this.getRole()
       this.getAllUser()
+      saveSecurityLogs(menuUrl, 'Menu Log')
      } 
      getAllPermissionsList=(roleName)=>{
         const permissionList=  SideMenuList.filter(data=> 
@@ -146,16 +148,20 @@ export class Index extends Component {
           })
           if (res && res.data.success) {
             this.getAllUser()
+            saveSecurityLogs(menuUrl, 'Create/Add')
           } else {
             toast["error"](res.data.message);
+            saveSecurityLogs(menuUrl, 'Error Log',res.data.message)
           } 
         })
         .catch((err) =>{
           this.handleClose()
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while submitting value");
+            saveSecurityLogs(menuUrl, 'Error Log',err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, 'Logout')
           }
         });
       }
@@ -175,16 +181,20 @@ export class Index extends Component {
           })
           if (res && res.data.success) {
             this.getAllUser()
+            saveSecurityLogs(menuUrl, 'Menu Log')
           } else {
             toast["error"](res.data.message);
+            saveSecurityLogs(menuUrl, 'Error Log',res.data.message)
           } 
         })
         .catch((err) =>{
           this.handleClose()
           if(err && err.response && err.response.data &&  err.response.data.success===false){
             toast["error"]( err.response.data.message?  err.response.data.message: "Error while getting user");
+            saveSecurityLogs(menuUrl, 'Error Log',err.response.data.messagee)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, 'Logout')
           }
         });
       }
@@ -209,11 +219,13 @@ export class Index extends Component {
             })
           } else {
             toast["error"](res.data.message);
+            saveSecurityLogs(menuUrl, 'Error Log',res.data.message)
           } 
         })
         .catch((err) =>{
           this.handleClose()
           logoutFunc(err)
+          saveSecurityLogs(menuUrl, 'Error Log',err.response)
           if(err && err.response && err.response.data &&  err.response.data.success===false  ){
             toast["error"]( err.response.data.message?  err.response.data.message: 'Error while getting password detail.');
           }else{

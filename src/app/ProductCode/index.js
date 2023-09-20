@@ -10,12 +10,13 @@ import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
-import { logoutFunc } from "../util/helper";
+import { logoutFunc, saveSecurityLogs } from "../util/helper";
 toast.configure();
 
 
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl = "productCode"
 
 export class ProductCode extends Component {
     constructor(props) {
@@ -34,6 +35,7 @@ export class ProductCode extends Component {
 
       componentDidMount() {
         this.getAllProductCode();
+        saveSecurityLogs(menuUrl,"Menu Log")
       }
 
       async getAllProductCode(){
@@ -52,6 +54,8 @@ export class ProductCode extends Component {
             this.setState({
               allProductCode: res.data.productCodeData,
             })
+
+        saveSecurityLogs(menuUrl,"Event Log")
           } else {
             toast["error"](res.data.message);
           } 
@@ -62,8 +66,10 @@ export class ProductCode extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while getting all Product Code.");
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }
@@ -94,6 +100,7 @@ export class ProductCode extends Component {
         .then((res) => {
           if (res && res.data.success) {
             toast["success"](res.data.message);
+            saveSecurityLogs(menuUrl,"Create/Add")
           } else {
             toast["error"](res.data.message);
           } 
@@ -103,8 +110,10 @@ export class ProductCode extends Component {
           this.handleClose()
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: `Error while ${this.state.edit?'updating':'creating'} product code.`);
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }
@@ -161,6 +170,7 @@ export class ProductCode extends Component {
         .then((res) => {
           if (res && res.data.success) {
             toast["success"](res.data.message);
+            saveSecurityLogs(menuUrl,"Delete")
           } else {
             toast["error"](res.data.message);
           }
@@ -170,6 +180,7 @@ export class ProductCode extends Component {
           this.handleClose()
           toast["error"]("Error while deleting product code.");
           logoutFunc(err)
+          saveSecurityLogs(menuUrl,"Error Log",err.message)
         });
        }
      

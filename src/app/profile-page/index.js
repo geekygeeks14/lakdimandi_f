@@ -4,15 +4,16 @@ import Axios from "axios";
 import { toast } from "react-toastify";
 import { SETTING } from "../app-config/cofiguration";
 import "react-toastify/dist/ReactToastify.css";
-import { Button, Card, Col, Form, Modal, Row } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
-import { logoutFunc } from "../util/helper";
+import { logoutFunc,saveSecurityLogs} from "../util/helper";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl ="profile"
 
 export class Profile extends Component {
 
@@ -25,6 +26,7 @@ export class Profile extends Component {
   }
   componentDidMount() {
     bsCustomFileInput.init()
+    saveSecurityLogs(menuUrl,"Menu Log")
   }
   resetPasswordModel=()=>{
     this.setState({
@@ -48,6 +50,7 @@ export class Profile extends Component {
         })
         if (res && res.data.success) {
           toast["success"](res.data.message);
+          saveSecurityLogs(menuUrl,"Update")
           setTimeout(() => {
             localStorage.clear()
             window.location.href = '/login'
@@ -63,8 +66,10 @@ export class Profile extends Component {
         })
         if(err && err.success===false  ){
           toast["error"](err.message? err.message: "Error while password reset");
+          saveSecurityLogs(menuUrl,"Error Log",err.message)
         }else{
           logoutFunc(err)
+          saveSecurityLogs(menuUrl,"Logout",err)
         }
       });
   }

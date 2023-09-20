@@ -10,12 +10,13 @@ import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
-import { capitalize, logoutFunc } from "../util/helper";
+import { capitalize, logoutFunc,saveSecurityLogs} from "../util/helper";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl ="company"
 
-export class CompanyDetail extends Component {
+class CompanyDetail extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -32,6 +33,7 @@ export class CompanyDetail extends Component {
 
       componentDidMount() {
         this.getCompanyDetail();
+        saveSecurityLogs(menuUrl,"Menu Log")
       }
       async getCompanyDetail(){
         this.setState({
@@ -49,6 +51,7 @@ export class CompanyDetail extends Component {
             this.setState({
               allCompany: res.data.data,
             })
+            saveSecurityLogs(menuUrl,"Event Log")
           } else {
             toast["error"](res.data.message);
           } 
@@ -59,8 +62,10 @@ export class CompanyDetail extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while getting all Copmpany data.');
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }

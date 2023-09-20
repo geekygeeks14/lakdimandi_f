@@ -7,7 +7,7 @@ import { SETTING } from "../app-config/cofiguration";
 import "react-toastify/dist/ReactToastify.css";
 import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
-import { capitalize, logoutFunc } from "../util/helper";
+import { capitalize, logoutFunc, saveSecurityLogs } from "../util/helper";
 import { Button, Card, Col, Form, Modal, Row } from "react-bootstrap";
 import 'react-block-ui/style.css';
 import { Link } from "react-router-dom/cjs/react-router-dom";
@@ -15,6 +15,7 @@ import { AvField, AvForm, AvRadio, AvRadioGroup } from "availity-reactstrap-vali
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl ="pay-option"
 const ROLE = (USER && USER.userInfo.roleName)?USER.userInfo.roleName:''
 const payOptionOption =[
   {value:'Cash',label:'Cash'},
@@ -58,6 +59,7 @@ class PayOptions extends Component {
         }else{
           this.getAllPayOptions()
         }
+         saveSecurityLogs(menuUrl,"Menu Log")
     }
 
     async getAllPayOptions(){
@@ -78,6 +80,7 @@ class PayOptions extends Component {
              this.setState({
               allPayOptions:allPayOptions              
             })
+            saveSecurityLogs(menuUrl,"Event Log")
           } else {
             toast["error"](res.data.message);
           } 
@@ -88,8 +91,10 @@ class PayOptions extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while getting all Pay Option");
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }
@@ -129,6 +134,7 @@ class PayOptions extends Component {
         .then((res) => {
           if (res && res.data.success) {
             toast["success"](res.data.message); 
+            saveSecurityLogs(menuUrl,"Create/Add")
             this.getAllPayOptions() 
             this.handleClosePayOptioneModel()     
           } else {
@@ -145,8 +151,10 @@ class PayOptions extends Component {
           this.handleClosePayOptioneModel()
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while submitting pay option data.");
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }
@@ -165,6 +173,7 @@ class PayOptions extends Component {
         .then((res) => {
           if (res && res.data.success) {
             toast["success"](res.data.message);
+            saveSecurityLogs(menuUrl,"Delete")
             this.getAllPayOptions()
             this.handleCloseDeleteModel()
           } else {
@@ -181,8 +190,10 @@ class PayOptions extends Component {
           this.handleCloseDeleteModel()
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while deleting pay option.");
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }

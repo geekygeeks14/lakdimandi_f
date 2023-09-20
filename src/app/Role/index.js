@@ -28,6 +28,7 @@ export class Role extends Component {
   }
   componentDidMount() {
     this.getRole();
+    saveSecurityLogs(menuUrl, 'Menu Log')
   }
   async getRole() {
     let options = SETTING.HEADER_PARAMETERS;
@@ -41,10 +42,12 @@ export class Role extends Component {
           toast["success"](res.data.message);
         }else{
           toast["error"](res.data.message);
+          saveSecurityLogs(menuUrl, 'Error Log',res.data.message)
         }
       })
       .catch((err) => {
         toast["error"](err && err.response.data && err.response.data.message?err.response.data.message:"Error while getting role.")
+        saveSecurityLogs(menuUrl, 'Error Log',err)
       });
   }
   async handleSubmit(err, values) {

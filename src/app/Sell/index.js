@@ -84,7 +84,7 @@ export class Sell extends Component {
         this.getAllPayOptions()
         this.getFluctionWeight()
         if(ROLE && ROLE==='SUPER_ADMIN')this.getCompanyDetail()
-        //saveSecurityLogs(menuUrl, 'Event Log')
+        saveSecurityLogs(menuUrl, 'Menu Log')
       }
 
       async getAllSell(){
@@ -795,7 +795,6 @@ renderSuggestions = () => {
 }
 
 editToggle=(cell)=>{
-  debugger
   this.setState({
     selectedCell: cell,
     sellProductList: (cell.sellInfo && cell.sellInfo.length>0)?cell.sellInfo.map(data=> {return {...data, weighted: data.weighted?data.weighted: data.weight, lineTotal:   parseFloat(data.weighted?data.weighted:data.weight) * parseFloat(data.rate)}}):[],

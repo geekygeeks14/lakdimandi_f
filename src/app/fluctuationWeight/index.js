@@ -12,11 +12,12 @@ import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import Select from 'react-select';
 import 'react-block-ui/style.css';
-import { capitalize, logoutFunc } from "../util/helper";
+import { capitalize, logoutFunc,saveSecurityLogs} from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl="weight"
 
 export class FluctuationWeight extends Component {
     constructor(props) {
@@ -33,6 +34,7 @@ export class FluctuationWeight extends Component {
       }
       componentDidMount=()=>{
          this.getFluctionWeight()
+         saveSecurityLogs(menuUrl,"Menu Log")
       }
       getFluctionWeight=async()=>{
         this.setState({
@@ -50,6 +52,7 @@ export class FluctuationWeight extends Component {
             this.setState({
               data: res.data.data,
             })
+            saveSecurityLogs(menuUrl,"Event Log")
           } else {
             toast["error"](res.data.message);
           } 
@@ -61,8 +64,10 @@ export class FluctuationWeight extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while getting value");
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }
@@ -95,6 +100,7 @@ export class FluctuationWeight extends Component {
           })
           if (res && res.data.success) {
             this.getFluctionWeight()
+            saveSecurityLogs(menuUrl,"Create/Add")
           } else {
             toast["error"](res.data.message);
           } 
@@ -106,8 +112,10 @@ export class FluctuationWeight extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while submitting value");
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }

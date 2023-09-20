@@ -33,6 +33,14 @@
     ]
   },
   {
+    "path": "/backup-data",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN",
+      "SUPER_ADMIN"
+    ]
+  },
+  {
     "path": "/register",
     "roles": [
       "TOPADMIN",

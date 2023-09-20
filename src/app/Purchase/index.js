@@ -10,7 +10,7 @@ import Spinner from "../shared/Spinner";
 import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
-import { capitalize, convertMilliSecToHrMints, logoutFunc } from "../util/helper";
+import { capitalize, convertMilliSecToHrMints, logoutFunc, saveSecurityLogs } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 import imageCompression from 'browser-image-compression';
 toast.configure();
@@ -32,6 +32,7 @@ const unitList =[
   {value:'Kg',label:'Kg'},
 ]
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl = "purchase"
 export class Purchase extends Component {
     constructor(props) {
         super(props);
@@ -78,6 +79,7 @@ export class Purchase extends Component {
         this.getAllProductName()
         this.getAllReciever()
         this.getAllWorker()
+        saveSecurityLogs(menuUrl, "Menu Log")
       }
 
       async getAllPurchase(){
@@ -98,7 +100,7 @@ export class Purchase extends Component {
             this.setState({
               allPurchase: res.data.purchaseData,
             })
-           
+            saveSecurityLogs(menuUrl, "Event Log")
           } else {
             toast["error"](res.data.message);
           }
@@ -109,8 +111,10 @@ export class Purchase extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while getting all purchase data.');
+            saveSecurityLogs(menuUrl, "Error Log", err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
        }
@@ -142,8 +146,10 @@ export class Purchase extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while getting all Product Code.');
+            saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
        }
@@ -174,8 +180,10 @@ export class Purchase extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while getting all Product Name.');
+            saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout",err)
           }
         });
        }
@@ -206,8 +214,10 @@ export class Purchase extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while getting all reciever list');
+            saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout",err)
           }
         });
        }
@@ -237,8 +247,10 @@ export class Purchase extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while getting worker");
+            saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout",err)
           }
         });
       }
@@ -276,8 +288,10 @@ export class Purchase extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while adding reciever');
+            saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout",err)
           }
         });
        }
@@ -301,6 +315,7 @@ export class Purchase extends Component {
                productNameModel: false
             },()=> this.getAllProductName())
             //toast["success"](res.data.message);
+            saveSecurityLogs(menuUrl, "Create/Add")
           } else {
             toast["error"](res.data.message);
           } 
@@ -309,8 +324,10 @@ export class Purchase extends Component {
         .catch((err) =>{
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: `Error while ${this.state.edit?'updating':'creating'} product Name.`);
+            saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout",err)
           }
         });
        }
@@ -387,7 +404,7 @@ export class Purchase extends Component {
               this.setState({
                 allSell: res.data.data,
               })
-             
+              saveSecurityLogs(menuUrl, "Create/Add")
             } else {
               toast["error"](res.data.message);
             } 
@@ -397,8 +414,10 @@ export class Purchase extends Component {
             //this.handleClose()
             if(err && err.success===false  ){
               toast["error"](err.message? err.message: 'Error while getting submitting purchase data.');
+              saveSecurityLogs(menuUrl, "Error Log",err.message)
             }else{
               logoutFunc(err)
+              saveSecurityLogs(menuUrl, "Logout",err)
             }
           });
       }
@@ -491,7 +510,7 @@ export class Purchase extends Component {
         .then((res) => {
           if (res && res.data.success) {
             // toast["success"](res.data.message);
-           
+            saveSecurityLogs(menuUrl, "Delete")
           } else {
             toast["error"](res.data.message);
           }
@@ -501,8 +520,10 @@ export class Purchase extends Component {
           this.handleClose()
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while deleting purchase data.');
+            saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout",err)
           }
         });
        }
@@ -775,7 +796,7 @@ export class Purchase extends Component {
           this.setState({
             allSell: res.data.data,
           })
-         
+          saveSecurityLogs(menuUrl, "Event Log")
         } else {
           toast["error"](res.data.message);
         } 
@@ -785,6 +806,7 @@ export class Purchase extends Component {
         //this.handleClose()
         if(err && err.success===false  ){
           toast["error"](err.message? err.message: 'Error.');
+          saveSecurityLogs(menuUrl, "Error Log",err.message)
         }else{
           //logoutFunc(err)
       }

@@ -7,7 +7,7 @@ import { SETTING } from "../app-config/cofiguration";
 import "react-toastify/dist/ReactToastify.css";
 import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
-import { capitalize, encryptAES, logoutFunc } from "../util/helper";
+import { capitalize, encryptAES, logoutFunc,saveSecurityLogs } from "../util/helper";
 import { Button, Card, Col, Form, Modal, Row } from "react-bootstrap";
 import 'react-block-ui/style.css';
 import { Link } from "react-router-dom/cjs/react-router-dom";
@@ -15,6 +15,7 @@ import { AvField, AvForm } from "availity-reactstrap-validation";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl ="due-amount"
 const ROLE = (USER && USER.userInfo.roleName)?USER.userInfo.roleName:''
 const paymentOption =[
   {value:'Cash',label:'Cash'},
@@ -58,6 +59,7 @@ class DueAmount extends Component {
       }else{
         this.getAllSell()
       }
+     saveSecurityLogs(menuUrl,"Menu Log")
     }
 
     async getAllSell(){
@@ -115,8 +117,11 @@ class DueAmount extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: "Error while getting all Sell data.");
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
-            logoutFunc(err)
+            logoutFunc(err) 
+            saveSecurityLogs(menuUrl,"Logout",err)
+
           }
         });
        }
@@ -137,6 +142,7 @@ class DueAmount extends Component {
           .then((res) => {
             if (res && res.data.success) {
               toast["success"](res.data.message); 
+              saveSecurityLogs(menuUrl,"Update")
               this.getAllSell() 
               this.handleClosePaymenteModel()     
               this.setState({
@@ -160,8 +166,10 @@ class DueAmount extends Component {
             this.handleClosePaymenteModel()
             if(err && err.success===false  ){
               toast["error"](err.message? err.message: "Error while submitting Sell data.");
+              saveSecurityLogs(menuUrl,"Error Log",err.message)
             }else{
               logoutFunc(err)
+              saveSecurityLogs(menuUrl,"Logout",err)
             }
           });
        }

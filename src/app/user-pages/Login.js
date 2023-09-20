@@ -10,10 +10,11 @@ import { Button, Col, Container, Form, FormGroup, Modal, Row } from "react-boots
 import BlockUi from 'react-block-ui';
 import 'react-block-ui/style.css';
 import './login.css';
-import { encryptAES } from "../util/helper";
+import { encryptAES, saveSecurityLogs } from "../util/helper";
 
 toast.configure();
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl = 'login'
 export class Login extends Component {
   
   constructor(props) {
@@ -27,20 +28,20 @@ export class Login extends Component {
   }
   componentDidMount(){
     //eslint-disable-next-line no-unused-expressions
+    saveSecurityLogs(menuUrl, "Menu Log")
     if(USER){
       const roleName= USER.userInfo.roleName
       if(roleName==='TOPADMIN')window.location.href="/dashboard"
       if(roleName!=='TOPADMIN')window.location.href="/adminDashboard"
+    
     }
   }
 
 
   userNameHandle=(e)=>{
-    console.log(" eeeeee", e.target.value)
     this.setState({userName:e.target.value})
   }
   passwordHandle=(e)=>{
-    //console.log(" eeeeee", e.target.value)
     this.setState({password:e.target.value})
   }
 
@@ -48,10 +49,6 @@ export class Login extends Component {
       this.setState({
           loading:true
       })
-      // let dataToSend = {
-      // userId: this.state.userName,
-      // password: this.state.password,
-      // };
 
       let dataToSend = {
         userId: values.userName,
@@ -68,6 +65,7 @@ export class Login extends Component {
           localStorage.setItem("userInformation", JSON.stringify(res.data.data.user))
           localStorage.setItem("token", JSON.stringify(res.data.data.token))
           toast["success"]("Logged in successfully");
+          saveSecurityLogs(menuUrl,"Login")
             const roleName= user.userInfo.roleName
             if(roleName==='TOPADMIN')window.location.href="/dashboard"
             if(roleName!=='TOPADMIN')window.location.href="/adminDashboard"
@@ -80,6 +78,7 @@ export class Login extends Component {
           loading:false
       })
         toast["error"]("Something went wrong.");
+        saveSecurityLogs(menuUrl,"Error Log",err)
       });
     }
   render() {
@@ -96,31 +95,6 @@ export class Login extends Component {
                       <h1 className="text-primary">
                           Sign In
                       </h1>
-                      {/* <form>
-                          <div className='form-row py-2 pt-5'>
-                              <div className='offset-1 col-lg-10'>
-                                  <input type='text' name="userName" placeholder='User Name' className='inp px-3'
-                                  onChange={this.userNameHandle}
-                                  />
-                                  
-                              </div>
-                          </div>
-                          <div className='form-row py-3'>
-                              <div className='offset-1 col-lg-10'>
-                                  <input type='password' name="password" placeholder='Password'className='inp px-3'
-                                  onChange={this.passwordHandle}
-                                  />
-                              </div>
-                          </div>
-                          <div className='form-row'>
-                              <div className='offset-1 col-lg-10'>
-                                  <button type="button" className='btn1'
-                                  onClick={this.handleSubmit}
-                                  >Sign In
-                                  </button>
-                              </div>
-                          </div>
-                      </form> */}
                       <AvForm className='mt-5 ml-2' onValidSubmit={this.handleSubmit}>
                       <AvField name="userName" placeholder="User Name" className="inp px-3 ml-5"
                         validate={{

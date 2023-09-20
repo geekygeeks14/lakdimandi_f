@@ -10,10 +10,11 @@ import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import 'react-block-ui/style.css';
-import { capitalize, logoutFunc } from "../util/helper";
+import { capitalize, logoutFunc,saveSecurityLogs } from "../util/helper";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
+const menuUrl="addProduct"
 
 export class ProductName extends Component {
     constructor(props) {
@@ -32,6 +33,7 @@ export class ProductName extends Component {
 
       componentDidMount() {
         this.getAllProductName();
+        saveSecurityLogs(menuUrl,"Menu Log")
       }
       async getAllProductName(){
         this.setState({
@@ -59,8 +61,10 @@ export class ProductName extends Component {
           })
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: 'Error while getting all Product Name.');
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
         });
        }
@@ -91,6 +95,7 @@ export class ProductName extends Component {
         .then((res) => {
           if (res && res.data.success) {
             toast["success"](res.data.message);
+            saveSecurityLogs(menuUrl,"Create/Add")
           } else {
             toast["error"](res.data.message);
           } 
@@ -99,8 +104,10 @@ export class ProductName extends Component {
         .catch((err) =>{
           if(err && err.success===false  ){
             toast["error"](err.message? err.message: `Error while ${this.state.edit?'updating':'creating'} product Name.`);
+            saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
+            saveSecurityLogs(menuUrl,"Logout",err)
           }
           this.handleClose()
         });
@@ -158,6 +165,7 @@ export class ProductName extends Component {
         .then((res) => {
           if (res && res.data.success) {
             toast["success"](res.data.message);
+            saveSecurityLogs(menuUrl,"Delete")
           } else {
             toast["error"](res.data.message);
           }
@@ -167,6 +175,7 @@ export class ProductName extends Component {
           this.handleClose()
           toast["error"]("Error while deleting product Name.");
           logoutFunc(err)
+          saveSecurityLogs(menuUrl,"Logout",err)
         });
        }
      

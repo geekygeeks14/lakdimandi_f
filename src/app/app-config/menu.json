@@ -120,6 +120,16 @@
     "SUPER_ADMIN"
   ]
 },
+{ "path": "/backup-data",
+  "title": "Backup Data",
+  "icon": "mdi mdi-crosshairs-gps menu-icon", 
+  "state": "backupDataCodeMenuOpen",
+  "role": [
+    "TOPADMIN",
+    "ADMIN",
+    "SUPER_ADMIN"
+  ]
+},
 { "path": "/roles",
   "title": "User Role",
   "icon": "mdi mdi-yin-yang mdi-spin menu-icon", 
