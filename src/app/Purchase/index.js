@@ -9,6 +9,7 @@ import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
+import CreatableSelect from 'react-select/creatable';
 import 'react-block-ui/style.css';
 import { capitalize, convertMilliSecToHrMints, logoutFunc, saveSecurityLogs } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
@@ -21,7 +22,7 @@ const paymentOption =[
   {value:'Cash',label:'Cash'},
   {value:'Gpay',label:'Gpay'},
   {value:'Paytm',label:'Paytm'},
-  {value:'phonePay',label:'phonePay'},
+  {value:'phonePay',label:'phonePe'},
   {value:'Axis Bank',label:'Axis Bank'},
 ]
 
@@ -31,6 +32,24 @@ const unitList =[
   {value:'Pcs',label:'Pcs'},
   {value:'Kg',label:'Kg'},
 ]
+const colorOption=[
+  { value: 'ocean', label: 'Ocean', color: '#00B8D9', isFixed: true },
+  { value: 'blue', label: 'Blue', color: '#0052CC', isDisabled: true },
+  { value: 'purple', label: 'Purple', color: '#5243AA' },
+  { value: 'red', label: 'Red', color: '#FF5630', isFixed: true },
+  { value: 'orange', label: 'Orange', color: '#FF8B00' },
+  { value: 'yellow', label: 'Yellow', color: '#FFC400' },
+  { value: 'green', label: 'Green', color: '#36B37E' },
+  { value: 'forest', label: 'Forest', color: '#00875A' },
+  { value: 'slate', label: 'Slate', color: '#253858' },
+  { value: 'silver', label: 'Silver', color: '#666666' },
+]
+const imgOptions = {
+  maxSizeMB: 0.1,
+  maxWidthOrHeight: 1024,
+  useWebWorker: true,
+  fileType: 'image/png',             // optional, fileType override e.g., 'image/jpeg', 'image/png' (default: file.type)
+}
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
 const menuUrl = "purchase"
 export class Purchase extends Component {
@@ -39,11 +58,13 @@ export class Purchase extends Component {
         this.state = {
           cmpName:'',
           cmpAdd:'',
-          newProductCode:'',
+          newProductCode:{},
           allPurchase: [],
           productData:[],
           loading:false,
-          purchaseModal:false,
+          purchaseModal_basicInfo:false,
+          purchaseModal_image: false,
+          purchaseModal_product:false,
           loading2:false,
           deletePurchaseModal: false,
           showProductModal:false,
@@ -67,6 +88,7 @@ export class Purchase extends Component {
           loadingRowTime:0,
           grossWeight:0,
           tareWeight: 0,
+          purchaseImageUpload:{},
           unLoadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
           loadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
           purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
@@ -133,8 +155,16 @@ export class Purchase extends Component {
           })
           if (res && res.data.success) {
             this.setState({
-              allProductCode: res.data.productCodeData,
-              allProductCodeData: res.data.allProductCodeData
+              allProductCode: res.data.productCodeData.map(data=> {return{
+                ...data,
+                label: data.productCode,
+                value: data._id
+              }}),
+              allProductCodeData: res.data.allProductCodeData.map(data=> {return{
+                ...data,
+                label: data.productCode,
+                value: data._id
+              }})
             })
           } else {
             toast["error"](res.data.message);
@@ -333,66 +363,111 @@ export class Purchase extends Component {
        }
 
         handleSubmit = async(e, values)=>{
-
-          // this.setState({
-          //   loading2:true
-          // })
-          const companyId= (USER && USER.userInfo.companyId)?USER.userInfo.companyId:USER._id
-          const unLoadingWorkDetail={
-            unLoadingWorker: values.unLoadingWorker,
-            startTime: this.state.unLoadingDateTime.startTime,
-            endTime: this.state.unLoadingDateTime.endTime,
-            parentUserId: USER && USER.userInfo.userId,
-            note: 'Unloading',
-            truck:true,
-            rowTime: new Date(this.state.unLoadingDateTime.endTime) - new Date(this.state.unLoadingDateTime.startTime),
-            dateOfWork : this.state.unLoadingDateTime.date.toLocaleDateString()
-          }
-          const loadingWorkDetail={
-            loadingWorker: values.loadingWorker,
-            startTime: this.state.loadingDateTime.startTime,
-            endTime: this.state.loadingDateTime.endTime,
-            parentUserId: USER && USER.userInfo.userId,
-            note: 'Loading',
-            truck:true,
-            rowTime: new Date(this.state.loadingDateTime.endTime) - new Date(this.state.loadingDateTime.startTime),
-            dateOfWork : this.state.loadingDateTime.date.toLocaleDateString()
-          }
-          const purchaseBasicInfo={
-            companyName: values.companyName,
-            companyAdress: values.companyAdress,
-            vehicleNumber: values.vehicleNumber,
-            kantaName: values.kantaName,
-            kantaNo :values.kantaNo,
-            grossWeight: values.grossWeight,
-            tareWeight: values.tareWeight,
-            netWeight: values.netWeight,
-            recieverId: values.recieverId,
-            materialName: values.materialName,
-            frontImage:'',
-            backImage:'',
-            leftImage:'',
-            rightImage:'',
-          }
-          const purchaseProduct=values.purchaseProduct.map(data=> {
-            return{
-              ...data,
-              productCode:values.productCode,
-              image: ''
-            }
+          this.setState({
+            loading2:true
           })
-        
-          const payload={
-            unLoadingWorkDetail: unLoadingWorkDetail,
-            loadingWorkDetail: loadingWorkDetail,
-            purchaseBasicInfo: purchaseBasicInfo,
-            purchaseProduct: purchaseProduct,
-            totalWeight:values.totalWeight,
-            actualWeght: values.actualWeght,
-            insertedBy : USER && USER._id,
-            companyId: companyId,
-            date: this.state.unLoadingDateTime.date,
-            productCode : values.productCode
+          const companyId= (USER && USER.userInfo.companyId)?USER.userInfo.companyId:USER._id
+          let payload={}
+          if(this.state.purchaseModal_basicInfo){
+             if(!this.state.newProductCode || (this.state.newProductCode && !this.state.newProductCode.value) ){
+              toast.error(`Please select product code or enter product code`)
+              return
+             }
+            const unLoadingWorkDetail={
+              unLoadingWorker: values.unLoadingWorker,
+              startTime: this.state.unLoadingDateTime.startTime,
+              endTime: this.state.unLoadingDateTime.endTime,
+              parentUserId: USER && USER.userInfo.userId,
+              note: 'Unloading',
+              truck:true,
+              rowTime: new Date(this.state.unLoadingDateTime.endTime) - new Date(this.state.unLoadingDateTime.startTime),
+              dateOfWork : this.state.unLoadingDateTime.date.toLocaleDateString()
+            }
+            const loadingWorkDetail={
+              loadingWorker: values.loadingWorker,
+              startTime: this.state.loadingDateTime.startTime,
+              endTime: this.state.loadingDateTime.endTime,
+              parentUserId: USER && USER.userInfo.userId,
+              note: 'Loading',
+              truck:true,
+              rowTime: new Date(this.state.loadingDateTime.endTime) - new Date(this.state.loadingDateTime.startTime),
+              dateOfWork : this.state.loadingDateTime.date.toLocaleDateString()
+            }
+            const purchaseBasicInfo={
+              companyName: values.companyName,
+              companyAdress: values.companyAdress,
+              vehicleNumber: values.vehicleNumber,
+              kantaName: values.kantaName,
+              kantaNo :values.kantaNo,
+              grossWeight: values.grossWeight,
+              tareWeight: values.tareWeight,
+              netWeight: values.netWeight,
+              recieverId: values.recieverId,
+              materialName: values.materialName,
+            }
+             payload={
+              unLoadingWorkDetail: unLoadingWorkDetail,
+              loadingWorkDetail: loadingWorkDetail,
+              purchaseBasicInfo: purchaseBasicInfo,
+              totalWeight:values.totalWeight,
+              actualWeght: values.actualWeght,
+              insertedBy : USER && USER._id,
+              companyId: companyId,
+              date: this.state.unLoadingDateTime.date,
+              productCode : this.state.newProductCode
+            }
+          }
+          if(this.state.purchaseModal_image && this.state.selectedDoc){
+            const {purchaseImageUpload}= this.state.selectedDoc 
+            if(purchaseImageUpload.vehicle_front_image_file){
+              toast.error("Please upload vehicle_front_image")
+              return 
+            }
+            if(purchaseImageUpload.vehicle_back_image_file){
+              toast.error("Please upload vehicle_front_image")
+              return 
+            }
+            if(purchaseImageUpload.vehicle_left_image_file){
+              toast.error("Please upload vehicle_front_image")
+              return 
+            }
+            if(purchaseImageUpload.vehicle_right_image_file){
+              toast.error("Please upload vehicle_front_image")
+              return 
+            }
+            if(purchaseImageUpload.kanta_slip_image_file){
+              toast.error("Please upload kanta_slip_image")
+              return 
+            }
+            const compr_truck_front_image = await imageCompression(purchaseImageUpload.truck_front_image_file, imgOptions);
+            const formData = new FormData();
+            formData.append('truck_front_image_name', purchaseImageUpload.truck_front_image_name)
+            formData.append('truck_front_image_file', compr_truck_front_image);
+            payload={
+              id: this.state.selectedCell._id,
+              purchaseImageUpload: {
+                vehicleImage:{
+                  front: '',
+                  back:'',
+                  left:'',
+                  right:'',
+                },
+                kantaSlipImage:''
+              },
+            }
+          }
+          if(this.state.purchaseModal_product){
+            const purchaseProduct=values.purchaseProduct.map(data=> {
+              return{
+                ...data,
+                productCode:values.productCode,
+                image: ''
+              }
+            })
+            payload={
+              id: this.state.selectedCell._id,
+              purchaseProduct: purchaseProduct,
+            }
           }
   
           let options = SETTING.HEADER_PARAMETERS;
@@ -408,13 +483,12 @@ export class Purchase extends Component {
             } else {
               toast["error"](res.data.message);
             } 
-            //this.handleClose()
+            this.handleClose()
           })
           .catch((err) =>{
             //this.handleClose()
             if(err && err.success===false  ){
-              toast["error"](err.message? err.message: 'Error while getting submitting purchase data.');
-              saveSecurityLogs(menuUrl, "Error Log",err.message)
+              toast["error"](err.message? err.message: 'Error while submitting purchase data.');
             }else{
               logoutFunc(err)
               saveSecurityLogs(menuUrl, "Logout",err)
@@ -430,12 +504,12 @@ export class Purchase extends Component {
        
        purchaseModelOpen=()=>{
         this.setState({
-            purchaseModal:true
+            purchaseModal_basicInfo:true
         })
        }
        handleClose=()=>{
         this.setState({
-            purchaseModal:false,
+            purchaseModal_basicInfo:false,
             loading:false,
             loading2:false,
             deletePurchaseModal:false,
@@ -468,7 +542,7 @@ export class Purchase extends Component {
 
        handleClosePuchaseModel=()=>{
         this.setState({
-          purchaseModal:false,
+          purchaseModal_basicInfo:false,
           loading:false,
           loading2:false,
           deletePurchaseModal:false,
@@ -668,12 +742,16 @@ export class Purchase extends Component {
       onChangeCmpName=(e)=>{
         this.setState({
           cmpName: e.target.value
-        },()=>this.uniqueProductCodeGen())
+        },
+        //()=>this.uniqueProductCodeGen()
+        )
       }
       onChangeCmpAdd=(e)=>{
         this.setState({
           cmpAdd: e.target.value
-        },()=> this.uniqueProductCodeGen())
+        },
+        //()=> this.uniqueProductCodeGen()
+        )
       }
 
       generateRandomName=(strings, fixedLength) =>{
@@ -700,7 +778,7 @@ export class Purchase extends Component {
           return randomName + padding;
         }
       
-        return randomName;
+        return randomName.toUpperCase();
       }
       
        getRandomPart=(partsArray, length)=> {
@@ -715,44 +793,57 @@ export class Purchase extends Component {
       }
 
       uniqueProductCodeGen =()=>{
-
+        if(!this.state.cmpName){
+          toast.error("Please enter company name")
+          return
+        }
+        if(!this.state.cmpAdd){
+          toast.error("Please enter company address")
+          return
+        }
         const cmpAdd=  this.state.cmpAdd
         const cmpName=  this.state.cmpName
         const inputStrings = cmpAdd+' '+ cmpName;
         const fixedLength = 12;
-        let randomName1 =''
-        let randomName2 =''
-        if(cmpName.length>0){
-           randomName1 = this.generateRandomName(inputStrings, fixedLength);
+        let randomName=''
+        let randomNameExist=true
+        while(randomNameExist){
+          const newRandomName = this.generateRandomName(inputStrings, fixedLength);
+          const foundProductCode= this.state.allProductCodeData.find(data => data.label.toLowerCase()===newRandomName)
+          if(!foundProductCode){
+            randomNameExist=false
+            randomName= newRandomName
+          }
         }
-        // if(cmpName.length>0){
-        //    randomName2 = this.generateRandomName(inputStrings, fixedLength)
-        // }
-   
-      const randomName= (randomName1+ randomName2).toUpperCase()
         this.setState({
-          newProductCode:randomName
+          newProductCode:{label:randomName, value:randomName}
+        })
+      }
+      onChnageProductCode=(e)=>{
+        this.setState({
+          newProductCode:e
         })
       }
 
-  fileSelect = async (e, docUploadType='truckFrontImage') => {
+  fileSelect = async (e, docUploadType) => {
       const uniqueNumber = `${new Date().getMilliseconds()}${Math.floor(Math.random() * 900000) + 100000}`;
       const selectedFile= e.target.files[0]
        if (selectedFile) {
             const doc = selectedFile
-            const bmmsId= USER.userInfo.userId
-            const slectedtUserId= USER._id
+            // const bmmsId= USER.userInfo.userId
+            // const slectedtUserId= USER._id
             const isValidExtension = doc ? ['png', 'jpg', 'jpeg'].includes(mime.getExtension(mime.getType(doc.name))) : false
             if(isValidExtension){
                 const fileName = uniqueNumber + '_'+ docUploadType + '.' + mime.getExtension(mime.getType(doc && doc.name));
-                const docData = {
-                  imageFile: selectedFile,
-                  fileName: fileName,
-                  userId:bmmsId,
-                  slectedtUserId:slectedtUserId,
-                  docUploadType:docUploadType
-                  }
-              this.setState({selectedDoc: docData})
+               
+              let purchaseImageUpload= this.state.purchaseImageUpload
+                purchaseImageUpload={
+                  ...purchaseImageUpload,
+                  [`${docUploadType}_name`]: fileName,
+                  [`${docUploadType}_file`]: selectedFile
+                }
+          
+              this.setState({purchaseImageUpload})
             } else {
               this.setState({
                 loading2:false,
@@ -1005,10 +1096,9 @@ export class Purchase extends Component {
             </div>
           </div>
         </div>
-        </BlockUi>    
-          
-          <Modal
-            show={this.state.purchaseModal}
+        </BlockUi>  
+        <Modal
+            show={this.state.purchaseModal_basicInfo}
             size={"lg"}
             onHide={this.handleClosePuchaseModel}
             aria-labelledby="contained-modal-title-vcenter"
@@ -1170,6 +1260,33 @@ export class Purchase extends Component {
                      </Col>
                      </Row>
                      <Row>
+                      {/* <Col>
+                        <AvField name="productCode" label="Product Code" placeholder="Product Code" 
+                          value={this.state.newProductCode}
+                          validate={{
+                          required: {
+                              value: true,
+                              errorMessage: 'This field is required.'
+                            }
+                          }} 
+                        />
+                      </Col> */}
+                      <Col md={4}>
+                      <label >Product code</label>
+                        <CreatableSelect 
+                        value={this.state.newProductCode}
+                        isClearable 
+                        placeholder="Product code"
+                        onChange={this.onChnageProductCode}
+                        options={this.state.allProductCode} 
+                        />
+                      </Col>
+                      <Col md={2} >
+                      <div> <label >&nbsp;</label></div>
+                        <button type="button" className="btn btn-gradient-primary btn-sm" onClick={this.uniqueProductCodeGen}>Auto Genrate</button>
+                      </Col>
+                     </Row>
+                     <Row>
                         <Col md={3}>
                           <div>
                             <label >Loading Date</label>
@@ -1218,7 +1335,7 @@ export class Purchase extends Component {
                             value={convertMilliSecToHrMints(this.state.loadingRowTime)}
                         />
                         </Col>
-                     </Row>
+                     </Row>             
                      {this.state.loadingWorkerList.map((data, indexNum)=>
                         <Row>
                         <Col md={4}>
@@ -1333,6 +1450,76 @@ export class Purchase extends Component {
                           Add More worker for unloading
                         </button>
                     </div>
+                    {/* <Row>
+                      <Col md={3}>
+                        <AvField name="totalWeight"  label ="Total Weight" placeholder="Total Weight"
+                        value={this.state.totalWeight}
+                          validate={{
+                            required: {
+                                value: true,
+                                errorMessage: 'This field is required.'
+                            },
+                            pattern: {
+                              value:/^[0-9]+.+$/,
+                              errorMessage: `Invalid Weight number.`
+                            }
+                        }} 
+                        />
+                      </Col>
+                       
+                      <Col md={3}>
+                        <AvField name="short"  label ="Short" placeholder="short"
+                        />
+                      </Col>
+                      <Col md={3}>
+                        <AvField name="Actual"  label ="Actual" placeholder="Actual"
+                         value={this.state.totalWeight}
+                          validate={{
+                            required: {
+                                value: true,
+                                errorMessage: 'This field is required.'
+                            },
+                            pattern: {
+                              value:/^[0-9]+.+$/,
+                              errorMessage: `Invalid Amount number.`
+                            }
+                        }} 
+                        />
+                      </Col>
+                  
+                    </Row> */}
+                    <Row>
+                        <div className="col-md-6 d-flex justify-content-end">
+                        <Button type="submit">Submit</Button>
+                        </div>
+                        <div className="col-md-6">
+                        <Button variant="dark" 
+                        onClick={this.handleClosePuchaseModel}
+                         >Cancel</Button>
+                        </div>
+                    </Row>
+                  </AvForm>
+                </div>
+              </div>
+              </BlockUi>
+            </Modal.Body>
+          </Modal>  
+          
+          <Modal
+            show={this.state.purchaseModal_image}
+            size={"lg"}
+            onHide={this.handleClosePuchaseModel}
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Purchase Details Enter</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+            <BlockUi tag="div" blocking={this.state.loading2}  className="block-overlay-dark"  loader={<Spinner/>}>
+            <div className="card">
+                <div className="card-body">
+                <AvForm onValidSubmit={this.handleSubmit}>
                     <Row>
                       <Col>
                           <label>Front Image </label>
@@ -1363,7 +1550,41 @@ export class Purchase extends Component {
                      </Col>
                     </Row>
                     <h3 className="text-dark d-flex justify-content-center">Product Details</h3>
-                    <Col>
+        
+                    <Row>
+                        <div className="col-md-6 d-flex justify-content-end">
+                        <Button type="submit">Submit</Button>
+                        </div>
+                        <div className="col-md-6">
+                        <Button variant="dark" 
+                        onClick={this.handleClosePuchaseModel}
+                         >Cancel</Button>
+                        </div>
+                    </Row>
+                  </AvForm>
+                </div>
+              </div>
+              </BlockUi>
+            </Modal.Body>
+          </Modal>
+          <Modal
+            show={this.state.purchaseModal_product}
+            size={"lg"}
+            onHide={this.handleClosePuchaseModel}
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Purchase Details Enter</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+            <BlockUi tag="div" blocking={this.state.loading2}  className="block-overlay-dark"  loader={<Spinner/>}>
+            <div className="card">
+                <div className="card-body">
+                <AvForm onValidSubmit={this.handleSubmit}>
+                     
+                    <h3 className="text-dark d-flex justify-content-center">Product Details</h3>
+                    {/* <Col>
                       <AvField name="productCode" label="Product Code" placeholder="Product Code" 
                         value={this.state.newProductCode}
                         validate={{
@@ -1373,7 +1594,7 @@ export class Purchase extends Component {
                           }
                         }} 
                       />
-                     </Col>
+                     </Col> */}
                     {this.state.purchaseProductList.map((data,numIndex)=>
                       <>
                       <Row >
@@ -1588,352 +1809,7 @@ export class Purchase extends Component {
               </BlockUi>
             </Modal.Body>
           </Modal>
-          <Modal
-            show={this.state.purchaseEditModal}
-            size={"lg"}
-            onHide={this.handleCloseEditModel}
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>Edit Purchase Details</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-            <BlockUi tag="div" blocking={this.state.loading4}  className="block-overlay-dark"  loader={<Spinner/>}>
-            <div className="card">
-                <div className="card-body">
-                <AvForm onValidSubmit={this.handleEditSubmit}>
-                <h3 className="text-dark d-flex justify-content-center">Purchase Details</h3>
-                    <Row>
-                          <Col md={3}>
-                          <AvField name="phoneNumber1" label="Phone Number" placeholder="Phone Number"
-                            value={selectedCell && selectedCell.sellerDetail && selectedCell.sellerDetail.phoneNumber1?selectedCell.sellerDetail.phoneNumber1:''}
-                            validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
-                              },
-                              maxLength: {
-                                value: 10,
-                                errorMessage: 'Invalid phone number'
-                              },
-                              minLength: {
-                                value: 10,
-                                errorMessage: 'Invalid phone number'
-                              },
-                              pattern: {
-                                value:/^[0-9]+$/,
-                                errorMessage: `Invalid phone number.`
-                              }
-                            }} 
-                        />
-                    </Col>
-                    <Col md={3}>
-                    <AvField name="sellerName" label="Seller Name" placeholder="Seller Name"
-                      value={selectedCell && selectedCell.sellerDetail && selectedCell.sellerDetail.sellerName?selectedCell.sellerDetail.sellerName:''}
-                        validate={{
-                        required: {
-                            value: true,
-                            errorMessage: 'This field is required.'
-                        },
-                        minLength: {
-                          value: 4,
-                          errorMessage: 'Invalid Purchase name.'
-                        },
-                        maxLength: {
-                          value: 35,
-                          errorMessage: 'Invalid Purchase name.'
-                        },
-                        pattern: {
-                          value:  /^[a-zA-Z][a-zA-Z\s]*$/,
-                          errorMessage: `Invalid Purchase name.`
-                        }
-                    }} 
-                    />
-                     </Col>
-                    <Col md={3}>
-                    <AvField name="companyName" label="Company Name" placeholder="Company Name" 
-                      value={selectedCell && selectedCell.sellerDetail && selectedCell.sellerDetail.companyName?selectedCell.sellerDetail.companyName:''}
-
-                        validate={{
-                        required: {
-                            value: true,
-                            errorMessage: 'This field is required.'
-                        }
-                    }} />
-                     </Col>
-                     <Col md={3}>
-                     <AvField name="address" label="Address" placeholder="Address" 
-                      value={selectedCell && selectedCell.sellerDetail && selectedCell.sellerDetail.address?selectedCell.sellerDetail.address:''}
-
-                        validate={{
-                        required: {
-                            value: true,
-                            errorMessage: 'This field is required.'
-                        }
-                    }} />
-                     </Col>
-                    </Row>
-
-                    <h3 className="text-dark d-flex justify-content-center">Product Details</h3>
-                    {selectedCell && selectedCell.purchaseInfo && selectedCell.purchaseInfo.length>0 && selectedCell.purchaseInfo.map((purchaseProduct,index)=>
-                      <>
-                      <Row key={`index_${index}`}>
-                      <Col >
-                        <AvField name= {`purchaseProduct[${index}].productName`}  label ="Product Name" placeholder="Product Name"
-                          value={purchaseProduct.productName? purchaseProduct.productName:''}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            }
-                        }} 
-                        />
-                      </Col>
-                      <Col >
-                        <AvField name= {`purchaseProduct[${index}].length`}  label ="Length" placeholder="Length"
-                          value={purchaseProduct.length? purchaseProduct.length:''}
-                          min={0}
-                          max={400}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            }, 
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid length number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                        <Col>
-                        <AvField name= {`purchaseProduct[${index}].breadth`}  label ="Breadth" placeholder="Breadth"
-                          value={purchaseProduct.breadth? purchaseProduct.breadth:''}
-                          min={0}
-                          max={200}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            }, 
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid breadth number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                      <Col >
-                        <AvField name= {`purchaseProduct[${index}].height`}  label ="Height" placeholder="Height"
-                          value={purchaseProduct.height? purchaseProduct.height:''}
-                          min={0}
-                          max={20}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid height number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                      <Col >
-                          <AvField type="select" name={`purchaseProduct[${index}].unit`} label="Unit" 
-                           value={purchaseProduct.unit? purchaseProduct.unit:''}
-                              validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
-                              }
-                          }} >
-                        <option value=''>Choose unit</option>
-                        {unitList.map((data, index)=> {return (<option key={index} style={{color:"black"}}>{data.label}</option>)} )}
-                        </AvField>
-                      </Col>
-                      <Col >
-                        <AvField name={`purchaseProduct[${index}].qty`}  label ="Qty" placeholder="Qty"
-                         value={purchaseProduct.qty? purchaseProduct.qty:''}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid qty number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-
-                      <Col >
-                        <AvField name={`purchaseProduct[${index}].weight`}  label ="Material Weight" placeholder="Material Weight"
-                         value={purchaseProduct.weight? purchaseProduct.weight:''}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid weight number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                        <Col >
-                        <AvField name={`purchaseProduct[${index}].rate`}  label ="Rate" placeholder="Rate"
-                        value={purchaseProduct.rate? purchaseProduct.rate:''}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid rate number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                      <Col md={2}>
-                        <AvField name="Amount"  label ="Amount" placeholder="Amount"
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid Amount`
-                            }
-                        }} 
-                        />
-                      </Col>
-                    </Row>
-                      </>
-                    )}
-                    <Col md={12} className="text-centre">
-                        <button type="button" className="btn btn-inverse-primary btn-rounded btn-rounded btn-icon" onClick={this.addMoreRow}>
-                          <i className="mdi mdi-plus-circle"></i>
-                        </button>
-                    </Col>
-                    {this.state.paymentList.map((data,index)=>
-                      <>
-                       <Row>
-                       <Col md={2}>
-                          <AvField type="select" name={`payment[${index}].payMode`} label="Select Pay" 
-                              //onClick={this.handlePyment}
-                              validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
-                              }
-                          }} >
-                        <option value=''>Choose pay</option>
-                        {paymentOption.map((data, index)=> {return (<option key={index} style={{color:"black"}}>{data.label}</option>)} )}
-                        </AvField>
-                      </Col>
-                      <Col md={2}>
-                        <AvField name={`payment[${index}].amount`}  label ="Enter amount" placeholder="0.00"
-                          //onKeyUp={e=> this.calculatePaidAmount(e, index)}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid amount number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                      </Row>
-                      </>
-                      )}
-                      <Col md={3} className="text-centre">
-                        <button type="button" className="btn btn-inverse-primary btn-rounded btn-rounded btn-icon" onClick={this.addMorePayment}>
-                          <i className="mdi mdi-plus-circle"></i>
-                        </button>
-                      </Col>
-                    <Row>
-                      <Col md={3}>
-                        <AvField name="totalWeight"  label ="Total Weight" placeholder="Total Weight"
-                         value={selectedCell && selectedCell.totalWeight?selectedCell.totalWeight:'0.00'}
-
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid Weight number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                       
-                      <Col md={3}>
-                        <AvField name="vehicleNumber"  label ="Vehical Detail" placeholder="Vehical Detail"
-                          //value={selectedCell && selectedCell.totalWeight?selectedCell.totalWeight:'0.00'}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            }
-                        }} 
-                        />
-                      </Col>
-                      <Col md={3}>
-                        <AvField name="totalAmount"  label ="Total Amount" placeholder="Total Amount"
-                        value={selectedCell && selectedCell.amount?selectedCell.amount:'0.00'}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid Amount number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                      {/* <Col md={3}>
-                          <AvField type="select" name="payMode" label="Select Pay" 
-                              validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
-                              }
-                          }} >
-                        <option value=''>Choose pay</option>
-                        {paymentList.map((data, index)=> {return (<option key={index} style={{color:"black"}}>{data.label}</option>)} )}
-                        </AvField>
-                      </Col> */}
-                    </Row>
-                    <Row>
-                        <div className="col-md-6 d-flex justify-content-end">
-                        <Button type="submit">Update</Button>
-                        </div>
-                        <div className="col-md-6">
-                        <Button variant="dark" 
-                        onClick={this.handleCloseEditModel}
-                         >Cancel</Button>
-                        </div>
-                    </Row>
-                  </AvForm>
-                </div>
-              </div>
-              </BlockUi>
-            </Modal.Body>
-          </Modal>
+        
           <Modal
             show={this.state.deletePurchaseModal}
             // size={"lg"}

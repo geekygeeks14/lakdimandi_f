@@ -33,11 +33,10 @@
     ]
   },
   {
-    "path": "/backup-data",
+    "path": "/cronJob-report",
     "roles": [
       "TOPADMIN",
-      "ADMIN",
-      "SUPER_ADMIN"
+      "ADMIN"
     ]
   },
   {

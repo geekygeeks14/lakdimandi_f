@@ -120,14 +120,13 @@
     "SUPER_ADMIN"
   ]
 },
-{ "path": "/backup-data",
-  "title": "Backup Data",
+{ "path": "/cronJob-report",
+  "title": "CronJob Report",
   "icon": "mdi mdi-crosshairs-gps menu-icon", 
-  "state": "backupDataCodeMenuOpen",
+  "state": "cronJobReportCodeMenuOpen",
   "role": [
     "TOPADMIN",
-    "ADMIN",
-    "SUPER_ADMIN"
+    "ADMIN"
   ]
 },
 { "path": "/roles",
