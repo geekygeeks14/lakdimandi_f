@@ -543,6 +543,7 @@ export class Purchase extends Component {
        handleClosePuchaseModel=()=>{
         this.setState({
           purchaseModal_basicInfo:false,
+          purchaseModal_image:false,
           loading:false,
           loading2:false,
           deletePurchaseModal:false,
