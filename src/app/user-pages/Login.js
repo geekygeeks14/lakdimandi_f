@@ -28,7 +28,7 @@ export class Login extends Component {
   }
   componentDidMount(){
     //eslint-disable-next-line no-unused-expressions
-    saveSecurityLogs(menuUrl, "Menu Log")
+    // saveSecurityLogs(menuUrl, "Menu Log")
     if(USER){
       const roleName= USER.userInfo.roleName
       if(roleName==='TOPADMIN')window.location.href="/dashboard"

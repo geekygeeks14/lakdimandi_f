@@ -4,7 +4,7 @@ import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import { SETTING } from "../app-config/cofiguration";
 import "react-toastify/dist/ReactToastify.css";
-import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { Button, Col, Form, Modal, Row,Card } from "react-bootstrap";
 import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import DatePicker from "react-datepicker";
@@ -567,6 +567,13 @@ export class Purchase extends Component {
         })
        }
 
+       imageToggle=(cell)=>{
+        this.setState({
+          selectedCell: cell,
+          purchaseModal_image:true
+        })
+       }
+
        editToggle=(cell)=>{
         this.setState({
           selectedCell: cell,
@@ -1051,12 +1058,12 @@ export class Purchase extends Component {
                       }>
                         <i className=" mdi mdi-delete mdi-18px"></i>
                     </a>
-                    {/* <a title='Edit' id={'edit'}
+                    <a title='Edit' id={'edit'}
                       className="mb-2 badge" 
-                        onClick={e=>this.editToggle(cell.original)
+                        onClick={e=>this.imageToggle(cell.original)
                       }>
-                        <i className=" mdi mdi-lead-pencil mdi-18px"></i>
-                    </a> */}
+                        <i className=" mdi mdi-file-image mdi-18px"></i>
+                    </a>
                 </Row>
             )
           }
@@ -1513,7 +1520,7 @@ export class Purchase extends Component {
             centered
           >
             <Modal.Header closeButton>
-              <Modal.Title>Purchase Details Enter</Modal.Title>
+              <Modal.Title>Purchaser Image Upload</Modal.Title>
             </Modal.Header>
             <Modal.Body>
             <BlockUi tag="div" blocking={this.state.loading2}  className="block-overlay-dark"  loader={<Spinner/>}>
@@ -1522,7 +1529,7 @@ export class Purchase extends Component {
                 <AvForm onValidSubmit={this.handleSubmit}>
                     <Row>
                       <Col>
-                          <label>Front Image </label>
+                          {/* <label>Front Image </label>
                           <div>
                             <input
                               type="file"
@@ -1535,10 +1542,19 @@ export class Purchase extends Component {
                             <button 
                             //onClick = {this.fileUpload}
                             >Upload</button>
-                          </div>
+                          </div> */}
+                      <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
+                            <Card.Body>
+                              {/* <Card.Title>Card Title</Card.Title> */}
+                              <Card.Title>
+                                <Button variant="success">Upload Front Image </Button>
+                              </Card.Title>
+                            <Card.Img variant="top" src="./blank_image.jpg"  width={50} height={100} />
+                            </Card.Body>
+                          </Card>
                      </Col>
                      <Col>
-                      <label>Back Image </label>
+                      {/* <label>Back Image </label>
                              <input
                                type="file"
                                className="form-control"
@@ -1546,12 +1562,81 @@ export class Purchase extends Component {
                                name="file"
                                onChange={this.handleInputChange}
                                required
-                             />
+                             /> */}
+                          <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
+                            <Card.Body>
+                              {/* <Card.Title>Card Title</Card.Title> */}
+                              <Card.Title>
+                                <Button variant="success">Upload Back Image </Button>
+                              </Card.Title>
+                            <Card.Img variant="top" src="./blank_image.jpg"  width={50} height={100} />
+                            </Card.Body>
+                          </Card>
+                     </Col>
+                     <Col>
+                      {/* <label>Back Image </label>
+                             <input
+                               type="file"
+                               className="form-control"
+                               multiple
+                               name="file"
+                               onChange={this.handleInputChange}
+                               required
+                             /> */}
+                          <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
+                            <Card.Body>
+                              {/* <Card.Title>Card Title</Card.Title> */}
+                              <Card.Title>
+                                <Button variant="success">Upload Left Image </Button>
+                              </Card.Title>
+                            <Card.Img variant="top" src="./blank_image.jpg"  width={50} height={100} />
+                            </Card.Body>
+                          </Card>
+                     </Col>
+                     <Col>
+                      {/* <label>Back Image </label>
+                             <input
+                               type="file"
+                               className="form-control"
+                               multiple
+                               name="file"
+                               onChange={this.handleInputChange}
+                               required
+                             /> */}
+                          <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
+                            <Card.Body>
+                              {/* <Card.Title>Card Title</Card.Title> */}
+                              <Card.Title>
+                                <Button variant="success">Upload Right Image </Button>
+                              </Card.Title>
+                            <Card.Img variant="top" src="./blank_image.jpg"  width={50} height={100}/>
+                            </Card.Body>
+                          </Card>
+                     </Col>
+                     <Col>
+                      {/* <label>Back Image </label>
+                             <input
+                               type="file"
+                               className="form-control"
+                               multiple
+                               name="file"
+                               onChange={this.handleInputChange}
+                               required
+                             /> */}
+                          <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
+                            <Card.Body>
+                              {/* <Card.Title>Card Title</Card.Title> */}
+                              <Card.Title>
+                                <Button variant="success">Upload Right Image </Button>
+                              </Card.Title>
+                            <Card.Img variant="top" src="./blank_image.jpg"  width={50} height={100}/>
+                            </Card.Body>
+                          </Card>
                      </Col>
                     </Row>
-                    <h3 className="text-dark d-flex justify-content-center">Product Details</h3>
+                    {/* <h3 className="text-dark d-flex justify-content-center">Product Details</h3> */}
         
-                    <Row>
+                    <Row className="mt-2">
                         <div className="col-md-6 d-flex justify-content-end">
                         <Button type="submit">Submit</Button>
                         </div>
