@@ -93,6 +93,11 @@ export class Purchase extends Component {
           loadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
           purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
         };
+        this.front_ref = React.createRef();
+        this.back_ref = React.createRef();
+        this.left_ref = React.createRef();
+        this.right_ref = React.createRef();
+        this.slip_ref = React.createRef();
       }
 
       componentDidMount() {
@@ -366,8 +371,10 @@ export class Purchase extends Component {
           this.setState({
             loading2:true
           })
+          const formData = new FormData();
+          let isformData= false
           const companyId= (USER && USER.userInfo.companyId)?USER.userInfo.companyId:USER._id
-          let payload={}
+          let payload
           if(this.state.purchaseModal_basicInfo){
              if(!this.state.newProductCode || (this.state.newProductCode && !this.state.newProductCode.value) ){
               toast.error(`Please select product code or enter product code`)
@@ -420,41 +427,44 @@ export class Purchase extends Component {
           if(this.state.purchaseModal_image && this.state.selectedDoc){
             const {purchaseImageUpload}= this.state.selectedDoc 
             if(purchaseImageUpload.vehicle_front_image_file){
-              toast.error("Please upload vehicle_front_image")
+              toast.error("Please upload vehicle front image")
               return 
             }
             if(purchaseImageUpload.vehicle_back_image_file){
-              toast.error("Please upload vehicle_front_image")
+              toast.error("Please upload vehicle front image")
               return 
             }
             if(purchaseImageUpload.vehicle_left_image_file){
-              toast.error("Please upload vehicle_front_image")
+              toast.error("Please upload vehicle front image")
               return 
             }
             if(purchaseImageUpload.vehicle_right_image_file){
-              toast.error("Please upload vehicle_front_image")
+              toast.error("Please upload vehicle front image")
               return 
             }
             if(purchaseImageUpload.kanta_slip_image_file){
-              toast.error("Please upload kanta_slip_image")
+              toast.error("Please upload kanta slip image")
               return 
             }
-            const compr_truck_front_image = await imageCompression(purchaseImageUpload.truck_front_image_file, imgOptions);
-            const formData = new FormData();
+            // const compr_truck_front_image = await imageCompression(purchaseImageUpload.truck_front_image_file, imgOptions);
+            // const compr_truck_back_image = await imageCompression(purchaseImageUpload.truck_back_image_file, imgOptions);
+            // const compr_truck_left_image = await imageCompression(purchaseImageUpload.truck_left_image_file, imgOptions);
+            // const compr_truck_right_image = await imageCompression(purchaseImageUpload.truck_right_image_file, imgOptions);
+            // const compr_kanta_slip_image = await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions);
+            
+            formData.append('id', this.state.selectedCell._id);
             formData.append('truck_front_image_name', purchaseImageUpload.truck_front_image_name)
-            formData.append('truck_front_image_file', compr_truck_front_image);
-            payload={
-              id: this.state.selectedCell._id,
-              purchaseImageUpload: {
-                vehicleImage:{
-                  front: '',
-                  back:'',
-                  left:'',
-                  right:'',
-                },
-                kantaSlipImage:''
-              },
-            }
+            formData.append('truck_front_image_file', await imageCompression(purchaseImageUpload.truck_front_image_file, imgOptions));
+            formData.append('truck_back_image_name', purchaseImageUpload.truck_back_image_name)
+            formData.append('truck_back_image_file', await imageCompression(purchaseImageUpload.truck_back_image_file, imgOptions));
+            formData.append('truck_left_image_name', purchaseImageUpload.truck_left_image_name)
+            formData.append('truck_left_image_file', await imageCompression(purchaseImageUpload.truck_left_image_file, imgOptions));
+            formData.append('truck_right_image_name', purchaseImageUpload.truck_right_image_name)
+            formData.append('truck_right_image_file', await imageCompression(purchaseImageUpload.truck_right_image_file, imgOptions));
+            formData.append('kanta_slip_image_name', purchaseImageUpload.kanta_slip_image_name)
+            formData.append('kanta_slip_image_file', await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions));
+            isformData= true
+            payload= formData
           }
           if(this.state.purchaseModal_product){
             const purchaseProduct=values.purchaseProduct.map(data=> {
@@ -832,8 +842,22 @@ export class Purchase extends Component {
           newProductCode:e
         })
       }
+      fileUploadAction = (name) =>{
+        console.log("namenamenamenamename", name)
+        this[`${name}_ref`].current.click()
+      }
+      fileUploadInputChange = (e) =>{
+        console.log("eeeeeeeeee", e.target.files[0])
+        console.log("eeeeeeeeee", e.target.value)
 
-  fileSelect = async (e, docUploadType) => {
+        this.setState({
+          fileUploadState:e.target.value,
+          selectedFile: e.target.files[0],
+          preview: URL.createObjectURL(e.target.files[0])
+        });
+      }
+  fileSelect =  docUploadType =>e  => {
+      console.log("docUploadTypedocUploadType", docUploadType)
       const uniqueNumber = `${new Date().getMilliseconds()}${Math.floor(Math.random() * 900000) + 100000}`;
       const selectedFile= e.target.files[0]
        if (selectedFile) {
@@ -848,10 +872,11 @@ export class Purchase extends Component {
                 purchaseImageUpload={
                   ...purchaseImageUpload,
                   [`${docUploadType}_name`]: fileName,
-                  [`${docUploadType}_file`]: selectedFile
+                  [`${docUploadType}_file`]: selectedFile,
+                  [`${docUploadType}_preview`]: URL.createObjectURL(selectedFile)
                 }
           
-              this.setState({purchaseImageUpload})
+              this.setState({purchaseImageUpload},()=> console.log("purchaseImageUploadpurchaseImageUpload", purchaseImageUpload))
             } else {
               this.setState({
                 loading2:false,
@@ -920,7 +945,7 @@ export class Purchase extends Component {
   }
 
   render() {
-    const {selectedCell, unLoadingDateTime, loadingDateTime}= this.state
+    const {selectedCell, unLoadingDateTime, loadingDateTime,purchaseImageUpload}= this.state
     const productColumn =[
       {
         Header: "Product Name",
@@ -1527,7 +1552,9 @@ export class Purchase extends Component {
             <BlockUi tag="div" blocking={this.state.loading2}  className="block-overlay-dark"  loader={<Spinner/>}>
             <div className="card">
                 <div className="card-body">
-                <AvForm onValidSubmit={this.handleSubmit}>
+                <AvForm 
+                //onValidSubmit={this.handleSubmit}
+                >
                     <Row>
                       <Col>
                           {/* <label>Front Image </label>
@@ -1537,20 +1564,28 @@ export class Purchase extends Component {
                               className="form-control"
                               multiple
                               id="document"
-                              onChange = {(e)=>this.fileSelect(e, 'truckFrontImage')}
+                              onChange = {this.fileSelect('truckFrontImage')}
                               required
+                              capture
                             />
-                            <button 
-                            //onClick = {this.fileUpload}
-                            >Upload</button>
                           </div> */}
+
+
                       <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
                             <Card.Body>
                               {/* <Card.Title>Card Title</Card.Title> */}
                               <Card.Title>
-                                <Button variant="success">Upload Front Image </Button>
+                                <input type="file" hidden ref={this.front_ref} 
+                                  //onChange={this.fileUploadInputChange}
+                                onChange={this.fileSelect('vehicle_front_image')}
+                                accept="image/*"
+                                capture
+                                 />  
+                                <Button variant="success"
+                                onClick={()=>this.fileUploadAction(`front`)}
+                                >Upload Front Image </Button>
                               </Card.Title>
-                            <Card.Img variant="top" src="./blank_image.jpg"  width={50} height={100} />
+                            <Card.Img variant="top" src={purchaseImageUpload.vehicle_front_image_preview? purchaseImageUpload.vehicle_front_image_preview:"./blank_image.jpg"}  width={50} height={100} />
                             </Card.Body>
                           </Card>
                      </Col>
@@ -1564,13 +1599,19 @@ export class Purchase extends Component {
                                onChange={this.handleInputChange}
                                required
                              /> */}
-                          <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
+                       <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
                             <Card.Body>
-                              {/* <Card.Title>Card Title</Card.Title> */}
                               <Card.Title>
-                                <Button variant="success">Upload Back Image </Button>
+                                <input type="file" hidden ref={this.back_ref} 
+                                onChange={this.fileSelect('vehicle_back_image')}
+                                accept="image/*"
+                                capture="user"
+                                 />  
+                                <Button variant="success"
+                                onClick={()=>this.fileUploadAction(`back`)}
+                                >Upload Front Image </Button>
                               </Card.Title>
-                            <Card.Img variant="top" src="./blank_image.jpg"  width={50} height={100} />
+                            <Card.Img variant="top" src={purchaseImageUpload.vehicle_back_image_preview? purchaseImageUpload.vehicle_back_image_preview:"./blank_image.jpg"}  width={50} height={100} />
                             </Card.Body>
                           </Card>
                      </Col>
@@ -1628,7 +1669,7 @@ export class Purchase extends Component {
                             <Card.Body>
                               {/* <Card.Title>Card Title</Card.Title> */}
                               <Card.Title>
-                                <Button variant="success">Upload Right Image </Button>
+                                <Button variant="success">Upload kanta slip </Button>
                               </Card.Title>
                             <Card.Img variant="top" src="./blank_image.jpg"  width={50} height={100}/>
                             </Card.Body>
