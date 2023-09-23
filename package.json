@@ -69,6 +69,7 @@
     "react-toastify": "^7.0.3",
     "react-treebeard": "^3.2.4",
     "react-trello": "^2.2.3",
+    "react-webcam": "^7.1.1",
     "sweetalert2-react": "^0.8.3"
   },
   "scripts": {

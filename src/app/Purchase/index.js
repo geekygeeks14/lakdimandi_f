@@ -13,6 +13,7 @@ import CreatableSelect from 'react-select/creatable';
 import 'react-block-ui/style.css';
 import { capitalize, convertMilliSecToHrMints, logoutFunc, saveSecurityLogs } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
+import Webcam from "react-webcam";
 import imageCompression from 'browser-image-compression';
 toast.configure();
 const mime = require('mime')
@@ -52,6 +53,10 @@ const imgOptions = {
 }
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
 const menuUrl = "purchase"
+const windowWidth = window.innerWidth;
+const windowHeight = window.innerHeight;
+console.log('width: ', windowWidth);
+console.log('height: ', windowHeight);
 export class Purchase extends Component {
     constructor(props) {
         super(props);
@@ -88,7 +93,15 @@ export class Purchase extends Component {
           loadingRowTime:0,
           grossWeight:0,
           tareWeight: 0,
+          imageSrc:null,
+          captureImage: false,
+          videoConstraints :{
+            //width: windowWidth -10,
+            //height: windowHeight,
+            facingMode: "user"
+          },
           purchaseImageUpload:{},
+          readyTocapture:false,
           unLoadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
           loadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
           purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
@@ -98,6 +111,7 @@ export class Purchase extends Component {
         this.left_ref = React.createRef();
         this.right_ref = React.createRef();
         this.slip_ref = React.createRef();
+        this.webcam_ref = React.createRef();
       }
 
       componentDidMount() {
@@ -107,6 +121,9 @@ export class Purchase extends Component {
         this.getAllReciever()
         this.getAllWorker()
         saveSecurityLogs(menuUrl, "Menu Log")
+      
+      
+     
       }
 
       async getAllPurchase(){
@@ -581,7 +598,8 @@ export class Purchase extends Component {
        imageToggle=(cell)=>{
         this.setState({
           selectedCell: cell,
-          purchaseModal_image:true
+          //purchaseModal_image:true
+          captureImage: true
         })
        }
 
@@ -943,9 +961,99 @@ export class Purchase extends Component {
       toast["error"]("Error while upload doc/photo. Please try again");
     }
   }
+    capture = (docType) => {
+    if(this.state[`readyTocapture${docType}`]){
+      const imageSrc = this[`${docType}_ref`].current.getScreenshot();
+      console.log("imageSrc", imageSrc)
+      this.setState({
+        [`imageSrc${docType}`]:imageSrc,
+        [`readyTocapture${docType}`]:false
+      })
+    }else{
+      if(docType && docType==='front'){
+        this.setState({
+          [`readyTocapture${docType}`]: true,
+          readyTocaptureback:false,
+          readyTocaptureleft:false,
+          readyTocaptureright:false,
+          readyTocapturerslip:false
+        })
+      }
+      if(docType && docType==='back'){
+        this.setState({
+          [`readyTocapture${docType}`]: true,
+          readyTocapturefront:false,
+          readyTocaptureleft:false,
+          readyTocaptureright:false,
+          readyTocapturerslip:false
+        })
+      }
+      if(docType && docType==='left'){
+        this.setState({
+          [`readyTocapture${docType}`]: true,
+          readyTocapturefront:false,
+          readyTocaptureback:false,
+          readyTocaptureright:false,
+          readyTocapturerslip:false
+        })
+      }
+      if(docType && docType==='right'){
+        this.setState({
+          [`readyTocapture${docType}`]: true,
+          readyTocapturefront:false,
+          readyTocaptureback:false,
+          readyTocaptureleft:false,
+          readyTocapturerslip:false
+        })
+      }
+      if(docType && docType==='slip'){
+        this.setState({
+          [`readyTocapture${docType}`]: true,
+          readyTocapturefront:false,
+          readyTocaptureback:false,
+          readyTocaptureleft:false,
+          readyTocapturerright:false
+        })
+      }
+      
+     
+    }
+ 
+   
+  };
+  hideCaptureImage=()=>{
+    this.setState({
+      captureImage: false
+    })
+  }
+  reTake=(docType)=>{
+    this.setState({
+      [`imageSrc${docType}`]:null,
+      [`readyTocapture${docType}`]: true
+    })
+  }
+  flipCamera=()=>{
+    let videoConstraints= this.state.videoConstraints
+    console.log("videoConstraints.facingMode", videoConstraints.facingMode)
+    if(videoConstraints.facingMode && videoConstraints.facingMode && videoConstraints.facingMode.exact){
+      videoConstraints={
+        ...videoConstraints,
+        facingMode:  "user"
+      }
+    }else{
+      videoConstraints={
+        ...videoConstraints,
+        facingMode:  { exact: "environment" }
+      }
+    }
+
+    this.setState({
+      videoConstraints
+    },()=> console.log("videoConstraints", videoConstraints))
+  }
 
   render() {
-    const {selectedCell, unLoadingDateTime, loadingDateTime,purchaseImageUpload}= this.state
+    const {selectedCell, unLoadingDateTime, loadingDateTime,purchaseImageUpload, videoConstraints}= this.state
     const productColumn =[
       {
         Header: "Product Name",
@@ -1084,7 +1192,7 @@ export class Purchase extends Component {
                       }>
                         <i className=" mdi mdi-delete mdi-18px"></i>
                     </a>
-                    <a title='Edit' id={'edit'}
+                    <a href="#/" title='Edit' id={'edit'}
                       className="mb-2 badge" 
                         onClick={e=>this.imageToggle(cell.original)
                       }>
@@ -1557,6 +1665,26 @@ export class Purchase extends Component {
                 >
                     <Row>
                       <Col>
+                        
+                            <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
+                              <Card.Body>
+                                {/* <Card.Title>Card Title</Card.Title> */}
+                                <Card.Title>
+                                  <Button variant="success" onClick={this.capture}>Capture Photo </Button>
+                                </Card.Title>
+                              <Card.Img variant="top" src={this.state.imageSrc?this.state.imageSrc:"./blank_image.jpg"}  width={50} height={100} />
+                              </Card.Body>
+                            </Card>
+                              <Webcam
+                                audio={false}
+                                ref={this.webcam_ref}
+                                screenshotFormat="image/jpeg"
+                                videoConstraints={videoConstraints}
+                                minScreenshotWidth={180}
+                                minScreenshotHeight={180}
+                              />
+                      </Col>
+                      <Col>
                           {/* <label>Front Image </label>
                           <div>
                             <input
@@ -1569,6 +1697,7 @@ export class Purchase extends Component {
                               capture
                             />
                           </div> */}
+              
 
 
                       <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
@@ -1609,7 +1738,7 @@ export class Purchase extends Component {
                                  />  
                                 <Button variant="success"
                                 onClick={()=>this.fileUploadAction(`back`)}
-                                >Upload Front Image </Button>
+                                >Upload Back Image </Button>
                               </Card.Title>
                             <Card.Img variant="top" src={purchaseImageUpload.vehicle_back_image_preview? purchaseImageUpload.vehicle_back_image_preview:"./blank_image.jpg"}  width={50} height={100} />
                             </Card.Body>
@@ -2119,6 +2248,51 @@ export class Purchase extends Component {
               </BlockUi>
             </Modal.Body>
           </Modal>
+
+      <Modal show={this.state.captureImage} onHide={this.hideCaptureImage}  size="xl">
+        <Modal.Header closeButton>Purchase Image </Modal.Header>
+        <Modal.Body>
+        {['front','back','left', 'right', 'slip'].map(docType=> <>
+        <Card>
+          <Card.Title>{docType!==`slip`? `Vehicle ${docType} Photo`: `Kanta ${docType} Photo`}</Card.Title> 
+          {!this.state[`imageSrc${docType}`] && this.state[`readyTocapture${docType}`]?
+            <Webcam 
+            audio={false}
+            ref={this[`${docType}_ref`]}
+            screenshotFormat="image/jpeg"
+            videoConstraints={videoConstraints}
+            // minScreenshotWidth={`100%`}
+            // minScreenshotHeight={`100%`}
+            />
+            :
+            <img  alt={docType} src={this.state[`imageSrc${docType}`]?this.state[`imageSrc${docType}`]:"./blank_image.jpg"} />
+          }
+            <Row>
+              <Col>
+                <div className="d-flex justify-content-center">
+                  <Button variant="success" onClick={()=>!this.state[`readyTocapture${docType}`] && this.state[`imageSrc${docType}`]?this.reTake(docType):this.capture(docType)}>
+                    {this.state[`imageSrc${docType}`]? `Retake` : this.state[`readyTocapture${docType}`] && !this.state[`imageSrc${docType}`]?`Capture`:`Click to take`} Photo 
+                    </Button>
+                </div>
+              </Col>
+              {/* {this.state[`readyTocapture${docType}`] &&
+              <Col>
+                <div className="d-flex justify-content-center">
+                  <Button variant="success" onClick={this.flipCamera}>Flip camera </Button>
+                </div>
+              </Col>
+              } */}
+            </Row>
+        </Card>
+        </>)}
+        
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={this.hideCaptureImage}>Close</Button>
+          <Button variant="primary"onClick={this.hideCaptureImage}>Upload</Button>
+        </Modal.Footer>
+      </Modal>
+
         </div>
     )
   }
