@@ -53,10 +53,6 @@ const imgOptions = {
 }
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
 const menuUrl = "purchase"
-const windowWidth = window.innerWidth;
-const windowHeight = window.innerHeight;
-console.log('width: ', windowWidth);
-console.log('height: ', windowHeight);
 export class Purchase extends Component {
     constructor(props) {
         super(props);
@@ -93,12 +89,21 @@ export class Purchase extends Component {
           loadingRowTime:0,
           grossWeight:0,
           tareWeight: 0,
-          imageSrc:null,
+          imageSrcfront:null,
+          imageSrcback:null,
+          imageSrcleft:null,
+          imageSrcright:null,
+          imageSrcslip:null,
           captureImage: false,
+          readyTocapturefront:false,
+          readyTocaptureback:false,
+          readyTocaptureleft:false,
+          readyTocaptureright:false,
+          readyTocaptureslip:false,   
           videoConstraints :{
-            //width: windowWidth -10,
-            //height: windowHeight,
-            facingMode: "user"
+            //width: 400,
+            //height: 400,
+            facingMode: { exact: "environment" }
           },
           purchaseImageUpload:{},
           readyTocapture:false,
@@ -384,7 +389,8 @@ export class Purchase extends Component {
         });
        }
 
-        handleSubmit = async(e, values)=>{
+      handleSubmit = async(e, values)=>{
+          console.log(" i calll")
           this.setState({
             loading2:true
           })
@@ -441,28 +447,48 @@ export class Purchase extends Component {
               productCode : this.state.newProductCode
             }
           }
-          if(this.state.purchaseModal_image && this.state.selectedDoc){
-            const {purchaseImageUpload}= this.state.selectedDoc 
-            if(purchaseImageUpload.vehicle_front_image_file){
+          if(this.state.captureImage ){
+            if(this.state.imageSrcfront){
               toast.error("Please upload vehicle front image")
               return 
             }
-            if(purchaseImageUpload.vehicle_back_image_file){
+            if(this.state.imageSrcback){
               toast.error("Please upload vehicle front image")
               return 
             }
-            if(purchaseImageUpload.vehicle_left_image_file){
+            if(this.state.imageSrcleft){
               toast.error("Please upload vehicle front image")
               return 
             }
-            if(purchaseImageUpload.vehicle_right_image_file){
+            if(this.state.imageSrcright){
               toast.error("Please upload vehicle front image")
               return 
             }
-            if(purchaseImageUpload.kanta_slip_image_file){
+            if(this.state.imageSrcslip){
               toast.error("Please upload kanta slip image")
               return 
             }
+            // const {purchaseImageUpload}= this.state.selectedDoc 
+            // if(purchaseImageUpload.vehicle_front_image_file){
+            //   toast.error("Please upload vehicle front image")
+            //   return 
+            // }
+            // if(purchaseImageUpload.vehicle_back_image_file){
+            //   toast.error("Please upload vehicle front image")
+            //   return 
+            // }
+            // if(purchaseImageUpload.vehicle_left_image_file){
+            //   toast.error("Please upload vehicle front image")
+            //   return 
+            // }
+            // if(purchaseImageUpload.vehicle_right_image_file){
+            //   toast.error("Please upload vehicle front image")
+            //   return 
+            // }
+            // if(purchaseImageUpload.kanta_slip_image_file){
+            //   toast.error("Please upload kanta slip image")
+            //   return 
+            // }
             // const compr_truck_front_image = await imageCompression(purchaseImageUpload.truck_front_image_file, imgOptions);
             // const compr_truck_back_image = await imageCompression(purchaseImageUpload.truck_back_image_file, imgOptions);
             // const compr_truck_left_image = await imageCompression(purchaseImageUpload.truck_left_image_file, imgOptions);
@@ -470,16 +496,26 @@ export class Purchase extends Component {
             // const compr_kanta_slip_image = await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions);
             
             formData.append('id', this.state.selectedCell._id);
-            formData.append('truck_front_image_name', purchaseImageUpload.truck_front_image_name)
-            formData.append('truck_front_image_file', await imageCompression(purchaseImageUpload.truck_front_image_file, imgOptions));
-            formData.append('truck_back_image_name', purchaseImageUpload.truck_back_image_name)
-            formData.append('truck_back_image_file', await imageCompression(purchaseImageUpload.truck_back_image_file, imgOptions));
-            formData.append('truck_left_image_name', purchaseImageUpload.truck_left_image_name)
-            formData.append('truck_left_image_file', await imageCompression(purchaseImageUpload.truck_left_image_file, imgOptions));
-            formData.append('truck_right_image_name', purchaseImageUpload.truck_right_image_name)
-            formData.append('truck_right_image_file', await imageCompression(purchaseImageUpload.truck_right_image_file, imgOptions));
-            formData.append('kanta_slip_image_name', purchaseImageUpload.kanta_slip_image_name)
-            formData.append('kanta_slip_image_file', await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions));
+            // formData.append('vehicle_front_image_name', purchaseImageUpload.vehicle_front_image_name)
+            // formData.append('vehicle_front_image_file', await imageCompression(purchaseImageUpload.vehicle_front_image_file, imgOptions));
+            // formData.append('vehicle_back_image_name', purchaseImageUpload.vehicle_back_image_name)
+            // formData.append('vehicle_back_image_file', await imageCompression(purchaseImageUpload.vehicle_back_image_file, imgOptions));
+            // formData.append('vehicle_left_image_name', purchaseImageUpload.vehicle_left_image_name)
+            // formData.append('vehicle_left_image_file', await imageCompression(purchaseImageUpload.vehicle_left_image_file, imgOptions));
+            // formData.append('vehicle_right_image_name', purchaseImageUpload.vehicle_right_image_name)
+            // formData.append('vehicle_right_image_file', await imageCompression(purchaseImageUpload.vehicle_right_image_file, imgOptions));
+            // formData.append('kanta_slip_image_name', purchaseImageUpload.kanta_slip_image_name)
+            // formData.append('kanta_slip_image_file', await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions));
+            formData.append('vehicle_front_image_name', this.genFileName(`vehicle_front_image`))
+            formData.append('vehicle_front_image_file', this.state.imageSrcfront);
+            formData.append('vehicle_back_image_name', this.genFileName(`vehicle_back_image`))
+            formData.append('vehicle_back_image_file', this.state.imageSrcback);
+            formData.append('vehicle_left_image_name', this.genFileName(`vehicle_left_image`))
+            formData.append('vehicle_left_image_file', this.state.imageSrcleft);
+            formData.append('vehicle_right_image_name', this.genFileName(`vehicle_right_image`))
+            formData.append('vehicle_right_image_file', this.state.imageSrcright);
+            formData.append('kanta_slip_image_name', this.genFileName(`kanta_slip_image`))
+            formData.append('kanta_slip_image_file',this.state.imageSrcslip);
             isformData= true
             payload= formData
           }
@@ -523,6 +559,128 @@ export class Purchase extends Component {
           });
       }
 
+      handleSubmitImage = async()=>{
+        const {selectedCell} = this.state
+        console.log("ggggggggggggggggggggggggggggg")
+        function dataURLtoFile(dataurl, filename) {
+          var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+          while(n--){
+              u8arr[n] = bstr.charCodeAt(n);
+          }
+          return new File([u8arr], filename, {type:mime});
+        }
+     
+        let formData = new FormData();
+    
+        if(this.state.captureImage ){
+          console.log("22222222222222222222222222222")
+          if(!this.state.imageSrcfront){
+            console.log("3333333333333333333")
+            toast.error("Please upload vehicle front image")
+            return 
+          }
+          if(!this.state.imageSrcback){
+            toast.error("Please upload vehicle back image")
+            return 
+          }
+          if(!this.state.imageSrcleft){
+            toast.error("Please upload vehicle left image")
+            return 
+          }
+          if(!this.state.imageSrcright){
+            toast.error("Please upload vehicle right image")
+            return 
+          }
+          if(!this.state.imageSrcslip){
+            toast.error("Please upload kanta slip image")
+            return 
+          }
+          // this.setState({
+          //   loading2:true
+          // })
+          // const {purchaseImageUpload}= this.state.selectedDoc 
+          // if(purchaseImageUpload.vehicle_front_image_file){
+          //   toast.error("Please upload vehicle front image")
+          //   return 
+          // }
+          // if(purchaseImageUpload.vehicle_back_image_file){
+          //   toast.error("Please upload vehicle front image")
+          //   return 
+          // }
+          // if(purchaseImageUpload.vehicle_left_image_file){
+          //   toast.error("Please upload vehicle front image")
+          //   return 
+          // }
+          // if(purchaseImageUpload.vehicle_right_image_file){
+          //   toast.error("Please upload vehicle front image")
+          //   return 
+          // }
+          // if(purchaseImageUpload.kanta_slip_image_file){
+          //   toast.error("Please upload kanta slip image")
+          //   return 
+          // }
+          // const compr_truck_front_image = await imageCompression(purchaseImageUpload.truck_front_image_file, imgOptions);
+          // const compr_truck_back_image = await imageCompression(purchaseImageUpload.truck_back_image_file, imgOptions);
+          // const compr_truck_left_image = await imageCompression(purchaseImageUpload.truck_left_image_file, imgOptions);
+          // const compr_truck_right_image = await imageCompression(purchaseImageUpload.truck_right_image_file, imgOptions);
+          // const compr_kanta_slip_image = await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions);
+          
+          formData.append('id', this.state.selectedCell._id);
+          // formData.append('vehicle_front_image_name', purchaseImageUpload.vehicle_front_image_name)
+          // formData.append('vehicle_front_image_file', await imageCompression(purchaseImageUpload.vehicle_front_image_file, imgOptions));
+          // formData.append('vehicle_back_image_name', purchaseImageUpload.vehicle_back_image_name)
+          // formData.append('vehicle_back_image_file', await imageCompression(purchaseImageUpload.vehicle_back_image_file, imgOptions));
+          // formData.append('vehicle_left_image_name', purchaseImageUpload.vehicle_left_image_name)
+          // formData.append('vehicle_left_image_file', await imageCompression(purchaseImageUpload.vehicle_left_image_file, imgOptions));
+          // formData.append('vehicle_right_image_name', purchaseImageUpload.vehicle_right_image_name)
+          // formData.append('vehicle_right_image_file', await imageCompression(purchaseImageUpload.vehicle_right_image_file, imgOptions));
+          // formData.append('kanta_slip_image_name', purchaseImageUpload.kanta_slip_image_name)
+          // formData.append('kanta_slip_image_file', await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions));
+          const front_name =  this.genFileName(`vehicle_front_image`)
+          const back_name =  this.genFileName(`vehicle_front_image`)
+          const left_name =  this.genFileName(`vehicle_front_image`)
+          const right_name =  this.genFileName(`vehicle_front_image`)
+          const slip_name =  this.genFileName(`vehicle_front_image`)
+          formData.append('vehicle_front_image_name',front_name)
+          formData.append('vehicle_front_image_file',dataURLtoFile(this.state.imageSrcfront, front_name));
+          formData.append('vehicle_back_image_name', back_name)
+          formData.append('vehicle_back_image_file', dataURLtoFile(this.state.imageSrcback, back_name));
+          formData.append('vehicle_left_image_name', left_name)
+          formData.append('vehicle_left_image_file', dataURLtoFile(this.state.imageSrcleft, left_name));
+          formData.append('vehicle_right_image_name', right_name)
+          formData.append('vehicle_right_image_file', dataURLtoFile(this.state.imageSrcright, right_name));
+          formData.append('kanta_slip_image_name', slip_name)
+          formData.append('kanta_slip_image_file', dataURLtoFile(this.state.imageSrcslip, slip_name));
+        }
+
+        console.log("formDataformData", formData)
+        
+
+        let options = SETTING.HEADER_PARAMETERS;
+        options['Authorization'] = localStorage.getItem("token")
+        //options['Content-Type']= 'multipart/form-data'
+        await Axios.post(SETTING.APP_CONSTANT.API_URL+`admin/updatePurchase`,formData,{headers: options})
+        .then((res) => {
+          if (res && res.data.success) {
+            toast["success"](res.data.message);
+            //saveSecurityLogs(menuUrl, "update")
+          } else {
+            toast["error"](res.data.message);
+          } 
+          this.handleClose()
+        })
+        .catch((err) =>{
+          //this.handleClose()
+          if(err && err.success===false  ){
+            toast["error"](err.message? err.message: 'Error while submitting purchase data.');
+          }else{
+            logoutFunc(err)
+            //saveSecurityLogs(menuUrl, "Logout",err)
+          }
+        });
+    }
+
       addMoreRow=()=>{
         const newRow=[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
 
@@ -550,6 +708,17 @@ export class Purchase extends Component {
             unLoadingWorkerList:[{workerId:''}],
             loadingWorkerList:[{workerId:''}],
             paymentList:[{}],
+            captureImage:false,
+            imageSrcfront:null,
+            imageSrcback: null,
+            imageSrcleft: null,
+            imageSrcright: null,
+            imageSrcslip: null,
+            readyTocapturefront:false,
+            readyTocaptureback:false,
+            readyTocaptureleft:false,
+            readyTocaptureright:false,
+            readyTocaptureslip:false,   
             purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
         },()=> this.getAllPurchase())
        }
@@ -874,9 +1043,17 @@ export class Purchase extends Component {
           preview: URL.createObjectURL(e.target.files[0])
         });
       }
+   genUniqueNumber=()=>{
+    return `${new Date().getMilliseconds()}${Math.floor(Math.random() * 900000) + 100000}`;
+   }
+   genFileName=(docType, docExtension=`jpeg`)=>{
+    const uniqueNumber = `${new Date().getMilliseconds()}${Math.floor(Math.random() * 900000) + 100000}`;
+    return  uniqueNumber + '_'+ docType + '.' + docExtension;
+   }
+
   fileSelect =  docUploadType =>e  => {
       console.log("docUploadTypedocUploadType", docUploadType)
-      const uniqueNumber = `${new Date().getMilliseconds()}${Math.floor(Math.random() * 900000) + 100000}`;
+      const uniqueNumber = this.genUniqueNumber()
       const selectedFile= e.target.files[0]
        if (selectedFile) {
             const doc = selectedFile
@@ -961,10 +1138,9 @@ export class Purchase extends Component {
       toast["error"]("Error while upload doc/photo. Please try again");
     }
   }
-    capture = (docType) => {
+  capture = (docType) => {
     if(this.state[`readyTocapture${docType}`]){
       const imageSrc = this[`${docType}_ref`].current.getScreenshot();
-      console.log("imageSrc", imageSrc)
       this.setState({
         [`imageSrc${docType}`]:imageSrc,
         [`readyTocapture${docType}`]:false
@@ -1015,15 +1191,21 @@ export class Purchase extends Component {
           readyTocapturerright:false
         })
       }
-      
-     
     }
- 
-   
   };
   hideCaptureImage=()=>{
     this.setState({
-      captureImage: false
+      captureImage: false,
+      imageSrcfront:null,
+      imageSrcback: null,
+      imageSrcleft: null,
+      imageSrcright:null,
+      imageSrcslip: null,
+      readyTocapturefront:false,
+      readyTocaptureback:false,
+      readyTocaptureleft:false,
+      readyTocaptureright:false,
+      readyTocaptureslip:false    
     })
   }
   reTake=(docType)=>{
@@ -1034,7 +1216,6 @@ export class Purchase extends Component {
   }
   flipCamera=()=>{
     let videoConstraints= this.state.videoConstraints
-    console.log("videoConstraints.facingMode", videoConstraints.facingMode)
     if(videoConstraints.facingMode && videoConstraints.facingMode && videoConstraints.facingMode.exact){
       videoConstraints={
         ...videoConstraints,
@@ -1046,10 +1227,9 @@ export class Purchase extends Component {
         facingMode:  { exact: "environment" }
       }
     }
-
     this.setState({
       videoConstraints
-    },()=> console.log("videoConstraints", videoConstraints))
+    })
   }
 
   render() {
@@ -2251,6 +2431,7 @@ export class Purchase extends Component {
 
       <Modal show={this.state.captureImage} onHide={this.hideCaptureImage}  size="xl">
         <Modal.Header closeButton>Purchase Image </Modal.Header>
+        <BlockUi tag="div" blocking={this.state.loading2}  className="block-overlay-dark"  loader={<Spinner/>}>
         <Modal.Body>
         {['front','back','left', 'right', 'slip'].map(docType=> <>
         <Card>
@@ -2265,7 +2446,11 @@ export class Purchase extends Component {
             // minScreenshotHeight={`100%`}
             />
             :
-            <img  alt={docType} src={this.state[`imageSrc${docType}`]?this.state[`imageSrc${docType}`]:"./blank_image.jpg"} />
+            <img  alt={docType} src={this.state[`imageSrc${docType}`]?this.state[`imageSrc${docType}`]
+            :(selectedCell.vehicleImage && selectedCell.vehicleImage[docType])? `https://res.cloudinary.com/dx7oism2m/image/upload/v1695562573/${selectedCell.vehicleImage[docType]}.jpg`
+            :selectedCell.kantaSlipImage? `https://res.cloudinary.com/dx7oism2m/image/upload/v1695562573/${selectedCell.kantaSlipImage}.jpg`
+            : "./blank_image.jpg"}
+             />
           }
             <Row>
               <Col>
@@ -2275,22 +2460,22 @@ export class Purchase extends Component {
                     </Button>
                 </div>
               </Col>
-              {/* {this.state[`readyTocapture${docType}`] &&
-              <Col>
-                <div className="d-flex justify-content-center">
-                  <Button variant="success" onClick={this.flipCamera}>Flip camera </Button>
-                </div>
-              </Col>
-              } */}
+              {this.state[`readyTocapture${docType}`] &&
+                <Col>
+                  <div className="d-flex justify-content-center">
+                    <Button variant="success" onClick={this.flipCamera}>Flip camera </Button>
+                  </div>
+                </Col>
+              }
             </Row>
         </Card>
         </>)}
-        
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={this.hideCaptureImage}>Close</Button>
-          <Button variant="primary"onClick={this.hideCaptureImage}>Upload</Button>
+          <Button variant="primary"onClick={this.handleSubmitImage}>Upload</Button>
         </Modal.Footer>
+        </BlockUi>
       </Modal>
 
         </div>
