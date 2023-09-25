@@ -15,7 +15,7 @@ import SideMenuList from "../app-config/menu.json"
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl = "register"
+const menuUrl = window.location.href
 export class Index extends Component {
     constructor(props) {
         super(props);

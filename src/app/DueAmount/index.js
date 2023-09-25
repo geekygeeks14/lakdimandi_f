@@ -15,7 +15,7 @@ import { AvField, AvForm } from "availity-reactstrap-validation";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl ="due-amount"
+const menuUrl =window.location.href
 const ROLE = (USER && USER.userInfo.roleName)?USER.userInfo.roleName:''
 const paymentOption =[
   {value:'Cash',label:'Cash'},

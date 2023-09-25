@@ -16,7 +16,7 @@ toast.configure();
 
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl = "productCode"
+const menuUrl = window.location.href
 
 export class ProductCode extends Component {
     constructor(props) {

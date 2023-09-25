@@ -52,7 +52,7 @@ const imgOptions = {
   fileType: 'image/png',             // optional, fileType override e.g., 'image/jpeg', 'image/png' (default: file.type)
 }
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl = "purchase"
+const menuUrl = window.location.href
 export class Purchase extends Component {
     constructor(props) {
         super(props);
@@ -740,6 +740,7 @@ export class Purchase extends Component {
         this.setState({
           purchaseModal_basicInfo:false,
           purchaseModal_image:false,
+          purchaseModal_product:false,
           loading:false,
           loading2:false,
           deletePurchaseModal:false,
@@ -770,6 +771,13 @@ export class Purchase extends Component {
           //purchaseModal_image:true
           captureImage: true
         })
+       }
+
+       productToggle=(cell)=>{
+          this.setState({
+            selectedCell: cell,
+            purchaseModal_product:true
+          })
        }
 
        editToggle=(cell)=>{
@@ -1372,11 +1380,17 @@ export class Purchase extends Component {
                       }>
                         <i className=" mdi mdi-delete mdi-18px"></i>
                     </a>
-                    <a href="#/" title='Edit' id={'edit'}
+                    <a href="#/" title='Edit' id={'image'}
                       className="mb-2 badge" 
                         onClick={e=>this.imageToggle(cell.original)
                       }>
                         <i className=" mdi mdi-file-image mdi-18px"></i>
+                    </a>
+                    <a href="#/" title='Product' id={'product'}
+                      className="mb-2 badge" 
+                        onClick={e=>this.productToggle(cell.original)
+                      }>
+                        <i className="mdi mdi-glass-stange mdi-18px"></i>
                     </a>
                 </Row>
             )
@@ -2019,7 +2033,7 @@ export class Purchase extends Component {
                 <div className="card-body">
                 <AvForm onValidSubmit={this.handleSubmit}>
                      
-                    <h3 className="text-dark d-flex justify-content-center">Product Details</h3>
+                    <h3 className="text-dark d-flex justify-content-center p-3">Product Details</h3>
                     {/* <Col>
                       <AvField name="productCode" label="Product Code" placeholder="Product Code" 
                         value={this.state.newProductCode}
@@ -2035,7 +2049,8 @@ export class Purchase extends Component {
                       <>
                       <Row >
                         <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
-                        <AvField type='select' name= {`purchaseProduct[${numIndex}].productNameId`}
+                          <lebel className="p-2">Select Product Name</lebel>
+                        <AvField type='select' name= {`purchaseProduct[${numIndex}].productNameId`} className="mt-1"
                           validate={{
                             required: {
                                 value: true,
@@ -2048,17 +2063,6 @@ export class Purchase extends Component {
                         <option key={'new_create'} value={'new_create'}> New Product Create</option>
                         </AvField>  
                       </Col>
-                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}} >
-                      <label>Select Image </label>
-                          <input
-                            type="file"
-                            className="form-control"
-                            multiple
-                            name="file"
-                            onChange={this.handleInputChange}
-                            required
-                          />
-                     </Col>
                       {/* <Col style={{paddingLeft:'3px',paddingRight:'3px'}} >
                         <AvField name={`purchaseProduct[${index}].productImage`}  label ="Product Image" placeholder="Product Image"
                           validate={{
@@ -2084,11 +2088,7 @@ export class Purchase extends Component {
                             required: {
                                 value: true,
                                 errorMessage: 'This field is required.'
-                            }, 
-                            // pattern: {
-                            //   value:/^[0-9]+.+$/,
-                            //   errorMessage: `Invalid length number.`
-                            // }
+                            },
                         }} 
                         />
                       </Col>
@@ -2175,6 +2175,48 @@ export class Purchase extends Component {
                               }
                           }} />
                       </Col>
+                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}} >
+                      {/* <label>Select Image </label>
+                          <input
+                            type="file"
+                            className="form-control"
+                            multiple
+                            name="file"
+                            onChange={this.handleInputChange}
+                            required
+                          /> */}
+
+
+          <Card>
+          <Card.Title>Select Product Image</Card.Title> 
+            {/* <Webcam 
+            audio={false}
+            // ref={this[`${docType}_ref`]}
+            screenshotFormat="image/jpeg"
+            videoConstraints={videoConstraints}
+            // minScreenshotWidth={`100%`}
+            // minScreenshotHeight={`100%`}
+            />
+            : */}
+            <img  alt="image" src="./blank_image.jpg" width={100} height={100}/>
+            {/* <Row>
+              <Col>
+                <div className="d-flex justify-content-center">
+                  <Button variant="success">
+                    Photo 
+                    </Button>
+                </div>
+              </Col>
+              {this.state[`readyTocapture${docType}`] &&
+                <Col>
+                  <div className="d-flex justify-content-center">
+                    <Button variant="success" onClick={this.flipCamera}>Flip camera </Button>
+                  </div>
+                </Col>
+              }
+            </Row> */}
+        </Card>
+                     </Col>
                       <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}} >
                           <Form.Group>
                             <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
@@ -2229,7 +2271,7 @@ export class Purchase extends Component {
                       </Col>
                   
                     </Row>
-                    <Row>
+                    <Row className="mt-3">
                         <div className="col-md-6 d-flex justify-content-end">
                         <Button type="submit">Submit</Button>
                         </div>

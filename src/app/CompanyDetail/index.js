@@ -14,7 +14,7 @@ import { capitalize, logoutFunc,saveSecurityLogs} from "../util/helper";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl ="company"
+const menuUrl =window.location.href
 
 class CompanyDetail extends Component {
     constructor(props) {

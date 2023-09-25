@@ -14,7 +14,7 @@ import { encryptAES, saveSecurityLogs } from "../util/helper";
 
 toast.configure();
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl = 'login'
+const menuUrl = window.location.href
 export class Login extends Component {
   
   constructor(props) {

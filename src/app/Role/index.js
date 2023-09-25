@@ -14,7 +14,7 @@ import { capitalize, logoutFunc,saveSecurityLogs } from "../util/helper";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl = "roles";
+const menuUrl = window.location.href
 
 export class Role extends Component {
   constructor(props) {

@@ -13,7 +13,7 @@ import { logoutFunc,saveSecurityLogs} from "../util/helper";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl ="profile"
+const menuUrl =window.location.href
 
 export class Profile extends Component {
 

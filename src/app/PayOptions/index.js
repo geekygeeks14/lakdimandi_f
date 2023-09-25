@@ -15,7 +15,7 @@ import { AvField, AvForm, AvRadio, AvRadioGroup } from "availity-reactstrap-vali
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl ="pay-option"
+const menuUrl =window.location.href
 const ROLE = (USER && USER.userInfo.roleName)?USER.userInfo.roleName:''
 const payOptionOption =[
   {value:'Cash',label:'Cash'},

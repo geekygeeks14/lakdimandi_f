@@ -31,7 +31,7 @@ const unitOption =[
 ]
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
 const ROLE = (USER && USER.userInfo.roleName)?USER.userInfo.roleName:''
-const menuUrl = 'sell'
+const menuUrl = window.location.href
 let flWtValue=null //fluctualateWeightValue
 export class Sell extends Component {
     constructor(props) {
@@ -71,6 +71,7 @@ export class Sell extends Component {
           selectedCompnay:'All',
           sizeRequired:true,
           allPayOptions:[],
+          selectedPhone:'',
           showSellHistoryModal:false,
           sellProductList:[{productNameId:'',productCodeId:'', length:'',breadth:'',height:'',weight:'', weighted:'',unit:'',qty:'', rate:''}]
      
@@ -97,6 +98,7 @@ export class Sell extends Component {
         url.searchParams.set('length', this.state.selectedLength)
         url.searchParams.set('breadth', this.state.selectedBreadth)
         url.searchParams.set('height', this.state.selectedHeight)
+        url.searchParams.set('phone', this.state.selectedPhone)
         if(this.state.selectedCompnay && ROLE && ROLE==='SUPER_ADMIN'){
           url.searchParams.set('companyId', this.state.selectedCompnay)
         }
@@ -839,6 +841,12 @@ editToggle=(cell)=>{
   },()=>this.getAllSell())
  }
 
+ filterByPhoneNumber=(e)=>{
+    this.setState({
+      selectedPhone:e.target.value
+    },()=>this.getAllSell())
+ }
+
  clearFilter=()=>{
    this.setState({
     selectedProductNameId:'',
@@ -847,6 +855,7 @@ editToggle=(cell)=>{
     selectedLength:'',
     selectedBreadth:'',
     selectedHeight:'',
+    selectedPhone:'',
     text:'',
     suggestions:[],
     selectedPurchaser:{}
@@ -1177,6 +1186,8 @@ editToggle=(cell)=>{
                     </Form.Group>
                   </Col>
                   }
+                  </Row>
+                  <Row>
                   <Col md={2}>
                     <Form.Group>
                       <label htmlFor="exampleFormControlSelect3">Product Name</label>
@@ -1202,7 +1213,7 @@ editToggle=(cell)=>{
                       </select>
                     </Form.Group>
                   </Col> 
-                  <Col md={2}>
+                  <Col md={1}>
                     <Form.Group>
                       <label htmlFor="exampleFormControlSelect3">Length</label>
                         <input className="form-control form-control-sm" id="exampleForm"
@@ -1212,7 +1223,7 @@ editToggle=(cell)=>{
                       </input>
                     </Form.Group>
                   </Col>  
-                  <Col md={2}>
+                  <Col md={1}>
                     <Form.Group>
                       <label htmlFor="exampleFormControlSelect3">Breadth</label>
                         <input className="form-control form-control-sm" id="exampleForm"
@@ -1222,12 +1233,23 @@ editToggle=(cell)=>{
                       </input>
                     </Form.Group>
                   </Col> 
-                  <Col md={2}>
+                  <Col md={1}>
                     <Form.Group>
                       <label htmlFor="exampleFormControlSelect3">Height</label>
                         <input className="form-control form-control-sm" id="exampleForm"
                          value={this.state.selectedHeight? this.state.selectedHeight:''}
                          onChange={this.filterByHeight}
+                      >
+                      </input>
+                    </Form.Group>
+                  </Col> 
+                  <Col md={2}>
+                    <Form.Group>
+                      <label htmlFor="exampleFormControlSelect3">Phone Number</label>
+                        <input className="form-control form-control-sm" id="exampleForm"
+                        placeholder="Enter phone number"
+                         value={this.state.selectedPhone? this.state.selectedPhone:''}
+                         onChange={this.filterByPhoneNumber}
                       >
                       </input>
                     </Form.Group>

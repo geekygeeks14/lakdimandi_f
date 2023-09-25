@@ -17,7 +17,7 @@ import { Link } from "react-router-dom/cjs/react-router-dom";
 toast.configure();
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-const menuUrl="weight"
+const menuUrl=window.location.href
 
 export class FluctuationWeight extends Component {
     constructor(props) {
