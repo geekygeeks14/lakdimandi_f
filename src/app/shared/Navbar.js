@@ -5,9 +5,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Axios from "axios";
 import { SETTING } from "../app-config/cofiguration";
+import { saveSecurityLogs } from "../util/helper";
 toast.configure();
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
-
+const menuUrl =window.location.href
 class Navbar extends Component {
 
   constructor(props) {
@@ -35,6 +36,8 @@ class Navbar extends Component {
       .then((res) => {
 
         if (res && res.data.success) {
+
+          saveSecurityLogs(menuUrl,"Logout")
           localStorage.clear();
           toast["success"]("Logged out successfully.");
           setTimeout(()=>{

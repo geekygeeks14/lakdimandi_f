@@ -64,7 +64,7 @@ export class ProductName extends Component {
             saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl,"Logout",err)
+            saveSecurityLogs(menuUrl,"Logout")
           }
         });
        }
@@ -107,7 +107,7 @@ export class ProductName extends Component {
             saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl,"Logout",err)
+            saveSecurityLogs(menuUrl,"Logout")
           }
           this.handleClose()
         });
@@ -175,7 +175,7 @@ export class ProductName extends Component {
           this.handleClose()
           toast["error"]("Error while deleting product Name.");
           logoutFunc(err)
-          saveSecurityLogs(menuUrl,"Logout",err)
+          saveSecurityLogs(menuUrl,"Logout")
         });
        }
      

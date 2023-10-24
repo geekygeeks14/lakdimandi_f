@@ -67,7 +67,7 @@ export class FluctuationWeight extends Component {
             saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl,"Logout",err)
+            saveSecurityLogs(menuUrl,"Logout")
           }
         });
        }
@@ -115,7 +115,7 @@ export class FluctuationWeight extends Component {
             saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl,"Logout",err)
+            saveSecurityLogs(menuUrl,"Logout")
           }
         });
        }

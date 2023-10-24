@@ -366,7 +366,11 @@ export class TopDashboard extends Component {
                   <i className="mdi mdi-bookmark-outline mdi-24px float-right"></i>
                 </h4>
                 <h2 className="mb-5">{dashboardData.todayPaid?<>&#x20B9; {parseFloat(dashboardData.todayPaid).toFixed(2)}</>:'loading...'}</h2>
-                <h6 className="card-text">....</h6>
+                {dashboardData.paidDetail && dashboardData.paidDetail.length>0 &&
+                    dashboardData.paidDetail.map(data=>{
+                       return <h6 className="card-text">{data.key}: {data.value}</h6>
+                    })
+                }
               </div>
             </div>
           </div>

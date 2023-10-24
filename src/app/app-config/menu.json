@@ -22,6 +22,16 @@
       "ACCOUNTANT"
     ]
   },
+  { "path": "/inventory",
+    "title": "Inventory",
+    "icon": "mdi mdi-car-door-lock menu-icon", 
+    "state": "inventoryMenuOpen",
+    "role": [
+      "TOPADMIN",
+      "ADMIN",
+      "ACCOUNTANT"
+    ]
+},
   { "path": "/weight",
     "title": "Fluctuation Weight",
     "icon": "mdi mdi-crosshairs-gps menu-icon", 

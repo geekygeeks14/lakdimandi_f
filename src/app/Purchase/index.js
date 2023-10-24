@@ -11,12 +11,13 @@ import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import CreatableSelect from 'react-select/creatable';
 import 'react-block-ui/style.css';
-import { capitalize, convertMilliSecToHrMints, logoutFunc, saveSecurityLogs } from "../util/helper";
+import { capitalize, convertMilliSecToHrMints, generateRandomID, logoutFunc, saveSecurityLogs } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 import Webcam from "react-webcam";
 import imageCompression from 'browser-image-compression';
 toast.configure();
 const mime = require('mime')
+const IMAGE_BASE_URL = process.env.REACT_APP_IMAGE_BASE_URL
 
 
 const paymentOption =[
@@ -60,6 +61,7 @@ export class Purchase extends Component {
           cmpName:'',
           cmpAdd:'',
           newProductCode:{},
+          selectedProductCode:{},
           allPurchase: [],
           productData:[],
           loading:false,
@@ -68,8 +70,10 @@ export class Purchase extends Component {
           purchaseModal_product:false,
           loading2:false,
           deletePurchaseModal: false,
+          purchaseProductDeleteModalShow:false,
           showProductModal:false,
           selectedCell:{},
+          selectedProductCell:{},
           loading3:false,
           purchaseEditModal:false,
           loading4:false,
@@ -240,7 +244,7 @@ export class Purchase extends Component {
             saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl, "Logout",err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
        }
@@ -274,7 +278,7 @@ export class Purchase extends Component {
             saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl, "Logout",err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
        }
@@ -307,7 +311,7 @@ export class Purchase extends Component {
             saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl, "Logout",err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
       }
@@ -348,7 +352,7 @@ export class Purchase extends Component {
             saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl, "Logout",err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
        }
@@ -384,20 +388,18 @@ export class Purchase extends Component {
             saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl, "Logout",err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
        }
 
       handleSubmit = async(e, values)=>{
-          console.log(" i calll")
           this.setState({
             loading2:true
           })
-          const formData = new FormData();
-          let isformData= false
           const companyId= (USER && USER.userInfo.companyId)?USER.userInfo.companyId:USER._id
-          let payload
+          let payload={}
+          let url= 'admin/submitPurchaseData'
           if(this.state.purchaseModal_basicInfo){
              if(!this.state.newProductCode || (this.state.newProductCode && !this.state.newProductCode.value) ){
               toast.error(`Please select product code or enter product code`)
@@ -447,84 +449,15 @@ export class Purchase extends Component {
               productCode : this.state.newProductCode
             }
           }
-          if(this.state.captureImage ){
-            if(this.state.imageSrcfront){
-              toast.error("Please upload vehicle front image")
-              return 
-            }
-            if(this.state.imageSrcback){
-              toast.error("Please upload vehicle front image")
-              return 
-            }
-            if(this.state.imageSrcleft){
-              toast.error("Please upload vehicle front image")
-              return 
-            }
-            if(this.state.imageSrcright){
-              toast.error("Please upload vehicle front image")
-              return 
-            }
-            if(this.state.imageSrcslip){
-              toast.error("Please upload kanta slip image")
-              return 
-            }
-            // const {purchaseImageUpload}= this.state.selectedDoc 
-            // if(purchaseImageUpload.vehicle_front_image_file){
-            //   toast.error("Please upload vehicle front image")
-            //   return 
-            // }
-            // if(purchaseImageUpload.vehicle_back_image_file){
-            //   toast.error("Please upload vehicle front image")
-            //   return 
-            // }
-            // if(purchaseImageUpload.vehicle_left_image_file){
-            //   toast.error("Please upload vehicle front image")
-            //   return 
-            // }
-            // if(purchaseImageUpload.vehicle_right_image_file){
-            //   toast.error("Please upload vehicle front image")
-            //   return 
-            // }
-            // if(purchaseImageUpload.kanta_slip_image_file){
-            //   toast.error("Please upload kanta slip image")
-            //   return 
-            // }
-            // const compr_truck_front_image = await imageCompression(purchaseImageUpload.truck_front_image_file, imgOptions);
-            // const compr_truck_back_image = await imageCompression(purchaseImageUpload.truck_back_image_file, imgOptions);
-            // const compr_truck_left_image = await imageCompression(purchaseImageUpload.truck_left_image_file, imgOptions);
-            // const compr_truck_right_image = await imageCompression(purchaseImageUpload.truck_right_image_file, imgOptions);
-            // const compr_kanta_slip_image = await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions);
-            
-            formData.append('id', this.state.selectedCell._id);
-            // formData.append('vehicle_front_image_name', purchaseImageUpload.vehicle_front_image_name)
-            // formData.append('vehicle_front_image_file', await imageCompression(purchaseImageUpload.vehicle_front_image_file, imgOptions));
-            // formData.append('vehicle_back_image_name', purchaseImageUpload.vehicle_back_image_name)
-            // formData.append('vehicle_back_image_file', await imageCompression(purchaseImageUpload.vehicle_back_image_file, imgOptions));
-            // formData.append('vehicle_left_image_name', purchaseImageUpload.vehicle_left_image_name)
-            // formData.append('vehicle_left_image_file', await imageCompression(purchaseImageUpload.vehicle_left_image_file, imgOptions));
-            // formData.append('vehicle_right_image_name', purchaseImageUpload.vehicle_right_image_name)
-            // formData.append('vehicle_right_image_file', await imageCompression(purchaseImageUpload.vehicle_right_image_file, imgOptions));
-            // formData.append('kanta_slip_image_name', purchaseImageUpload.kanta_slip_image_name)
-            // formData.append('kanta_slip_image_file', await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions));
-            formData.append('vehicle_front_image_name', this.genFileName(`vehicle_front_image`))
-            formData.append('vehicle_front_image_file', this.state.imageSrcfront);
-            formData.append('vehicle_back_image_name', this.genFileName(`vehicle_back_image`))
-            formData.append('vehicle_back_image_file', this.state.imageSrcback);
-            formData.append('vehicle_left_image_name', this.genFileName(`vehicle_left_image`))
-            formData.append('vehicle_left_image_file', this.state.imageSrcleft);
-            formData.append('vehicle_right_image_name', this.genFileName(`vehicle_right_image`))
-            formData.append('vehicle_right_image_file', this.state.imageSrcright);
-            formData.append('kanta_slip_image_name', this.genFileName(`kanta_slip_image`))
-            formData.append('kanta_slip_image_file',this.state.imageSrcslip);
-            isformData= true
-            payload= formData
-          }
           if(this.state.purchaseModal_product){
+            url= 'admin/updatePurchase'
             const purchaseProduct=values.purchaseProduct.map(data=> {
               return{
                 ...data,
-                productCode:values.productCode,
-                image: ''
+                randomId: generateRandomID(),
+                deleted: false,
+                created: new Date(),
+                productCodeId: this.state.selectedProductCode._id,
               }
             })
             payload={
@@ -535,33 +468,35 @@ export class Purchase extends Component {
   
           let options = SETTING.HEADER_PARAMETERS;
           options['Authorization'] = localStorage.getItem("token")
-          await Axios.post(SETTING.APP_CONSTANT.API_URL+`admin/submitPurchaseData`,payload,{headers: options})
+          await Axios.post(SETTING.APP_CONSTANT.API_URL+ url ,payload,{headers: options})
           .then((res) => {
             if (res && res.data.success) {
+               if(url==='admin/submitPurchaseData'){
+                this.getAllProductCode()
+               }
               toast["success"](res.data.message);
-              this.setState({
-                allSell: res.data.data,
-              })
+             
+              this.handleClose()
               saveSecurityLogs(menuUrl, "Create/Add")
             } else {
               toast["error"](res.data.message);
             } 
-            this.handleClose()
           })
           .catch((err) =>{
-            //this.handleClose()
             if(err && err.success===false  ){
-              toast["error"](err.message? err.message: 'Error while submitting purchase data.');
+              const errorMessage= err.message? err.message: 'Error while submitting purchase data.'
+              toast["error"](errorMessage);
+              saveSecurityLogs(menuUrl, "Error Log", errorMessage)
+              this.handleClose()
             }else{
               logoutFunc(err)
-              saveSecurityLogs(menuUrl, "Logout",err)
+              saveSecurityLogs(menuUrl, "Logout")
             }
           });
       }
 
       handleSubmitImage = async()=>{
         const {selectedCell} = this.state
-        console.log("ggggggggggggggggggggggggggggg")
         function dataURLtoFile(dataurl, filename) {
           var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
           bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
@@ -570,13 +505,15 @@ export class Purchase extends Component {
           }
           return new File([u8arr], filename, {type:mime});
         }
+  
+        function isBase64(src) {
+          // Check if the src starts with "data:image/"
+          return src.startsWith("data:image/")?true:false;
+        }
      
         let formData = new FormData();
-    
         if(this.state.captureImage ){
-          console.log("22222222222222222222222222222")
           if(!this.state.imageSrcfront){
-            console.log("3333333333333333333")
             toast.error("Please upload vehicle front image")
             return 
           }
@@ -626,7 +563,7 @@ export class Purchase extends Component {
           // const compr_truck_right_image = await imageCompression(purchaseImageUpload.truck_right_image_file, imgOptions);
           // const compr_kanta_slip_image = await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions);
           
-          formData.append('id', this.state.selectedCell._id);
+          formData.append('id', selectedCell._id);
           // formData.append('vehicle_front_image_name', purchaseImageUpload.vehicle_front_image_name)
           // formData.append('vehicle_front_image_file', await imageCompression(purchaseImageUpload.vehicle_front_image_file, imgOptions));
           // formData.append('vehicle_back_image_name', purchaseImageUpload.vehicle_back_image_name)
@@ -637,25 +574,34 @@ export class Purchase extends Component {
           // formData.append('vehicle_right_image_file', await imageCompression(purchaseImageUpload.vehicle_right_image_file, imgOptions));
           // formData.append('kanta_slip_image_name', purchaseImageUpload.kanta_slip_image_name)
           // formData.append('kanta_slip_image_file', await imageCompression(purchaseImageUpload.kanta_slip_image_file, imgOptions));
-          const front_name =  this.genFileName(`vehicle_front_image`)
-          const back_name =  this.genFileName(`vehicle_front_image`)
-          const left_name =  this.genFileName(`vehicle_front_image`)
-          const right_name =  this.genFileName(`vehicle_front_image`)
-          const slip_name =  this.genFileName(`vehicle_front_image`)
-          formData.append('vehicle_front_image_name',front_name)
-          formData.append('vehicle_front_image_file',dataURLtoFile(this.state.imageSrcfront, front_name));
-          formData.append('vehicle_back_image_name', back_name)
-          formData.append('vehicle_back_image_file', dataURLtoFile(this.state.imageSrcback, back_name));
-          formData.append('vehicle_left_image_name', left_name)
-          formData.append('vehicle_left_image_file', dataURLtoFile(this.state.imageSrcleft, left_name));
-          formData.append('vehicle_right_image_name', right_name)
-          formData.append('vehicle_right_image_file', dataURLtoFile(this.state.imageSrcright, right_name));
-          formData.append('kanta_slip_image_name', slip_name)
-          formData.append('kanta_slip_image_file', dataURLtoFile(this.state.imageSrcslip, slip_name));
+          if(this.state.imageSrcfront && isBase64(this.state.imageSrcfront)){
+            const front_name =  this.genFileName(`vehicle_front_image`)
+            formData.append('vehicle_front_image_name',front_name)
+            formData.append('vehicle_front_image_file',dataURLtoFile(this.state.imageSrcfront, front_name));
+       
+          }
+          if(this.state.imageSrcback && isBase64(this.state.imageSrcback)){
+            const back_name =  this.genFileName(`vehicle_back_image`)
+            formData.append('vehicle_back_image_name', back_name)
+            formData.append('vehicle_back_image_file', dataURLtoFile(this.state.imageSrcback, back_name));
+          
+          }
+          if(this.state.imageSrcleft && isBase64(this.state.imageSrcleft)){
+            const left_name =  this.genFileName(`vehicle_left_image`)
+            formData.append('vehicle_left_image_name', left_name)
+            formData.append('vehicle_left_image_file', dataURLtoFile(this.state.imageSrcleft, left_name));
+          }
+          if(this.state.imageSrcright && isBase64(this.state.imageSrcright)){
+            const right_name =  this.genFileName(`vehicle_right_image`)
+            formData.append('vehicle_right_image_name', right_name)
+            formData.append('vehicle_right_image_file', dataURLtoFile(this.state.imageSrcright, right_name));
+          }
+          if(this.state.imageSrcslip && isBase64(this.state.imageSrcslip)){
+            const slip_name =  this.genFileName(`kanta_slip_image`)
+            formData.append('kanta_slip_image_name', slip_name)
+            formData.append('kanta_slip_image_file', dataURLtoFile(this.state.imageSrcslip, slip_name));
+          }
         }
-
-        console.log("formDataformData", formData)
-        
 
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
@@ -671,19 +617,18 @@ export class Purchase extends Component {
           this.handleClose()
         })
         .catch((err) =>{
-          //this.handleClose()
+          this.handleClose()
           if(err && err.success===false  ){
-            toast["error"](err.message? err.message: 'Error while submitting purchase data.');
+            toast["error"](err.message? err.message: 'Error while submitting purchase image data.');
           }else{
             logoutFunc(err)
-            //saveSecurityLogs(menuUrl, "Logout",err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
     }
 
       addMoreRow=()=>{
         const newRow=[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
-
         this.setState({purchaseProductList:[...this.state.purchaseProductList,...newRow]})
        }
        
@@ -695,6 +640,7 @@ export class Purchase extends Component {
        handleClose=()=>{
         this.setState({
             purchaseModal_basicInfo:false,
+            purchaseModal_product:false,
             loading:false,
             loading2:false,
             deletePurchaseModal:false,
@@ -738,45 +684,61 @@ export class Purchase extends Component {
 
        handleClosePuchaseModel=()=>{
         this.setState({
-          purchaseModal_basicInfo:false,
-          purchaseModal_image:false,
-          purchaseModal_product:false,
-          loading:false,
-          loading2:false,
-          deletePurchaseModal:false,
-          showProductModal:false,
-          selectedCell:{},
-          loading3:false,
-          loading4:false,
-          totalAmount:0,
-          dueAmount:0,
-          purchaseEditModal:false,
-          unLoadingWorkerList:[{workerId:''}],
-          loadingWorkerList:[{workerId:''}],
-          paymentList:[{}],
-          purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
+            purchaseModal_basicInfo:false,
+            purchaseModal_product:false,
+            loading:false,
+            loading2:false,
+            deletePurchaseModal:false,
+            showProductModal:false,
+            selectedCell:{},
+            loading3:false,
+            loading4:false,
+            totalAmount:0,
+            dueAmount:0,
+            purchaseEditModal:false,
+            unLoadingWorkerList:[{workerId:''}],
+            loadingWorkerList:[{workerId:''}],
+            paymentList:[{}],
+            captureImage:false,
+            imageSrcfront:null,
+            imageSrcback: null,
+            imageSrcleft: null,
+            imageSrcright: null,
+            imageSrcslip: null,
+            readyTocapturefront:false,
+            readyTocaptureback:false,
+            readyTocaptureleft:false,
+            readyTocaptureright:false,
+            readyTocaptureslip:false,   
+            purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
         })
        }
 
        deleteToggle =(cell)=>{
-        this.setState({
-          selectedCell: cell,
-          deletePurchaseModal:true
-        })
+        // this.setState({
+        //   selectedCell: cell,
+        //   deletePurchaseModal:true
+        // })
        }
 
        imageToggle=(cell)=>{
         this.setState({
           selectedCell: cell,
           //purchaseModal_image:true
-          captureImage: true
+          captureImage: true,
+          imageSrcfront:(cell.vehicleImage && cell.vehicleImage.front)?IMAGE_BASE_URL+cell.vehicleImage.front+'.jpg':null,
+          imageSrcback: (cell.vehicleImage && cell.vehicleImage.back)? IMAGE_BASE_URL+cell.vehicleImage.back+'.jpg':null,
+          imageSrcleft: (cell.vehicleImage && cell.vehicleImage.left)? IMAGE_BASE_URL+cell.vehicleImage.left+'.jpg':null,
+          imageSrcright:(cell.vehicleImage && cell.vehicleImage.right)? IMAGE_BASE_URL+cell.vehicleImage.right+'.jpg':null,
+          imageSrcslip: (cell.kantaSlipImage) ? IMAGE_BASE_URL+cell.kantaSlipImage+'.jpg':null,
         })
        }
 
        productToggle=(cell)=>{
           this.setState({
             selectedCell: cell,
-            purchaseModal_product:true
+            purchaseModal_product:true,
+            selectedProductCode: this.state.allProductCodeData.find(data=> data._id.toString()===cell.productCodeId)
           })
        }
 
@@ -810,7 +772,7 @@ export class Purchase extends Component {
             saveSecurityLogs(menuUrl, "Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl, "Logout",err)
+            saveSecurityLogs(menuUrl, "Logout")
           }
         });
        }
@@ -1239,6 +1201,61 @@ export class Purchase extends Component {
       videoConstraints
     })
   }
+  shortWeightCalculate=(cell)=>{
+
+    const netWeight=  Number(cell.purchaseBasicInfo.netWeight)
+    const productTotalWt= cell.purchaseProduct.reduce((acc, curr)=> acc+ Number(curr.rowWeight), 0)
+    const diff= productTotalWt-netWeight
+    return productTotalWt>netWeight?`+${diff}`:`-${diff}`
+  }
+
+  deletePurchaseProductToggle=(cell)=>{
+    console.log("cellcellcell", cell)
+     console.log("selected selectedCell", this.state.selectedCell)
+    this.setState({
+      selectedProductCell: cell,
+      purchaseProductDeleteModalShow:true
+    })
+   }
+   purchaseProductDeleteModalClose=()=>{
+    this.setState({
+      selectedCell:{},
+      selectedProductCell: {},
+      purchaseProductDeleteModalShow:false
+    })
+   }
+   deleteHandlePurchaseProduct=async()=>{
+    this.setState({
+      loading4:true
+    })
+    let payload={
+        id: this.state.selectedCell._id,
+        selectedProduct: this.state.selectedProductCell
+    }
+    let options = SETTING.HEADER_PARAMETERS;
+    options['Authorization'] = localStorage.getItem("token")
+     await Axios.post(SETTING.APP_CONSTANT.API_URL+`admin/deletePurchaseProduct`,payload,{headers: options})
+    .then((res) => {
+      if (res && res.data.success) {
+        // toast["success"](res.data.message);
+        saveSecurityLogs(menuUrl, "Delete")
+      } else {
+        toast["error"](res.data.message);
+      }
+      this.handleClose()
+    })
+    .catch((err) =>{
+      this.handleClose()
+      if(err && err.success===false  ){
+        const errorMessage= err.message? err.message: 'Error while deleting purchase data.'
+        toast["error"]();
+        saveSecurityLogs(menuUrl, "Error Log",errorMessage)
+      }else{
+        logoutFunc(err)
+        saveSecurityLogs(menuUrl, "Logout")
+      }
+    });
+  }
 
   render() {
     const {selectedCell, unLoadingDateTime, loadingDateTime,purchaseImageUpload, videoConstraints}= this.state
@@ -1253,13 +1270,6 @@ export class Purchase extends Component {
           }else{
             return  'N/A'
           }
-        }
-      },
-      {
-        Header: "No of Units",
-        accessor: "No of Units",
-        Cell: (cell) => {
-          return cell.original.qty ? cell.original.qty:'N/A'
         }
       },
       {
@@ -1284,26 +1294,44 @@ export class Purchase extends Component {
         }
       },
       {
-        Header: "Weight",
-        accessor: "weight",
+        Header: "Per Unit Weight",
+        accessor: "perUnitWeight",
         Cell: (cell) => {
-          return cell.original.weight ? cell.original.weight:'N/A'
+          return cell.original.perUnitWeight ? cell.original.perUnitWeight:'N/A'
+        }
+      },
+   
+      {
+        Header: "Qty",
+        accessor: "qty",
+        Cell: (cell) => {
+          return cell.original.qty ? cell.original.qty:'N/A'
         }
       },
       {
-        Header: "Rate",
-        accessor: "rate",
+        Header: "Product Total Weight",
+        accessor: "rowWeight",
         Cell: (cell) => {
-          return cell.original.rate ? cell.original.rate:'N/A'
+          return cell.original.rowWeight ? cell.original.rowWeight:'N/A'
         }
       },
-      {
-        Header: "Unit",
-        accessor: "unit",
-        Cell: (cell) => {
-          return cell.original.unit ? cell.original.unit:'N/A'
-        }
-      },
+      // {
+      //   Header: "Action",
+      //   width: 150,
+      //   Cell:cell=>{
+      //     return(
+
+      //         <Row style={{marginLeft:"0.1rem", marginTop:"0px"}}>
+      //             <a href="#/" title='Delete' id={'delete'}
+      //               className="mb-2 badge" 
+      //                 onClick={e=>this.deletePurchaseProductToggle(cell.original)
+      //               }>
+      //                 <i className=" mdi mdi-delete mdi-18px"></i>
+      //             </a>
+      //         </Row>
+      //     )
+      //   }
+      // }
     ]
     
     const columns = [
@@ -1330,19 +1358,39 @@ export class Purchase extends Component {
           },
         },
         {
-          Header: "Net Weight",
+          Header: "Products",
+          accessor: "products",
+          Cell: (cell) => {
+            return  (
+              <Link to="#" onClick={()=>this.ShowProduct(cell.original)}>Product Detail</Link>
+            )}
+        },
+        {
+          Header: "Net Wt.",
           accessor: "netWeight",
           Cell: (cell) => {
             return  cell.original.purchaseBasicInfo &&  cell.original.purchaseBasicInfo.netWeight?cell.original.purchaseBasicInfo.netWeight:'NA'
           },
         },
         {
-          Header: "Product Name",
-          accessor: "productName",
+          Header: "Gross Wt.",
+          accessor: "grossWeight",
           Cell: (cell) => {
-            return  (
-              <Link to="#" onClick={()=>this.ShowProduct(cell.original)}>Product Detail</Link>
-            )}
+            return  cell.original.purchaseBasicInfo &&  cell.original.purchaseBasicInfo.grossWeight?cell.original.purchaseBasicInfo.grossWeight:'NA'
+          },
+        },
+        {
+          Header: "Tare Wt.",
+          accessor: "tareWeight",
+          Cell: (cell) => {
+            return  cell.original.purchaseBasicInfo &&  cell.original.purchaseBasicInfo.tareWeight?cell.original.purchaseBasicInfo.tareWeight:'NA'
+          },
+        },
+        {
+          Header: "Short Weight",
+          accessor: "shortWeight",
+          Cell: (cell) => this.shortWeightCalculate(cell.original)
+          
         },
         // {
         //   Header: "vehicle Number",
@@ -1371,15 +1419,13 @@ export class Purchase extends Component {
           width: 150,
           Cell:cell=>{
             return(
-  
                 <Row style={{marginLeft:"0.1rem", marginTop:"0px"}}>
-               
-                    <a href="#/" title='Delete' id={'delete'}
+                    {/* <a href="#/" title='Delete' id={'delete'}
                       className="mb-2 badge" 
                         onClick={e=>this.deleteToggle(cell.original)
                       }>
                         <i className=" mdi mdi-delete mdi-18px"></i>
-                    </a>
+                    </a> */}
                     <a href="#/" title='Edit' id={'image'}
                       className="mb-2 badge" 
                         onClick={e=>this.imageToggle(cell.original)
@@ -1390,14 +1436,12 @@ export class Purchase extends Component {
                       className="mb-2 badge" 
                         onClick={e=>this.productToggle(cell.original)
                       }>
-                        <i className="mdi mdi-glass-stange mdi-18px"></i>
+                        <i className="mdi mdi-database-plus mdi-18px"></i>
                     </a>
                 </Row>
             )
           }
         }
-
-        
       ];
     return (
         <div>
@@ -1595,17 +1639,6 @@ export class Purchase extends Component {
                      </Col>
                      </Row>
                      <Row>
-                      {/* <Col>
-                        <AvField name="productCode" label="Product Code" placeholder="Product Code" 
-                          value={this.state.newProductCode}
-                          validate={{
-                          required: {
-                              value: true,
-                              errorMessage: 'This field is required.'
-                            }
-                          }} 
-                        />
-                      </Col> */}
                       <Col md={4}>
                       <label >Product code</label>
                         <CreatableSelect 
@@ -1785,44 +1818,6 @@ export class Purchase extends Component {
                           Add More worker for unloading
                         </button>
                     </div>
-                    {/* <Row>
-                      <Col md={3}>
-                        <AvField name="totalWeight"  label ="Total Weight" placeholder="Total Weight"
-                        value={this.state.totalWeight}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid Weight number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                       
-                      <Col md={3}>
-                        <AvField name="short"  label ="Short" placeholder="short"
-                        />
-                      </Col>
-                      <Col md={3}>
-                        <AvField name="Actual"  label ="Actual" placeholder="Actual"
-                         value={this.state.totalWeight}
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:/^[0-9]+.+$/,
-                              errorMessage: `Invalid Amount number.`
-                            }
-                        }} 
-                        />
-                      </Col>
-                  
-                    </Row> */}
                     <Row>
                         <div className="col-md-6 d-flex justify-content-end">
                         <Button type="submit">Submit</Button>
@@ -1854,12 +1849,8 @@ export class Purchase extends Component {
             <BlockUi tag="div" blocking={this.state.loading2}  className="block-overlay-dark"  loader={<Spinner/>}>
             <div className="card">
                 <div className="card-body">
-                <AvForm 
-                //onValidSubmit={this.handleSubmit}
-                >
                     <Row>
                       <Col>
-                        
                             <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
                               <Card.Body>
                                 {/* <Card.Title>Card Title</Card.Title> */}
@@ -1879,21 +1870,6 @@ export class Purchase extends Component {
                               />
                       </Col>
                       <Col>
-                          {/* <label>Front Image </label>
-                          <div>
-                            <input
-                              type="file"
-                              className="form-control"
-                              multiple
-                              id="document"
-                              onChange = {this.fileSelect('truckFrontImage')}
-                              required
-                              capture
-                            />
-                          </div> */}
-              
-
-
                       <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
                             <Card.Body>
                               {/* <Card.Title>Card Title</Card.Title> */}
@@ -1913,15 +1889,6 @@ export class Purchase extends Component {
                           </Card>
                      </Col>
                      <Col>
-                      {/* <label>Back Image </label>
-                             <input
-                               type="file"
-                               className="form-control"
-                               multiple
-                               name="file"
-                               onChange={this.handleInputChange}
-                               required
-                             /> */}
                        <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
                             <Card.Body>
                               <Card.Title>
@@ -1939,15 +1906,6 @@ export class Purchase extends Component {
                           </Card>
                      </Col>
                      <Col>
-                      {/* <label>Back Image </label>
-                             <input
-                               type="file"
-                               className="form-control"
-                               multiple
-                               name="file"
-                               onChange={this.handleInputChange}
-                               required
-                             /> */}
                           <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
                             <Card.Body>
                               {/* <Card.Title>Card Title</Card.Title> */}
@@ -1959,15 +1917,6 @@ export class Purchase extends Component {
                           </Card>
                      </Col>
                      <Col>
-                      {/* <label>Back Image </label>
-                             <input
-                               type="file"
-                               className="form-control"
-                               multiple
-                               name="file"
-                               onChange={this.handleInputChange}
-                               required
-                             /> */}
                           <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
                             <Card.Body>
                               {/* <Card.Title>Card Title</Card.Title> */}
@@ -1979,15 +1928,6 @@ export class Purchase extends Component {
                           </Card>
                      </Col>
                      <Col>
-                      {/* <label>Back Image </label>
-                             <input
-                               type="file"
-                               className="form-control"
-                               multiple
-                               name="file"
-                               onChange={this.handleInputChange}
-                               required
-                             /> */}
                           <Card style={{ width: '15rem', backgroundColor:"#090a11cc"}}>
                             <Card.Body>
                               {/* <Card.Title>Card Title</Card.Title> */}
@@ -1999,8 +1939,6 @@ export class Purchase extends Component {
                           </Card>
                      </Col>
                     </Row>
-                    {/* <h3 className="text-dark d-flex justify-content-center">Product Details</h3> */}
-        
                     <Row className="mt-2">
                         <div className="col-md-6 d-flex justify-content-end">
                         <Button type="submit">Submit</Button>
@@ -2011,7 +1949,6 @@ export class Purchase extends Component {
                          >Cancel</Button>
                         </div>
                     </Row>
-                  </AvForm>
                 </div>
               </div>
               </BlockUi>
@@ -2025,32 +1962,19 @@ export class Purchase extends Component {
             centered
           >
             <Modal.Header closeButton>
-              <Modal.Title>Purchase Details Enter</Modal.Title>
+              <Modal.Title>Add new products {this.state.selectedProductCode && `[Product Code: ${this.state.selectedProductCode.productCode}]`}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-            <BlockUi tag="div" blocking={this.state.loading2}  className="block-overlay-dark"  loader={<Spinner/>}>
+            <BlockUi tag="div" blocking={this.state.loading2} className="block-overlay-dark"  loader={<Spinner/>}>
             <div className="card">
                 <div className="card-body">
                 <AvForm onValidSubmit={this.handleSubmit}>
-                     
                     <h3 className="text-dark d-flex justify-content-center p-3">Product Details</h3>
-                    {/* <Col>
-                      <AvField name="productCode" label="Product Code" placeholder="Product Code" 
-                        value={this.state.newProductCode}
-                        validate={{
-                        required: {
-                            value: true,
-                            errorMessage: 'This field is required.'
-                          }
-                        }} 
-                      />
-                     </Col> */}
                     {this.state.purchaseProductList.map((data,numIndex)=>
                       <>
                       <Row >
                         <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}}>
-                          <lebel className="p-2">Select Product Name</lebel>
-                        <AvField type='select' name= {`purchaseProduct[${numIndex}].productNameId`} className="mt-1"
+                        <AvField type='select' name= {`purchaseProduct[${numIndex}].productNameId`} label ="Select Product Name" className="mt-1"
                           validate={{
                             required: {
                                 value: true,
@@ -2063,22 +1987,9 @@ export class Purchase extends Component {
                         <option key={'new_create'} value={'new_create'}> New Product Create</option>
                         </AvField>  
                       </Col>
-                      {/* <Col style={{paddingLeft:'3px',paddingRight:'3px'}} >
-                        <AvField name={`purchaseProduct[${index}].productImage`}  label ="Product Image" placeholder="Product Image"
-                          validate={{
-                            required: {
-                                value: true,
-                                errorMessage: 'This field is required.'
-                            },
-                            // pattern: {
-                            //   value:/^[0-9]+.+$/,
-                            //   errorMessage: `Invalid Unit number.`
-                            // }
-                        }} 
-                        />
-                      </Col> */}
                       <Col  style={{paddingLeft:'3px',paddingRight:'3px'}}>
                         <AvField name= {`purchaseProduct[${numIndex}].qty`}  label ="Qty" placeholder="Qty"
+                            type='number'
                            value={data.qty}
                            onChange={this.updateProductField(numIndex,'qty' )}
                            onKeyUp={  e => this.calculateField(e, numIndex) }
@@ -2146,8 +2057,8 @@ export class Purchase extends Component {
                         }} 
                         />
                       </Col>
-                      <Col style={{paddingLeft:'3px',paddingRight:'3px'}}>
-                        <AvField name= {`purchaseProduct[${numIndex}].perUnitWeight`}  label ="Unit/Weight" placeholder="00" key={`${numIndex}_Unit/Weight`}
+                      <Col  style={{paddingLeft:'3px',paddingRight:'3px'}}>
+                        <AvField name= {`purchaseProduct[${numIndex}].perUnitWeight`}  label ="Per Unit Weight" placeholder="00" key={`${numIndex}_Unit/Weight`}
                         value={data.perUnitWeight}
                         onChange={this.updateProductField(numIndex,'perUnitWeight' )}
                         onKeyUp={  e => this.calculateField(e, numIndex) }
@@ -2168,6 +2079,7 @@ export class Purchase extends Component {
                       <Col style={{paddingLeft:'3px',paddingRight:'3px'}}>
                           <AvField type="text" name={`purchaseProduct[${numIndex}].rowWeight`} label="Total Weight" key={`${numIndex}_rowWeight`}
                               value={data.rowWeight} 
+                              disabled={true}
                               validate={{
                               required: {
                                   value: true,
@@ -2175,48 +2087,6 @@ export class Purchase extends Component {
                               }
                           }} />
                       </Col>
-                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}} >
-                      {/* <label>Select Image </label>
-                          <input
-                            type="file"
-                            className="form-control"
-                            multiple
-                            name="file"
-                            onChange={this.handleInputChange}
-                            required
-                          /> */}
-
-
-          <Card>
-          <Card.Title>Select Product Image</Card.Title> 
-            {/* <Webcam 
-            audio={false}
-            // ref={this[`${docType}_ref`]}
-            screenshotFormat="image/jpeg"
-            videoConstraints={videoConstraints}
-            // minScreenshotWidth={`100%`}
-            // minScreenshotHeight={`100%`}
-            />
-            : */}
-            <img  alt="image" src="./blank_image.jpg" width={100} height={100}/>
-            {/* <Row>
-              <Col>
-                <div className="d-flex justify-content-center">
-                  <Button variant="success">
-                    Photo 
-                    </Button>
-                </div>
-              </Col>
-              {this.state[`readyTocapture${docType}`] &&
-                <Col>
-                  <div className="d-flex justify-content-center">
-                    <Button variant="success" onClick={this.flipCamera}>Flip camera </Button>
-                  </div>
-                </Col>
-              }
-            </Row> */}
-        </Card>
-                     </Col>
                       <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}} >
                           <Form.Group>
                             <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
@@ -2233,7 +2103,7 @@ export class Purchase extends Component {
                           Add More
                         </button>
                     </div>
-                    <Row>
+                    {/* <Row>
                       <Col md={3}>
                         <AvField name="totalWeight"  label ="Total Weight" placeholder="Total Weight"
                         value={this.state.totalWeight}
@@ -2270,7 +2140,7 @@ export class Purchase extends Component {
                         />
                       </Col>
                   
-                    </Row>
+                    </Row> */}
                     <Row className="mt-3">
                         <div className="col-md-6 d-flex justify-content-end">
                         <Button type="submit">Submit</Button>
@@ -2488,11 +2358,7 @@ export class Purchase extends Component {
             // minScreenshotHeight={`100%`}
             />
             :
-            <img  alt={docType} src={this.state[`imageSrc${docType}`]?this.state[`imageSrc${docType}`]
-            :(selectedCell.vehicleImage && selectedCell.vehicleImage[docType])? `https://res.cloudinary.com/dx7oism2m/image/upload/v1695562573/${selectedCell.vehicleImage[docType]}.jpg`
-            :selectedCell.kantaSlipImage? `https://res.cloudinary.com/dx7oism2m/image/upload/v1695562573/${selectedCell.kantaSlipImage}.jpg`
-            : "./blank_image.jpg"}
-             />
+            <img  alt={docType} src={this.state[`imageSrc${docType}`]?this.state[`imageSrc${docType}`]: "./blank_image.jpg"} />
           }
             <Row>
               <Col>
@@ -2519,6 +2385,26 @@ export class Purchase extends Component {
         </Modal.Footer>
         </BlockUi>
       </Modal>
+        <Modal
+          show={this.state.purchaseProductDeleteModalShow}
+          // size={"lg"}
+          onHide={this.purchaseProductDeleteModalClose}
+          aria-labelledby="contained-modal-title-vcenter"
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Delete Product Name Detail</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+              Are you want sure delete this product?
+          </Modal.Body>
+          <Modal.Footer>
+              <Button variant="secondary" onClick={this.purchaseProductDeleteModalClose}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={this.deleteHandlePurchaseProduct}>Delete</Button>
+          </Modal.Footer>
+        </Modal>
 
         </div>
     )

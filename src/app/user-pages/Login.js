@@ -65,7 +65,7 @@ export class Login extends Component {
           localStorage.setItem("userInformation", JSON.stringify(res.data.data.user))
           localStorage.setItem("token", JSON.stringify(res.data.data.token))
           toast["success"]("Logged in successfully");
-          saveSecurityLogs(menuUrl,"Login")
+          saveSecurityLogs(menuUrl,"Login", undefined, user._id)
             const roleName= user.userInfo.roleName
             if(roleName==='TOPADMIN')window.location.href="/dashboard"
             if(roleName!=='TOPADMIN')window.location.href="/adminDashboard"
@@ -77,8 +77,9 @@ export class Login extends Component {
         this.setState({
           loading:false
       })
-        toast["error"]("Something went wrong.");
-        saveSecurityLogs(menuUrl,"Error Log",err)
+      const errorMessage = 'Login error'
+        toast["error"](errorMessage);
+        //saveSecurityLogs(menuUrl,"Error Log",errorMessage)
       });
     }
   render() {

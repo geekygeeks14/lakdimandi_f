@@ -99,12 +99,12 @@ export const groupedData =(data, key) => {
   }, {});
 }
 
-export const saveSecurityLogs= async(menuUrl, activityType, message='')=>{
+export const saveSecurityLogs= async(menuUrl, activityType, message='',userId='')=>{
   let dataToSend={
     message: message,
     menuUrl: menuUrl,
     activity_type: activityType, 
-    userId: USER._id, 
+    userId: USER && USER._id?USER._id:userId?userId:'' , 
     // ipAdress: getIpAdress(),
     // device: getDevice()
   }
@@ -120,5 +120,14 @@ export const saveSecurityLogs= async(menuUrl, activityType, message='')=>{
   });
 
 }
+export const  generateRandomID=() =>{
+  const randomNum = Math.floor(Math.random() * 1000000);
+  // Convert the number to a string and pad it with leading zeros if necessary
+  const randomID = String(randomNum).padStart(6, '0');
+
+  return randomID;
+}
+
+
 
 

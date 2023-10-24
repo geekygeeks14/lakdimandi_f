@@ -14,13 +14,21 @@
       "ACCOUNTANT"
     ]
   },
-    {
+  {
     "path": "/sell",
     "roles": [
       "TOPADMIN",
       "ADMIN",
       "INSTANCE ADMIN",
       "SUPER_ADMIN",
+      "ACCOUNTANT"
+    ]
+  },
+  {
+    "path": "/inventory",
+    "roles": [
+      "TOPADMIN",
+      "ADMIN",
       "ACCOUNTANT"
     ]
   },

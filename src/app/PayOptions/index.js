@@ -94,7 +94,7 @@ class PayOptions extends Component {
             saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl,"Logout",err)
+            saveSecurityLogs(menuUrl,"Logout")
           }
         });
        }
@@ -154,7 +154,7 @@ class PayOptions extends Component {
             saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl,"Logout",err)
+            saveSecurityLogs(menuUrl,"Logout")
           }
         });
        }
@@ -193,7 +193,7 @@ class PayOptions extends Component {
             saveSecurityLogs(menuUrl,"Error Log",err.message)
           }else{
             logoutFunc(err)
-            saveSecurityLogs(menuUrl,"Logout",err)
+            saveSecurityLogs(menuUrl,"Logout")
           }
         });
        }

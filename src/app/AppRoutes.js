@@ -33,6 +33,8 @@ const DueAmount = lazy(()=>import("./DueAmount"));
 const PayOption = lazy(()=> import("./PayOptions"))
 const Security = lazy(()=>import("./securitylog/security"))
 const CronJobReport = lazy(()=>import("./cronJobReport"))
+const Inventory = lazy(()=>import("./Invetory"))
+
 
 
 class AppRoutes extends Component {
@@ -68,6 +70,7 @@ class AppRoutes extends Component {
           <PrivateRoute path="/due-amount" component={DueAmount} exact/>
           <PrivateRoute path="/pay-option" component={PayOption} exact/>
           <PrivateRoute path="/cronJob-report" component={CronJobReport} exact/>
+          <PrivateRoute path="/inventory" component={Inventory} exact/>
           {/* <PrivateRoute path="/user-pages/lockscreen" component={Lockscreen} exact/> */}
           <PrivateRoute path="/error-pages/error-404" component={Error404} exact/>
           <PrivateRoute path="/error-pages/error-500" component={Error500} exact/>

@@ -138,6 +138,14 @@ class Security extends Component{
                 }
             },
             {
+                Header:"IP Address",
+                accessor:"ipAdress",
+                width: 100,
+                Cell :(cell)=>{
+                    return cell.original.ipAdress?cell.original.ipAdress:"NA"
+                }
+            },
+            {
                 Header:"Description",
                 accessor:"desc",
                 Cell :(cell)=>{
