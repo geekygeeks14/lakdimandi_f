@@ -4,10 +4,11 @@ import ReactTable from "react-table";
 import { toast } from "react-toastify";
 import { SETTING } from "../app-config/cofiguration";
 import "react-toastify/dist/ReactToastify.css";
-import { Button, Card, Col, Container, Form, FormGroup, Modal, Row } from "react-bootstrap";
+import { Button, Card, Col, Container, Form, FormGroup, InputGroup, Modal, Row } from "react-bootstrap";
 import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import DatePicker from "react-datepicker";
+import FilterDateComponent from '../dateFilter'
 import Select from 'react-select';
 import 'react-block-ui/style.css';
 import { logoutFunc } from "../util/helper";
@@ -47,7 +48,11 @@ class Security extends Component{
           loading:false,   
           securityData:[],
           searchValue:"",
-          logValue:""   
+          logValue:"",
+          dateOption:'',
+          pageNumber:0,
+          pageSize:10,
+          count:0   
         }
       }
        componentDidMount(){
@@ -65,15 +70,31 @@ class Security extends Component{
         if(this.state.logValue){
             url.searchParams.set('logType', this.state.logValue)
         }
+        if(this.state.startDate){
+            url.searchParams.set('startDate', this.state.startDate)
+        }
+        if(this.state.endDate){
+            url.searchParams.set('endDate', this.state.endDate)
+        }
+        url.searchParams.set('pageNumber', this.state.pageNumber)
         await Axios.get(url,{headers: options})
         .then((res) => {
           this.setState({
             loading:false
           })
         
-          if (res.data && res.data.data.length>0) {
-             this.setState({securityData:res.data.data})
+          if (res && res.data.success) {
+             this.setState({
+                securityData:res.data.data,
+                pageSize: res.data.pageSize,
+                count: res.data.count
+             })
           } else {
+            this.setState({
+                securityData:[],
+                pageSize: 0,
+                count: 0
+             })
             toast["error"](res.data.message);
           } 
         })
@@ -92,16 +113,30 @@ class Security extends Component{
        }
 
        clearFilter =()=>{
-            this.setState({logValue:""},()=>this.getSecurityLogs())
+            this.setState({
+             logValue:"",
+             startDate:'',
+             endDate:'',
+             dateOption:'',
+             pageNumber:0
+            },()=>this.getSecurityLogs())
        }
-
-    //    handleSearch=(e)=>{
-    //     this.setState({searchValue:e.target.value},()=>this.getSecurityLogs())
-        
-    //    }
-
+       onDateChange=(e, start, end)=>{
+            this.setState({dateOption: e.value, startDate: start, endDate: end, pageNumber:0},()=>this.getSecurityLogs())
+       }
+       handleDateChange = (key, value) => {
+        if(key==='startDate'){
+            this.setState({[key]: value, endDate:'', pageNumber:0}, () => this.getSecurityLogs())
+        }else{
+            this.setState({[key]: value, pageNumber:0}, () => this.getSecurityLogs())
+        }
+       }   
+       
+       getPageIndex=(pageIndex)=>{
+        this.setState({pageNumber:pageIndex},()=>this.getSecurityLogs())
+       }
        filterLogType=(e)=>{
-        this.setState({logValue:e.target.value},()=>this.getSecurityLogs())
+        this.setState({logValue:e.target.value, pageNumber:0},()=>this.getSecurityLogs())
        }
     render(){
         const columns =[
@@ -187,14 +222,66 @@ class Security extends Component{
                                    <Col md={3}>
                                    <Form.Group>
                                    <label htmlFor="exampleFormControlSelect3">Log Type</label>
-                                   <select className="form-control form-control-sm" id="exampleForm"
-                                   value={this.state.logValue}
-                                        onChange={this.filterLogType}
-                                    >
-                                    {MenuLog.map((data,ind)=>{return(<option key={data.ind} value={data.value}>{data.label}</option>)})}
+                                    <select className="form-control form-control-sm" id="exampleForm"
+                                            value={this.state.logValue}
+                                            onChange={this.filterLogType}
+                                        >
+                                        {MenuLog.map((data,ind)=>{return(<option key={data.ind} value={data.value}>{data.label}</option>)})}
                                     </select>
                                     </Form.Group>
                                    </Col>
+                                   <Col md={3}>
+                                   <label style={{fontSize:'smaller'}}>Log Type</label>
+                                        <Form.Group>
+                                            <FilterDateComponent
+                                                value={this.state.dateOption}
+                                                onDateChange={this.onDateChange}
+                                                extraOption={{value: 'customDate', label: 'Custom Date Range'}}
+                                            />
+                                        </Form.Group>
+                                   </Col>
+
+                                {
+                                    this.state.dateOption === 'customDate' ? <>
+                                        <Col md={2}>
+                                            <FormGroup>
+                                                <label for="exampleEmail" className="mr-sm-2">
+                                                    Start Date
+                                                </label>
+                                                <InputGroup>
+                                                    {/* <InputGroupAddon addonType="prepend">
+                                                        <div className="input-group-text">
+                                                            <FontAwesomeIcon icon={faCalendarAlt}/>
+                                                        </div>
+                                                    </InputGroupAddon> */}
+                                                    <DatePicker
+                                                        selectsStart
+                                                        className="form-control"
+                                                        selected={this.state.startDate}
+                                                        startDate={this.state.startDate}
+                                                        endDate={this.state.endDate}
+                                                        onChange={date => this.handleDateChange('startDate', date)}
+                                                    />
+                                                </InputGroup>
+                                            </FormGroup>
+                                        </Col>
+                                        <Col md={2}>
+                                            <FormGroup>
+                                                <label for="examplePassword" className="mr-sm-2">End Date</label>
+                                                <DatePicker
+                                                    selectsEnd
+                                                    className="form-control"
+                                                    disabled={!this.state.startDate}
+                                                    minDate={this.state.startDate}
+                                                    selected={this.state.endDate}
+                                                    endDate={this.state.endDate}
+                                                    startDate={this.state.startDate}
+                                                    onChange={date => this.handleDateChange('endDate', date)}
+                                                />
+                                            </FormGroup>
+                                        </Col>
+                                    </> : null
+                                }
                                    <Col md={4}>
                                    <Form.Group>
                                         <Button type="button" className="btn btn-warning text-dark mt-3" onClick={this.clearFilter}>Clear Filter</Button>
@@ -203,16 +290,21 @@ class Security extends Component{
                                 </Row>
                                
                                 
-                                <p className="card-title2">Security Log Count : {this.state.securityData && this.state.securityData.length>0?this.state.securityData.length:0}</p>
+                                <p className="card-title2">Security Log Count : {this.state.count}</p>
                                 <ReactTable
+                                    manual
                                     data={this.state.securityData.length>0?this.state.securityData:[]}
                                     className='-striped -highlight'
                                     // className='-highlight'
                                     columns={columns}
                                     defaultSorted={[{ id: "created", desc: true }]}
-                                    pageSize={10}
+                                    //pageSize={10}
                                     showPageSizeOptions={false}
                                     showPageJump={false}
+                                    pageSize={this.state.securityData.length? this.state.securityData.length:0}
+                                    page={this.state.pageNumber}
+                                    onPageChange={(pageIndex)=>this.getPageIndex(pageIndex)}
+                                    pages={this.state.pageSize}
                                 />
                             </div>
                         </div>
