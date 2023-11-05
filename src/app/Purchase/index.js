@@ -34,18 +34,7 @@ const unitList =[
   {value:'Pcs',label:'Pcs'},
   {value:'Kg',label:'Kg'},
 ]
-const colorOption=[
-  { value: 'ocean', label: 'Ocean', color: '#00B8D9', isFixed: true },
-  { value: 'blue', label: 'Blue', color: '#0052CC', isDisabled: true },
-  { value: 'purple', label: 'Purple', color: '#5243AA' },
-  { value: 'red', label: 'Red', color: '#FF5630', isFixed: true },
-  { value: 'orange', label: 'Orange', color: '#FF8B00' },
-  { value: 'yellow', label: 'Yellow', color: '#FFC400' },
-  { value: 'green', label: 'Green', color: '#36B37E' },
-  { value: 'forest', label: 'Forest', color: '#00875A' },
-  { value: 'slate', label: 'Slate', color: '#253858' },
-  { value: 'silver', label: 'Silver', color: '#666666' },
-]
+
 const imgOptions = {
   maxSizeMB: 0.1,
   maxWidthOrHeight: 1024,
@@ -77,6 +66,7 @@ export class Purchase extends Component {
           loading3:false,
           purchaseEditModal:false,
           loading4:false,
+          freeSize: false,
           totalAmount:0,
           dueAmount:0,
           allWorker:[],
@@ -113,7 +103,7 @@ export class Purchase extends Component {
           readyTocapture:false,
           unLoadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
           loadingDateTime:{date: new Date(),startTime: new Date(),endTime: new Date()},
-          purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
+          purchaseProductList:[{productNameId:'', qty:0, unit:'', length:0, breadth:0, height:0, perUnitWeight:0}]
         };
         this.front_ref = React.createRef();
         this.back_ref = React.createRef();
@@ -130,9 +120,6 @@ export class Purchase extends Component {
         this.getAllReciever()
         this.getAllWorker()
         saveSecurityLogs(menuUrl, "Menu Log")
-      
-      
-     
       }
 
       async getAllPurchase(){
@@ -457,6 +444,7 @@ export class Purchase extends Component {
                 randomId: generateRandomID(),
                 deleted: false,
                 created: new Date(),
+                freeSize : this.state.freeSize, 
                 productCodeId: this.state.selectedProductCode._id,
               }
             })
@@ -628,7 +616,7 @@ export class Purchase extends Component {
     }
 
       addMoreRow=()=>{
-        const newRow=[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
+        const newRow=[{productNameId:'', qty:0, unit:'', length:0, breadth:0, height:0, perUnitWeight:0}]
         this.setState({purchaseProductList:[...this.state.purchaseProductList,...newRow]})
        }
        
@@ -710,7 +698,7 @@ export class Purchase extends Component {
             readyTocaptureleft:false,
             readyTocaptureright:false,
             readyTocaptureslip:false,   
-            purchaseProductList:[{productNameId:'',image:'', qty:0, length:0, breadth:0, height:0, perUnitWeight:0}]
+            purchaseProductList:[{productNameId:'', qty:0, unit:'',length:0, breadth:0, height:0, perUnitWeight:0}]
         })
        }
 
@@ -965,6 +953,12 @@ export class Purchase extends Component {
         // Truncate or pad the part to fit the available length
         randomPart = randomPart.slice(0, length);
         return randomPart;
+      }
+
+      handleRequiredSize=()=>{
+        this.setState({
+          freeSize: !this.state.freeSize
+        })
       }
 
       uniqueProductCodeGen =()=>{
@@ -1258,7 +1252,7 @@ export class Purchase extends Component {
   }
 
   render() {
-    const {selectedCell, unLoadingDateTime, loadingDateTime,purchaseImageUpload, videoConstraints}= this.state
+    const {selectedCell, unLoadingDateTime, loadingDateTime,purchaseImageUpload, videoConstraints, freeSize}= this.state
     const productColumn =[
       {
         Header: "Product Name",
@@ -1968,6 +1962,15 @@ export class Purchase extends Component {
             <BlockUi tag="div" blocking={this.state.loading2} className="block-overlay-dark"  loader={<Spinner/>}>
             <div className="card">
                 <div className="card-body">
+                <Form>
+                      <Form.Check 
+                        type="switch"
+                        id='sizeRequired'
+                        label={this.state.freeSize===true?'Free Size':'Size Required'}
+                        checked={this.state.freeSize}
+                        onChange={this.handleRequiredSize}
+                      />
+                    </Form>
                 <AvForm onValidSubmit={this.handleSubmit}>
                     <h3 className="text-dark d-flex justify-content-center p-3">Product Details</h3>
                     {this.state.purchaseProductList.map((data,numIndex)=>
@@ -1989,7 +1992,7 @@ export class Purchase extends Component {
                       </Col>
                       <Col  style={{paddingLeft:'3px',paddingRight:'3px'}}>
                         <AvField name= {`purchaseProduct[${numIndex}].qty`}  label ="Qty" placeholder="Qty"
-                            type='number'
+                           type='number'
                            value={data.qty}
                            onChange={this.updateProductField(numIndex,'qty' )}
                            onKeyUp={  e => this.calculateField(e, numIndex) }
@@ -2003,15 +2006,31 @@ export class Purchase extends Component {
                         }} 
                         />
                       </Col>
+                      <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}} >
+                          <AvField 
+                            type="select" name={`purchaseProduct[${numIndex}].unit`} label="Unit" 
+                            value={data.unit}
+                            onChange={this.updateProductField(numIndex,'unit')}
+                              validate={{
+                              required: {
+                                  value: true,
+                                  errorMessage: 'This field is required.'
+                              }
+                          }} >
+                          <option value=''>Choose unit</option>
+                          {unitList.map((data, ind)=> {return (<option key={ind} style={{color:"black"}}>{data.label}</option>)} )}
+                          </AvField>
+                      </Col>
                       <Col style={{paddingLeft:'3px',paddingRight:'3px'}}>
                         <AvField name= {`purchaseProduct[${numIndex}].length`}  label ="Length" placeholder="00" key={`${numIndex}_length `}
                         value={data.length}
                         onChange={this.updateProductField(numIndex,'length' )}
                           min={0}
                           max={200}
+                          disabled={freeSize}
                           validate={{
                             required: {
-                                value: true,
+                                value: !freeSize,
                                 errorMessage: 'This field is required.'
                             }, 
                             pattern: {
@@ -2027,9 +2046,10 @@ export class Purchase extends Component {
                         onChange={this.updateProductField(numIndex,'breadth' )}
                           min={0}
                           max={200}
+                          disabled={freeSize}
                           validate={{
                             required: {
-                                value: true,
+                                value: !freeSize,
                                 errorMessage: 'This field is required.'
                             }, 
                             pattern: {
@@ -2045,9 +2065,10 @@ export class Purchase extends Component {
                         onChange={this.updateProductField(numIndex,'height' )}
                           min={0}
                           max={200}
+                          disabled={freeSize}
                           validate={{
                             required: {
-                                value: true,
+                                value: !freeSize,
                                 errorMessage: 'This field is required.'
                             }, 
                             pattern: {
@@ -2063,10 +2084,11 @@ export class Purchase extends Component {
                         onChange={this.updateProductField(numIndex,'perUnitWeight' )}
                         onKeyUp={  e => this.calculateField(e, numIndex) }
                         min={0}
+                        disabled={freeSize}
                         // max={20}
                         validate={{
                           required: {
-                              value: true,
+                              value: !freeSize,
                               errorMessage: 'This field is required.'
                           },
                           pattern: {
