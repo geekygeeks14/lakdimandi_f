@@ -34,6 +34,7 @@ const PayOption = lazy(()=> import("./PayOptions"))
 const Security = lazy(()=>import("./securitylog/security"))
 const CronJobReport = lazy(()=>import("./cronJobReport"))
 const Inventory = lazy(()=>import("./Invetory"))
+const newSell = lazy(()=>import("./New Sell"))
 
 
 
@@ -57,6 +58,7 @@ class AppRoutes extends Component {
           <PrivateRoute path="/profile" component={Profile} exact/>
           <PrivateRoute path="/purchase" component={Purchase} exact/>
           <PrivateRoute path="/sell" component={Sell} exact/>
+          <PrivateRoute path="/newSell" component={newSell} exact/>
           <PrivateRoute path="/security" component={Security} exact/> 
           <PrivateRoute path="/weight" component={FluctuationWeight} exact/>
           <PrivateRoute path="/register" component={RegisterForm} exact/>

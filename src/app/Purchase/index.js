@@ -11,7 +11,7 @@ import DatePicker from "react-datepicker";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 import CreatableSelect from 'react-select/creatable';
 import 'react-block-ui/style.css';
-import { capitalize, convertMilliSecToHrMints, generateRandomID, logoutFunc, saveSecurityLogs } from "../util/helper";
+import { capitalize, convertMilliSecToHrMints, generateRandomID, logoutFunc, saveSecurityLogs, unitOption } from "../util/helper";
 import { Link } from "react-router-dom/cjs/react-router-dom";
 import Webcam from "react-webcam";
 import imageCompression from 'browser-image-compression';
@@ -26,13 +26,6 @@ const paymentOption =[
   {value:'Paytm',label:'Paytm'},
   {value:'phonePay',label:'phonePe'},
   {value:'Axis Bank',label:'Axis Bank'},
-]
-
-const unitList =[
-  {value:'Sqf',label:'Sqf'},
-  {value:'Cfs',label:'Cfs'},
-  {value:'Pcs',label:'Pcs'},
-  {value:'Kg',label:'Kg'},
 ]
 
 const imgOptions = {
@@ -2018,7 +2011,7 @@ export class Purchase extends Component {
                               }
                           }} >
                           <option value=''>Choose unit</option>
-                          {unitList.map((data, ind)=> {return (<option key={ind} style={{color:"black"}}>{data.label}</option>)} )}
+                          {unitOption.map((data, ind)=> {return (<option key={ind} style={{color:"black"}}>{data.label}</option>)} )}
                           </AvField>
                       </Col>
                       <Col style={{paddingLeft:'3px',paddingRight:'3px'}}>

@@ -128,6 +128,13 @@ export const  generateRandomID=() =>{
   return randomID;
 }
 
+export const  unitOption =[
+  {value:'Sqf',label:'Sqf'},
+  {value:'Cfs',label:'Cfs'},
+  {value:'Pcs',label:'Pcs'},
+  {value:'Kg',label:'Kg'},
+]
+
 
 
 

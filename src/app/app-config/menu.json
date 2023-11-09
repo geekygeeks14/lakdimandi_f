@@ -12,6 +12,14 @@
       "ACCOUNTANT"
     ]
   },
+  { "path": "/newSell",
+    "title": "All Sell(New)",
+    "icon": "mdi mdi-truck-delivery menu-icon", 
+    "state": "sellMenuNewOpen",
+    "role": [
+      "TOPADMIN"
+    ]
+  },
   { "path": "/purchase",
     "title": "All Purchase",
     "icon": "mdi mdi-car-door-lock menu-icon", 

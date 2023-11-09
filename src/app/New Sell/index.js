@@ -65,25 +65,27 @@ export class Sell extends Component {
           selectedCompnay:'All',
           sizeRequired:true,
           allPayOptions:[],
+          inventoryData:[],
           selectedPhone:'',
           showSellHistoryModal:false,
-          sellProductList:[{productNameId:'',productCodeId:'', length:'',breadth:'',height:'',weight:'', weighted:'',unit:'',qty:'', rate:''}]
+          sellProductList:[{productNameId:'',productCodeId:'',inventoryId:'', length:'',breadth:'',height:'',weight:'', weighted:'',unit:'',qty:'', rate:''}]
      
         };
       }
 
       componentDidMount() {
         this.getAllSell();
+        this.getAllInventory();
         this.getAllProductCode()
         this.getAllProductName()
         this.getAllPayOptions()
         this.getFluctionWeight()
+   
         if(ROLE && ROLE==='SUPER_ADMIN')this.getCompanyDetail()
         saveSecurityLogs(menuUrl, 'Menu Log')
       }
 
       async getAllSell(){
-
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
         const url = new URL(SETTING.APP_CONSTANT.API_URL+'admin/getAllSell')
@@ -123,6 +125,62 @@ export class Sell extends Component {
           }
         });
        }
+       async getAllInventory(){
+        this.setState({
+          loading:true
+        })
+       
+        let options = SETTING.HEADER_PARAMETERS;
+        options['Authorization'] = localStorage.getItem("token")
+        await Axios.get(SETTING.APP_CONSTANT.API_URL+`admin/getAllInventory`,{headers: options})
+        .then((res) => {
+          this.setState({
+            loading:false
+          })
+          if (res && res.data.success) {
+            toast["success"](res.data.message);
+              if(res.data && res.data.data && res.data.data.inventoryData && res.data.data.inventoryData.length>0){
+                this.setState({
+                  inventoryData: res.data.data.inventoryData.map(data=> {
+                    if(data.freeSize){
+                      return{
+                        ...data,
+                        label: `${data.productName}(Free size)`,
+                        value : data._id 
+                      }
+                    }else{
+                      return{
+                        ...data,
+                        label: `${data.productName}(L=${data.length},B=${data.breadth},H=${data.height})`,
+                        value : data._id 
+                      }
+                    }
+                  })
+                })
+              }else{
+                this.setState({
+                  inventoryData: [],
+                })
+              }
+          
+          } else {
+            toast["error"](res.data.message);
+          }
+        })
+        .catch((err) =>{
+          this.setState({
+            loading:false
+          })
+          if(err && err.success===false  ){
+            toast["error"](err.message? err.message: 'Error while getting all inventory data.');
+            saveSecurityLogs(menuUrl, "Error Log", err.message)
+          }else{
+            logoutFunc(err)
+            saveSecurityLogs(menuUrl, "Logout")
+          }
+        });
+       }
+
       async getAllProductCode(){
         this.setState({
           loading:true
@@ -289,10 +347,11 @@ export class Sell extends Component {
      
 
        handleSubmit = async(e, values)=>{
-        //console.log("eeeeeeeeeeeeee", values)
-        this.setState({
-          loading2:true
-        })
+        console.log("eeeeeeeeeeeeee", values)
+        console.log("eeeeeeeeeeeeee", this.state.sellProductList)
+        // this.setState({
+        //   loading2:true
+        // })
         const buyerDetail={
           phoneNumber1: values.phoneNumber1,
           phoneNumber2: '',
@@ -318,7 +377,7 @@ export class Sell extends Component {
 
         const payload={
           buyerDetail,
-          sellInfo:values.sellProduct,
+          sellInfo:this.state.sellProductList,
           payInfo: values.payment,
           totalWeight:values.totalWeight,
           vehicleInfo:vehicleDetail,
@@ -330,6 +389,7 @@ export class Sell extends Component {
           insertedBy : USER && USER._id,
           companyId: USER && USER.userInfo.companyId
         }
+        console.log("payloadpayload", payload)
         
         let options = SETTING.HEADER_PARAMETERS;
         options['Authorization'] = localStorage.getItem("token")
@@ -462,6 +522,7 @@ export class Sell extends Component {
 
        handleClose=()=>{
         this.setState({
+            text:'',
             sellModal:false,
             loading:false,
             loading2:false,
@@ -478,7 +539,7 @@ export class Sell extends Component {
             totalPaidAmount:0,
             selectedPurchaser:{},
             editSellModal:false,
-            sellProductList:[{productNameId:'',productCodeId:'',length:'',breadth:'',height:'',weight:'',unit:'', qty:'',rate:''}]
+            sellProductList:[{productNameId:'',productCodeId:'',inventoryId:'',length:'',breadth:'',height:'',weight:'',unit:'', qty:'',rate:''}]
         },()=> this.getAllSell())
        }
 
@@ -490,30 +551,36 @@ export class Sell extends Component {
       }
       handleCloseSellEditModel=()=>{
         this.setState({
+          text:'',
           editSellModal:false,
+          selectedCell:{},
           paymentList:[{}],
           totalAmount:0,
           dueAmount:0,
           discountAmount:0,
           totalWeight:0,
+          totalPaidAmount:0,
           suggestions:[],
           selectedPurchaser:{}, 
-          sellProductList:[{productName:'',length:'',breadth:'',height:'',weight:'',unit:'',qty:'', rate:''}]
+          sellProductList:[{productNameId:'',productCodeId:'',inventoryId:'',length:'',breadth:'',height:'',weight:'',unit:'', qty:'',rate:''}]
         })
       }
 
       handleCloseSellModel=()=>{
         this.setState({
-          sellModal:false,
+          text:'',
+          editSellModal:false,
+          selectedCell:{},
           paymentList:[{}],
           totalAmount:0,
           dueAmount:0,
           discountAmount:0,
           totalWeight:0,
+          totalPaidAmount:0,
           suggestions:[],
-          selectedPurchaser:{},
-          text:'', 
-          sellProductList:[{productName:'',length:'',breadth:'',height:'',weight:'',unit:'',qty:'', rate:''}]
+          selectedPurchaser:{}, 
+          sellModal:false,
+          sellProductList:[{productNameId:'',productCodeId:'',inventoryId:'',length:'',breadth:'',height:'',weight:'',unit:'', qty:'',rate:''}]
         })
       }
 
@@ -663,6 +730,7 @@ export class Sell extends Component {
    };
   calculateField = (e, rowIndex) => { 
     let data = [...this.state.sellProductList]; 
+    console.log("datadatadata", data)
     let num1 = !!data[rowIndex].rate ? parseFloat(data[rowIndex].rate) : 0; 
     let num2 = !!data[rowIndex].qty ? parseFloat(data[rowIndex].qty) : 0;
     let num3 = !!data[rowIndex].weighted ? parseFloat(data[rowIndex].weighted) : 0;
@@ -710,9 +778,22 @@ export class Sell extends Component {
   };
 
   changeSellSelectOption = (rowIndex, e, key) => {
+    console.log("rowIndexrowIndex", rowIndex, "eee", e, 'keyyyy',key)
+    const {inventoryData} = this.state
     let data = [...this.state.sellProductList];
-    data[rowIndex][key] = e.target.value;
-    
+    if(key && key==='inventoryId' && e.value){
+      const productData = inventoryData.find(iData=> iData._id===e.value)
+      data[rowIndex][key] = e.value
+      data[rowIndex]['productNameId'] = productData.productNameId 
+      data[rowIndex]['productCodeId'] = productData.productCodeId
+      data[rowIndex]['length'] = productData.length
+      data[rowIndex]['breadth'] = productData.breadth
+      data[rowIndex]['height'] = productData.height
+      data[rowIndex]['unit'] = productData.unit?productData.unit:''
+      data[rowIndex]['weight'] = productData.perUnitWeight?productData.perUnitWeight:0
+    }else{
+      data[rowIndex][key] = e.target.value;
+    }
   this.setState({ sellProductList:data });
  };
 
@@ -1411,7 +1492,31 @@ editToggle=(cell)=>{
                     {this.state.sellProductList.map((productData,index)=>
                       <>
                       <Row key={`sellProductIndex_${index}`}>
-                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}} >
+                      <Col md={4} style={{paddingLeft:'3px',paddingRight:'3px'}} >
+                        {/* <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
+                          type='select' name= {`sellProduct[${index}].productNameId`}  label ="Product Name" placeholder="Product Name"
+                          value={!!productData && !!productData.productNameId? productData.productNameId: null}
+                          onChange={(e)=>this.changeSellSelectOption(index, e, 'productNameId')}
+                          validate={{
+                            required: {
+                                value: true,
+                                errorMessage: 'This field is required.'
+                            }
+                          }} 
+                          >
+                        <option value=''>Choose product name</option>
+                        {this.state.inventoryData.length>0 && this.state.inventoryData.map((data, index)=> {return (<option key={`${index}_prodname`} value={data.productNameId} style={{color:"black"}}>{data.productNameId}-{data.unit}-{data.length}</option>)} )}
+                        </AvField> */}
+                        <Select 
+                            //style={{"display": "block","marginLeft": "9.5px",'float':'right',menu: provided => ({ ...provided, zIndex: 999999 })}}
+                            placeholder="Product Name"
+                            options={this.state.inventoryData}
+                            maxMenuHeight={150}
+                            value={this.state.inventoryData.length>0?this.state.inventoryData.find(it=>it._id===productData.inventoryId):''}
+                            onChange={(e)=>this.changeSellSelectOption(index, e, 'inventoryId')}
+                        />  
+                      </Col>
+                      {/* <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}} >
                         <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
                           type='select' name= {`sellProduct[${index}].productNameId`}  label ="Product Name" placeholder="Product Name"
                           value={!!productData && !!productData.productNameId? productData.productNameId: null}
@@ -1426,8 +1531,8 @@ editToggle=(cell)=>{
                         <option value=''>Choose product name</option>
                         {this.state.allProductName.length>0 && this.state.allProductName.map((data, index)=> {return (<option key={`${index}_prodname`} value={data._id} style={{color:"black"}}>{data.productName}</option>)} )}
                         </AvField>  
-                      </Col>
-                      <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}} >
+                      </Col> */}
+                      {/* <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}} >
                      <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
                       type="select" name={`sellProduct[${index}].productCodeId`} label="Product Code" placeholder="Product Code"
                       value={!!productData && !!productData.productCodeId? productData.productCodeId: null}
@@ -1441,7 +1546,7 @@ editToggle=(cell)=>{
                       <option value=''>Choose product code</option>
                         {this.state.allProductCode.length>0 && this.state.allProductCode.map((data, index)=> {return (<option key={`${index}_prodcode`} value={data._id} style={{color:"black"}}>{data.productCode}</option>)} )}
                       </AvField>
-                     </Col>
+                     </Col> */}
                      </Row>
                      <Row>
                      <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}} >
@@ -1468,16 +1573,17 @@ editToggle=(cell)=>{
                         value={!!productData && !!productData.length? productData.length:0.00}
                         min={0}
                         max={400}
-                          validate={{
-                            required: {
-                                value: this.state.sizeRequired,
-                                errorMessage: 'This field is required.'
-                            }, 
-                            pattern: {
-                              value:'^[0-9]+(\\.[0-9]{2})?$',
-                              errorMessage: `Invalid length number.`
-                            }
-                        }} 
+                        disabled={true}
+                        //   validate={{
+                        //     required: {
+                        //         value: this.state.sizeRequired,
+                        //         errorMessage: 'This field is required.'
+                        //     }, 
+                        //     pattern: {
+                        //       value:'^[0-9]+(\\.[0-9]{2})?$',
+                        //       errorMessage: `Invalid length number.`
+                        //     }
+                        // }} 
                         />
                       </Col>
                       <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}} >
@@ -1486,16 +1592,17 @@ editToggle=(cell)=>{
                           value={!!productData && !!productData.breadth? productData.breadth:0.00}
                           min={0}
                           max={200}
-                          validate={{
-                            required: {
-                                value: this.state.sizeRequired,
-                                errorMessage: 'This field is required.'
-                            }, 
-                            pattern: {
-                              value:'^[0-9]+(\\.[0-9]{2})?$',
-                              errorMessage: `Invalid breadth number.`
-                            }
-                        }} 
+                          disabled={true}
+                        //   validate={{
+                        //     required: {
+                        //         value: this.state.sizeRequired,
+                        //         errorMessage: 'This field is required.'
+                        //     }, 
+                        //     pattern: {
+                        //       value:'^[0-9]+(\\.[0-9]{2})?$',
+                        //       errorMessage: `Invalid breadth number.`
+                        //     }
+                        // }} 
                         />
                       </Col>
                       <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}}  >
@@ -1504,31 +1611,34 @@ editToggle=(cell)=>{
                         value={!!productData && !!productData.height? productData.height:0.00}
                         min={0}
                         max={20}
-                          validate={{
-                            required: {
-                                value: this.state.sizeRequired,
-                                errorMessage: 'This field is required.'
-                            },
-                            pattern: {
-                              value:'^[0-9]+(\\.[0-9]{2})?$',
-                              errorMessage: `Invalid height number.`
-                            }
-                        }} 
+                        disabled={true}
+                        //   validate={{
+                        //     required: {
+                        //         value: this.state.sizeRequired,
+                        //         errorMessage: 'This field is required.'
+                        //     },
+                        //     pattern: {
+                        //       value:'^[0-9]+(\\.[0-9]{2})?$',
+                        //       errorMessage: `Invalid height number.`
+                        //     }
+                        // }} 
                         />
                       </Col>
                       <Col md={1} style={{paddingLeft:'3px',paddingRight:'3px'}} >
                           <AvField style={{paddingLeft:'6px',paddingRight:'6px', paddingTop:'4px', paddingBottom:'4px'}}
-                            type="select" name={`sellProduct[${index}].unit`} label="Unit" 
-                            value={!!productData && !!productData.unit? productData.unit:null}
+                            type="text" name={`sellProduct[${index}].unit`} label="Unit" 
+                            value={!!productData && !!productData.unit? productData.unit:''}
                             onChange={(e)=>this.changeSellSelectOption(index, e, 'unit')}
-                              validate={{
-                              required: {
-                                  value: true,
-                                  errorMessage: 'This field is required.'
-                              }
-                          }} >
-                        <option value=''>Choose unit</option>
-                        {unitOption.map((data, ind)=> {return (<option key={ind} style={{color:"black"}}>{data.label}</option>)} )}
+                            disabled={true}
+                          //     validate={{
+                          //     required: {
+                          //         value: true,
+                          //         errorMessage: 'This field is required.'
+                          //     }
+                          // }} 
+                          >
+                        {/* <option value=''>Choose unit</option>
+                        {unitOption.map((data, ind)=> {return (<option key={ind} style={{color:"black"}}>{data.label}</option>)} )} */}
                         </AvField>
                       </Col>
                       <Col md={2} style={{paddingLeft:'3px',paddingRight:'3px'}} >
@@ -1536,6 +1646,7 @@ editToggle=(cell)=>{
                           name={`sellProduct[${index}].weight`}  label ="Per Unit Weight" placeholder="0.00"
                           value={!!productData && !!productData.weight? productData.weight:0.00}
                           onKeyUp={  e => this.calculateField(e, index) }
+                          //disabled={true}
                           onChange={ this.updateField(index, 'weight') }
                           validate={{
                             required: {

@@ -8,17 +8,12 @@ import "react-toastify/dist/ReactToastify.css";
 import BlockUi from "react-block-ui";
 import Spinner from "../shared/Spinner";
 import 'react-block-ui/style.css';
-import { capitalize, logoutFunc,saveSecurityLogs} from "../util/helper";
+import { capitalize, logoutFunc,saveSecurityLogs, unitOption} from "../util/helper";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { AvField, AvForm } from "availity-reactstrap-validation";
 toast.configure();
 
-const unitOption =[
-  {value:'Sqf',label:'Sqf'},
-  {value:'Cfs',label:'Cfs'},
-  {value:'Pcs',label:'Pcs'},
-  {value:'Kg',label:'Kg'},
-]
+
 
 const USER = localStorage.getItem("userInformation") && JSON.parse(localStorage.getItem("userInformation"));
 const menuUrl= window.location.href

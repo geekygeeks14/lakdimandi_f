@@ -25,6 +25,12 @@
     ]
   },
   {
+    "path": "/newSell",
+    "roles": [
+      "TOPADMIN"
+    ]
+  },
+  {
     "path": "/inventory",
     "roles": [
       "TOPADMIN",
